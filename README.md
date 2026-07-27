@@ -2,7 +2,7 @@
 
 Eigenständiger Zeitgeber und Run-Recorder für modulare ellmos-Stacks. Das Modul
 ist bewusst **außerhalb von BACH** angelegt. BACH, Wonderland/Riverfall,
-Desktop-Automationen, COMAS, MarbleRun/llmauto und swarm-ai können es über
+Desktop-Automationen, COMA, MarbleRun/llmauto und swarm-ai können es über
 schmale Adapter konsumieren.
 
 Status: `0.1.0` (MVP, 2026-07-27).
@@ -11,7 +11,7 @@ Status: `0.1.0` (MVP, 2026-07-27).
 
 - ellmos Scheduler: Zeitplan, Due-Ermittlung, Lease/Claim, deduplizierende
   `run_id`, Pause/Resume, Run-Historie und Heartbeat.
-- COMAS: Provider-Prozess starten und Ergebnis abholen.
+- COMA: Provider-Prozess starten und Ergebnis abholen.
 - MarbleRun/llmauto: Ketten ausführen.
 - swarm-ai: Agentenmuster ausführen.
 - `.SYNC/automation-exchange`: systemübergreifender Aufgaben-,
