@@ -37,14 +37,16 @@ ellmos-scheduler --db "$env:LOCALAPPDATA\ellmos\scheduler.db" add `
   --id sync.daily.cross-system `
   --schedule '{"kind":"daily","time":"09:00","timezone":"Europe/Berlin"}' `
   --executor command `
-  --payload '{"argv":["codex","exec","/sync"],"cwd":"C:\\Users\\lukas"}'
+  --payload '{"argv":["python","C:\\path\\to\\task.py"],"cwd":"C:\\Users\\lukas"}'
 ellmos-scheduler --db "$env:LOCALAPPDATA\ellmos\scheduler.db" status --json
 ellmos-scheduler --db "$env:LOCALAPPDATA\ellmos\scheduler.db" serve
 ```
 
 Der eingebaute `command`-Executor akzeptiert ausschließlich eine `argv`-Liste
 und startet ohne Shell. Provider-spezifische Ausführung soll als Executor-Adapter
-registriert werden.
+registriert werden. Codex-Custom-Prompts und App-Aufgaben nicht durch einen
+unbelegten `codex exec /command`-Aufruf simulieren; der jeweilige native Einstieg
+muss separat live verifiziert sein.
 
 ## Sicherheits- und Verfügbarkeitsmodell
 
