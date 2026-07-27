@@ -1,0 +1,57 @@
+{
+  "schema": "ellmos.module.v2",
+  "id": "ellmos-scheduler",
+  "display_name": "ellmos Scheduler",
+  "version": "0.1.0",
+  "category": "control",
+  "kind": "library",
+  "status": "experimental",
+  "visibility": "public-candidate",
+  "description": "Eigenstaendiger Zeitgeber, Lease-/Claim-Manager und Run-Recorder fuer ellmos-Stacks; BACH konsumiert ihn spaeter ueber einen Adapter.",
+  "package": "ellmos-scheduler",
+  "entrypoints": {
+    "cli": "python -m ellmos_scheduler",
+    "python": "ellmos_scheduler.SchedulerService"
+  },
+  "provides": [
+    "automation.schedule",
+    "automation.lease",
+    "automation.run-history",
+    "automation.operator-control"
+  ],
+  "requires": [],
+  "optional": [
+    "orchestration.execute",
+    "sync.automation-exchange"
+  ],
+  "conflicts": [],
+  "surfaces": [
+    "library",
+    "cli",
+    "service"
+  ],
+  "state": {
+    "ownership": "module",
+    "location": "user-home"
+  },
+  "boundaries": {
+    "network": "optional",
+    "data": "application-defined",
+    "platforms": [
+      "windows",
+      "macos",
+      "linux"
+    ]
+  },
+  "source_of_truth": {
+    "type": "local-directory",
+    "path": ".",
+    "repository": null
+  },
+  "adapters": [
+    {
+      "type": "cli-wrapper",
+      "id": "bach"
+    }
+  ]
+}
