@@ -16,7 +16,8 @@ Status: `0.1.0` (MVP, 2026-07-27).
 - swarm-ai: Agentenmuster ausführen.
 - `.SYNC/automation-exchange`: systemübergreifender Aufgaben-,
   Abdeckungs- und Vertretungsvertrag.
-- BACH: später Consumer über Adapter, nicht Eigentümer der Scheduler-Logik.
+- BACH: Consumer über `BachSchedulerAdapter`, nicht Eigentümer der
+  Scheduler-Logik.
 
 ## Unterstützte Zeitpläne
 
@@ -42,11 +43,38 @@ ellmos-scheduler --db "$env:LOCALAPPDATA\ellmos\scheduler.db" status --json
 ellmos-scheduler --db "$env:LOCALAPPDATA\ellmos\scheduler.db" serve
 ```
 
-Der eingebaute `command`-Executor akzeptiert ausschließlich eine `argv`-Liste
-und startet ohne Shell. Provider-spezifische Ausführung soll als Executor-Adapter
-registriert werden. Codex-Custom-Prompts und App-Aufgaben nicht durch einen
-unbelegten `codex exec /command`-Aufruf simulieren; der jeweilige native Einstieg
-muss separat live verifiziert sein.
+`command` und der gleichwertige Name `subprocess` akzeptieren ausschließlich
+eine `argv`-Liste und starten ohne Shell. Zusätzlich sind `noop`, `coma` und
+`marblerun` registriert:
+
+```json
+{"executor":"coma","payload":{"provider":"codex","prompt":"Prüfe den Build","cwd":"C:\\repo"}}
+{"executor":"marblerun","payload":{"chain":"review-chain","background":false}}
+```
+
+COMA wird erst beim tatsächlichen Lauf importiert. Der MarbleRun-Adapter startet
+die öffentliche CLI als sichere argv-Liste und respektiert den
+Scheduler-Timeout. Die jeweiligen Pakete müssen für diese Adapter installiert
+sein. Codex-Custom-Prompts und App-Aufgaben nicht durch einen unbelegten
+`codex exec /command`-Aufruf simulieren; der jeweilige native Einstieg muss
+separat live verifiziert sein.
+
+Eigene Integrationen erhalten eine isolierte Registry:
+
+```python
+from ellmos_scheduler import ExecutionResult, ExecutorRegistry, SchedulerService
+
+registry = ExecutorRegistry()
+registry.register(
+    "my-adapter",
+    lambda payload, timeout: ExecutionResult("succeeded", output="ok"),
+)
+service = SchedulerService(store, registry=registry)
+```
+
+Eine doppelte Registrierung schlägt fehl. Absichtliches Ersetzen erfordert
+`replace=True`; dadurch können parallel laufende Scheduler-Instanzen getrennte
+Adaptermengen verwenden.
 
 ## Sicherheits- und Verfügbarkeitsmodell
 
@@ -61,5 +89,17 @@ muss separat live verifiziert sein.
 ## Migration aus BACH
 
 Siehe [MIGRATION_FROM_BACH.md](MIGRATION_FROM_BACH.md). Der bestehende
-`BACH/system/hub/scheduler.py` bleibt bis zur Parität als Legacy-Quelle in
-Betrieb. Er wird nicht zur kanonischen Zielarchitektur erklärt.
+`BACH/system/hub/scheduler.py` bleibt bis zum Betriebsvergleich als
+Legacy-Quelle in Betrieb. Ein Dry-Run zeigt übertragbare und bewusst
+übersprungene Jobs, ohne die Quell- oder Zieldatenbank anzulegen bzw. zu ändern:
+
+```powershell
+ellmos-scheduler --db C:\state\scheduler.db import-bach `
+  --source-db C:\BACH\system\data\bach.db `
+  --bach-root C:\BACH `
+  --timezone Europe/Berlin `
+  --dry-run --json
+```
+
+Der Python-Einstieg `create_bach_adapter(state_db)` liefert die schmale
+Consumer-API, die BACH hinter seiner `scheduler_provider`-Seam verwenden kann.

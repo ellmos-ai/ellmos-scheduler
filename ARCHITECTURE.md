@@ -4,12 +4,18 @@
 
 1. `schedules.py`: plattformneutrale Due-Berechnung in UTC.
 2. `store.py`: SQLite-Schema, Jobs, Controls, Claims und Run-Historie.
-3. `executors.py`: schmales Executor-Protokoll und sichere Built-ins.
-4. `service.py`: Tick-/Lease-/Ausführungsschleife.
-5. `cli.py`: Operatoroberfläche.
+3. `executors.py`: isolierbare Registry, schmales Executor-Protokoll und sichere
+   Built-ins.
+4. `adapters.py`: lazy geladene COMA- und argv-basierte MarbleRun-Anbindung.
+5. `bach.py`: read-only Legacy-Import und BACH-Consumer-API.
+6. `service.py`: Tick-/Lease-/Ausführungsschleife mit injizierbarer Registry.
+7. `cli.py`: Operatoroberfläche.
 
-Der Kern kennt weder BACH noch einen LLM-Anbieter. Integrationen registrieren
-einen Executor mit `register_executor(name, callable)`.
+Der Scheduler-Kern kennt weder die BACH-Implementierung noch einen
+LLM-Anbieter. Integrationen registrieren einen Executor in einer
+`ExecutorRegistry`. Die prozessweite `register_executor(...)`-Funktion bleibt
+als Kompatibilitätsweg bestehen, überschreibt Namen aber nur noch mit dem
+expliziten Argument `replace=True`.
 
 ## Zustandsmodell
 
@@ -22,6 +28,9 @@ erneut beansprucht werden; die Historie bleibt erhalten.
 ## Komposition
 
 Wonderland/Riverfall kann den Scheduler als Capability
-`automation.schedule` auswählen. BACH 1.x erhält später einen Adapter, der
-seine CLI auf dieselbe API abbildet. Dadurch existiert nach der Migration nur
-eine schreibbare Scheduler-Implementierung.
+`automation.schedule` auswählen. BACH 1.x kann den exportierten
+`BachSchedulerAdapter` hinter seiner Provider-Seam verwenden. Der
+Legacy-Importer öffnet die BACH-Datenbank ausschließlich mit SQLite
+`mode=ro`; nur der Ziel-Store ist schreibbar. Nach dem noch ausstehenden
+Parallelvergleich soll dadurch genau eine schreibbare Scheduler-Implementierung
+existieren.

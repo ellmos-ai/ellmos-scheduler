@@ -94,25 +94,36 @@ class SchedulerStore:
         payload: dict[str, Any],
         *,
         now: datetime | None = None,
+        enabled: bool = True,
+        next_due_at: datetime | None = None,
         lease_seconds: int = 900,
         timeout_seconds: int = 600,
     ) -> None:
         now = (now or datetime.now(UTC)).astimezone(UTC)
-        due = next_after(schedule, now)
+        if lease_seconds <= 0:
+            raise ValueError("lease_seconds must be positive")
+        if timeout_seconds <= 0:
+            raise ValueError("timeout_seconds must be positive")
+        due = (
+            next_after(schedule, now)
+            if next_due_at is None
+            else next_due_at.astimezone(UTC)
+        )
         stamp = iso(now)
         with self.connect() as conn:
             conn.execute(
                 """
                 INSERT INTO jobs(
-                    id, schedule_json, executor, payload_json, next_due_at,
+                    id, schedule_json, executor, payload_json, enabled, next_due_at,
                     lease_seconds, timeout_seconds, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     job_id,
                     json.dumps(schedule, sort_keys=True),
                     executor,
                     json.dumps(payload, sort_keys=True),
+                    int(enabled),
                     iso(due),
                     lease_seconds,
                     timeout_seconds,
@@ -126,7 +137,9 @@ class SchedulerStore:
             rows = conn.execute("SELECT * FROM jobs ORDER BY id").fetchall()
         return [dict(row) for row in rows]
 
-    def set_enabled(self, job_id: str, enabled: bool, *, now: datetime | None = None) -> None:
+    def set_enabled(
+        self, job_id: str, enabled: bool, *, now: datetime | None = None
+    ) -> None:
         stamp = iso(now or datetime.now(UTC))
         with self.connect() as conn:
             result = conn.execute(
@@ -227,7 +240,9 @@ class SchedulerStore:
                     (row["id"], scheduled_for),
                 ).fetchone()
                 attempt = int(attempt_row["count"]) + 1
-                run_id = self._run_id(row["id"], row["generation"], scheduled_for, attempt)
+                run_id = self._run_id(
+                    row["id"], row["generation"], scheduled_for, attempt
+                )
                 lease_expires = now + timedelta(seconds=row["lease_seconds"])
                 conn.execute(
                     """
@@ -236,7 +251,14 @@ class SchedulerStore:
                         lease_expires_at, status
                     ) VALUES (?, ?, ?, ?, ?, ?, 'claimed')
                     """,
-                    (run_id, row["id"], scheduled_for, attempt, worker_id, iso(lease_expires)),
+                    (
+                        run_id,
+                        row["id"],
+                        scheduled_for,
+                        attempt,
+                        worker_id,
+                        iso(lease_expires),
+                    ),
                 )
                 schedule = json.loads(row["schedule_json"])
                 next_due = next_after(schedule, parse_iso(scheduled_for))
@@ -306,6 +328,23 @@ class SchedulerStore:
             ).fetchall()
         return [dict(row) for row in rows]
 
+    def latest_runs_by_job(self) -> dict[str, dict[str, Any]]:
+        with self.connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT r.*
+                FROM runs r
+                WHERE r.run_id = (
+                    SELECT latest.run_id
+                    FROM runs latest
+                    WHERE latest.job_id = r.job_id
+                    ORDER BY latest.scheduled_for DESC, latest.attempt DESC
+                    LIMIT 1
+                )
+                """
+            ).fetchall()
+        return {str(row["job_id"]): dict(row) for row in rows}
+
     def status(self) -> dict[str, Any]:
         with self.connect() as conn:
             jobs = conn.execute(
@@ -323,7 +362,9 @@ class SchedulerStore:
             control = conn.execute(
                 "SELECT paused, reason FROM controls WHERE scope = 'global'"
             ).fetchone()
-            tick = conn.execute("SELECT value FROM meta WHERE key = 'last_tick_at'").fetchone()
+            tick = conn.execute(
+                "SELECT value FROM meta WHERE key = 'last_tick_at'"
+            ).fetchone()
         return {
             "database": str(self.path),
             "jobs": {

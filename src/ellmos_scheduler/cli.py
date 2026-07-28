@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 from typing import Sequence
 
+from .bach import import_legacy_jobs
+from .executors import executor_names
 from .service import SchedulerService
 from .store import SchedulerStore
 
@@ -35,6 +37,15 @@ def parser() -> argparse.ArgumentParser:
     runs = sub.add_parser("runs")
     runs.add_argument("--limit", type=int, default=20)
     runs.add_argument("--json", action="store_true")
+    executors = sub.add_parser("executors")
+    executors.add_argument("--json", action="store_true")
+
+    import_bach = sub.add_parser("import-bach")
+    import_bach.add_argument("--source-db", type=Path, required=True)
+    import_bach.add_argument("--bach-root", type=Path)
+    import_bach.add_argument("--timezone", default="UTC")
+    import_bach.add_argument("--dry-run", action="store_true")
+    import_bach.add_argument("--json", action="store_true")
 
     for name in ("enable", "disable"):
         item = sub.add_parser(name)
@@ -64,7 +75,20 @@ def _print(value: object, as_json: bool) -> None:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parser().parse_args(argv)
+    if args.command == "executors":
+        _print(list(executor_names()), args.json)
+        return 0
     store = SchedulerStore(args.db)
+    if args.command == "import-bach":
+        report = import_legacy_jobs(
+            args.source_db,
+            store,
+            timezone_name=args.timezone,
+            bach_root=args.bach_root,
+            dry_run=args.dry_run,
+        )
+        _print(report.to_dict(), args.json)
+        return 0
     store.init()
     if args.command == "init":
         print(args.db)

@@ -7,8 +7,9 @@ created: 2026-07-27
 # Projekt
 
 Eigenständiger, plattformneutraler Scheduler für ellmos-Stacks und das modulare
-Wonderland/Riverfall-Zielbild. BACH konsumiert dieses Modul später über einen
-Adapter; BACH-internes Scheduler-Verhalten ist nur Migrationsquelle.
+Wonderland/Riverfall-Zielbild. BACH konsumiert dieses Modul über den
+`BachSchedulerAdapter`; BACH-internes Scheduler-Verhalten ist nur
+Migrationsquelle.
 
 ## Regeln
 

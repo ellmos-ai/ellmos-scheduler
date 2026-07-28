@@ -5,14 +5,20 @@ import socket
 import time
 from datetime import datetime
 
-from .executors import execute
+from .executors import DEFAULT_REGISTRY, ExecutorRegistry
 from .store import SchedulerStore
 
 
 class SchedulerService:
-    def __init__(self, store: SchedulerStore, worker_id: str | None = None):
+    def __init__(
+        self,
+        store: SchedulerStore,
+        worker_id: str | None = None,
+        registry: ExecutorRegistry | None = None,
+    ):
         self.store = store
         self.worker_id = worker_id or f"{socket.gethostname()}:{id(self)}"
+        self.registry = registry or DEFAULT_REGISTRY
 
     def tick(self, *, now: datetime | None = None, limit: int = 20) -> list[dict]:
         claimed = self.store.claim_due(self.worker_id, now=now, limit=limit)
@@ -20,7 +26,7 @@ class SchedulerService:
         for job in claimed:
             run_id = job["run_id"]
             self.store.start_run(run_id, now=now)
-            result = execute(
+            result = self.registry.execute(
                 job["executor"],
                 json.loads(job["payload_json"]),
                 int(job["timeout_seconds"]),

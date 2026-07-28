@@ -7,7 +7,7 @@
   "kind": "library",
   "status": "experimental",
   "visibility": "public-candidate",
-  "description": "Eigenstaendiger Zeitgeber, Lease-/Claim-Manager und Run-Recorder fuer ellmos-Stacks; BACH konsumiert ihn spaeter ueber einen Adapter.",
+  "description": "Eigenstaendiger Zeitgeber, Lease-/Claim-Manager und Run-Recorder fuer ellmos-Stacks mit BACH-Consumer- und Executor-Adaptern.",
   "package": "ellmos-scheduler",
   "entrypoints": {
     "cli": "python -m ellmos_scheduler",
