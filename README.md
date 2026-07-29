@@ -103,3 +103,21 @@ ellmos-scheduler --db C:\state\scheduler.db import-bach `
 
 Der Python-Einstieg `create_bach_adapter(state_db)` liefert die schmale
 Consumer-API, die BACH hinter seiner `scheduler_provider`-Seam verwenden kann.
+
+## Bundles und Partner
+
+`ellmos-scheduler` bleibt ein einzeln nutzbarer Zeitgeber. In der
+V4-Komposition ist es ein erforderlicher Zeit- und Run-Recorder im
+`ellmos-automation-control-bundle`; es entscheidet weiterhin nur **wann**
+etwas fällig ist, nicht welcher Provider, Workflow oder Agent ausführt.
+
+Direkte Bundlepartner sind die erforderliche Automationsregistry und
+Runtime-Readback-Komponente; die Cloud-Control-Schicht ist empfohlen. Für das
+Profil `self-healing` ist `automation-self-care` der erforderliche
+Skillpartner: Er wird deklarativ aufgelöst und kann bezogen werden, aktiviert
+oder verändert aber ohne die vorgesehenen Freigabe-, Native-Readback- und
+Rollback-Gates keine Automatisierung.
+
+Die verbindliche Mitgliedschaft, Versionen, Profile und privaten
+Zusammensetzungsrezepte stehen ausschließlich im Bundle-Manifest. Diese
+Übersicht ist öffentlich und dient nur der Partner-Discovery.
