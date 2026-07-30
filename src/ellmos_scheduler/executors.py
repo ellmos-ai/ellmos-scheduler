@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import re
 import subprocess
+from codecs import lookup
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Any, Callable, Mapping
@@ -18,10 +19,45 @@ class ExecutionResult:
 
 Executor = Callable[[dict[str, Any], int], ExecutionResult]
 _EXECUTOR_NAME = re.compile(r"^[a-z][a-z0-9_.-]*$")
+_STREAM_OUTPUT_ENCODINGS = frozenset(
+    {
+        "ascii",
+        "cp437",
+        "cp850",
+        "cp1252",
+        "iso8859-1",
+        "utf-8",
+        "utf-8-sig",
+        "utf-16",
+        "utf-16-be",
+        "utf-16-le",
+    }
+)
+
+
+def _output_encoding(payload: dict[str, Any]) -> str | None:
+    value = payload.get("output_encoding", "utf-8")
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        codec = lookup(value)
+    except LookupError:
+        return None
+    if codec.name not in _STREAM_OUTPUT_ENCODINGS:
+        return None
+    return codec.name
+
+
+def _decode_stream(value: bytes | str | None, encoding: str) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        return value
+    return value.decode(encoding, errors="strict")
 
 
 def command_executor(payload: dict[str, Any], timeout_seconds: int) -> ExecutionResult:
-    """Execute a subprocess from an argv list, never through a shell."""
+    """Execute an argv list and fail closed if audit output cannot be decoded."""
     argv = payload.get("argv")
     if (
         not isinstance(argv, list)
@@ -39,33 +75,93 @@ def command_executor(payload: dict[str, Any], timeout_seconds: int) -> Execution
     cwd = payload.get("cwd")
     if cwd is not None and not isinstance(cwd, str):
         return ExecutionResult("failed", error="cwd must be a string")
+    output_encoding = _output_encoding(payload)
+    if output_encoding is None:
+        return ExecutionResult(
+            "failed", error="output_encoding must name a supported text encoding"
+        )
+    python_encoding_items = [
+        (key, value)
+        for key, value in raw_env.items()
+        if key.casefold() == "pythonioencoding"
+    ]
+    if len(python_encoding_items) > 1:
+        return ExecutionResult(
+            "failed",
+            error="env must not contain multiple PYTHONIOENCODING variants",
+        )
+    configured_python_encoding = (
+        python_encoding_items[0][1] if python_encoding_items else None
+    )
+    if configured_python_encoding is not None:
+        configured_parts = configured_python_encoding.split(":", 1)
+        configured_python_encoding = configured_parts[0]
+        configured_error_handler = (
+            configured_parts[1].strip().lower() if len(configured_parts) == 2 else "strict"
+        )
+        if configured_error_handler != "strict":
+            return ExecutionResult(
+                "failed",
+                error="PYTHONIOENCODING error handler must be strict",
+            )
+        if (
+            _output_encoding({"output_encoding": configured_python_encoding})
+            != output_encoding
+        ):
+            return ExecutionResult(
+                "failed",
+                error="PYTHONIOENCODING conflicts with output_encoding",
+            )
     env = os.environ.copy()
     env.update(raw_env)
+    for key in tuple(env):
+        if key.casefold() == "pythonioencoding":
+            del env[key]
+    env["PYTHONIOENCODING"] = f"{output_encoding}:strict"
     try:
         completed = subprocess.run(
             argv,
             cwd=cwd,
             env=env,
             capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
+            text=False,
             timeout=timeout_seconds,
             shell=False,
             check=False,
         )
     except subprocess.TimeoutExpired as exc:
+        try:
+            output = _decode_stream(exc.stdout, output_encoding)
+            error = _decode_stream(exc.stderr, output_encoding)
+        except UnicodeDecodeError:
+            return ExecutionResult(
+                "timed_out",
+                error=(
+                    "subprocess timed out and emitted output that is not valid "
+                    f"{output_encoding}; set output_encoding explicitly"
+                ),
+            )
         return ExecutionResult(
             "timed_out",
-            output=(exc.stdout or "") if isinstance(exc.stdout, str) else "",
-            error=(exc.stderr or "") if isinstance(exc.stderr, str) else "",
+            output=output,
+            error=error,
         )
     except (OSError, ValueError) as exc:
         return ExecutionResult("failed", error=str(exc))
+    try:
+        output = _decode_stream(completed.stdout, output_encoding)
+        error = _decode_stream(completed.stderr, output_encoding)
+    except UnicodeDecodeError:
+        return ExecutionResult(
+            "failed",
+            exit_code=completed.returncode,
+            error=(
+                "subprocess output is not valid "
+                f"{output_encoding}; set output_encoding explicitly"
+            ),
+        )
     status = "succeeded" if completed.returncode == 0 else "failed"
-    return ExecutionResult(
-        status, completed.returncode, completed.stdout, completed.stderr
-    )
+    return ExecutionResult(status, completed.returncode, output, error)
 
 
 def noop_executor(payload: dict[str, Any], timeout_seconds: int) -> ExecutionResult:

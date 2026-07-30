@@ -1,17 +1,21 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 import sys
 import types
 from datetime import datetime, timezone
+from pathlib import Path
 
 import pytest
 
 from ellmos_scheduler import adapters
-from ellmos_scheduler.cli import main
+from ellmos_scheduler.cli import _print, main
 from ellmos_scheduler.executors import (
     ExecutionResult,
     ExecutorRegistry,
+    command_executor,
     executor_names,
 )
 from ellmos_scheduler.service import SchedulerService
@@ -106,6 +110,218 @@ def test_subprocess_executor_alias_runs_argv():
     )
     assert result.status == "succeeded"
     assert result.output.strip() == "adapter-ok"
+
+
+def test_command_executor_sets_explicit_utf8_python_contract():
+    result = command_executor(
+        {
+            "argv": [
+                sys.executable,
+                "-c",
+                (
+                    "import os, sys; "
+                    "print(os.environ['PYTHONIOENCODING']); "
+                    "print(sys.stdout.encoding); "
+                    "print('ä')"
+                ),
+            ]
+        },
+        10,
+    )
+    assert result.status == "succeeded"
+    assert "\ufffd" not in result.output
+    assert result.output.splitlines() == ["utf-8:strict", "utf-8", "ä"]
+
+
+def test_command_executor_fails_closed_on_output_encoding_mismatch():
+    result = command_executor(
+        {
+            "argv": [
+                sys.executable,
+                "-c",
+                "import sys; sys.stdout.buffer.write(bytes([0xe4]))",
+            ]
+        },
+        10,
+    )
+    assert result.status == "failed"
+    assert result.exit_code == 0
+    assert result.output == ""
+    assert "not valid utf-8" in result.error
+
+
+def test_command_executor_supports_explicit_legacy_output_encoding():
+    result = command_executor(
+        {
+            "argv": [
+                sys.executable,
+                "-c",
+                "import sys; sys.stdout.buffer.write(bytes([0xe4]))",
+            ],
+            "output_encoding": "cp1252",
+        },
+        10,
+    )
+    assert result == ExecutionResult("succeeded", 0, "ä", "")
+
+
+def test_command_executor_supports_explicit_utf16_output_encoding():
+    result = command_executor(
+        {
+            "argv": [sys.executable, "-c", "print('gültig')"],
+            "output_encoding": "utf-16",
+        },
+        10,
+    )
+    assert result.status == "succeeded"
+    assert result.output.strip() == "gültig"
+
+
+def test_command_executor_decodes_valid_timeout_partial_output():
+    result = command_executor(
+        {
+            "argv": [
+                sys.executable,
+                "-c",
+                (
+                    "import sys, time; "
+                    "sys.stdout.write('part'); "
+                    "sys.stdout.flush(); "
+                    "time.sleep(3)"
+                ),
+            ]
+        },
+        1,
+    )
+    assert result.status == "timed_out"
+    assert result.output == "part"
+    assert result.error == ""
+
+
+def test_command_executor_fails_closed_on_invalid_timeout_partial_output():
+    result = command_executor(
+        {
+            "argv": [
+                sys.executable,
+                "-c",
+                (
+                    "import sys, time; "
+                    "sys.stdout.buffer.write(bytes([0xff])); "
+                    "sys.stdout.flush(); "
+                    "time.sleep(3)"
+                ),
+            ]
+        },
+        1,
+    )
+    assert result.status == "timed_out"
+    assert result.output == ""
+    assert "not valid utf-8" in result.error
+
+
+def test_command_executor_rejects_conflicting_python_output_encoding():
+    result = command_executor(
+        {
+            "argv": [sys.executable, "-c", "print('never runs')"],
+            "env": {"PYTHONIOENCODING": "cp1252"},
+        },
+        10,
+    )
+    assert result.status == "failed"
+    assert result.error == "PYTHONIOENCODING conflicts with output_encoding"
+
+
+@pytest.mark.parametrize("encoding", ("not-a-real-codec", "base64_codec", "idna"))
+def test_command_executor_rejects_non_text_output_encoding(encoding):
+    result = command_executor(
+        {
+            "argv": [sys.executable, "-c", "print('never runs')"],
+            "output_encoding": encoding,
+        },
+        10,
+    )
+    assert result.status == "failed"
+    assert result.error == "output_encoding must name a supported text encoding"
+
+
+@pytest.mark.parametrize("error_handler", ("ignore", "replace", "backslashreplace"))
+def test_command_executor_rejects_lossy_python_error_handler(error_handler):
+    result = command_executor(
+        {
+            "argv": [sys.executable, "-c", "print('never runs')"],
+            "env": {"PYTHONIOENCODING": f"utf-8:{error_handler}"},
+        },
+        10,
+    )
+    assert result.status == "failed"
+    assert result.error == "PYTHONIOENCODING error handler must be strict"
+
+
+def test_command_executor_rejects_mixed_case_python_encoding_duplicates():
+    result = command_executor(
+        {
+            "argv": [sys.executable, "-c", "print('never runs')"],
+            "env": {
+                "PYTHONIOENCODING": "utf-8:strict",
+                "pythonioencoding": "cp1252:ignore",
+            },
+        },
+        10,
+    )
+    assert result.status == "failed"
+    assert result.error == "env must not contain multiple PYTHONIOENCODING variants"
+
+
+def test_command_executor_normalizes_lowercase_python_encoding_key():
+    result = command_executor(
+        {
+            "argv": [
+                sys.executable,
+                "-c",
+                "import os; print(os.environ['PYTHONIOENCODING']); print('gültig')",
+            ],
+            "env": {"pythonioencoding": "utf-8:strict"},
+        },
+        10,
+    )
+    assert result.status == "succeeded"
+    assert result.output.splitlines() == ["utf-8:strict", "gültig"]
+
+
+def test_json_output_is_ascii_safe_and_round_trips(capsys):
+    value = {"output": "gültig \ufffd"}
+    _print(value, True)
+    rendered = capsys.readouterr().out
+    assert rendered.isascii()
+    assert json.loads(rendered) == value
+
+
+def test_json_output_is_ascii_safe_in_real_cp1252_child():
+    env = os.environ.copy()
+    env["PYTHONIOENCODING"] = "cp1252:strict"
+    source_root = str(Path(__file__).resolve().parents[1] / "src")
+    env["PYTHONPATH"] = os.pathsep.join(
+        value for value in (source_root, env.get("PYTHONPATH")) if value
+    )
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            (
+                "from ellmos_scheduler.cli import _print; "
+                "_print({'output': 'gültig'}, True)"
+            ),
+        ],
+        env=env,
+        capture_output=True,
+        text=False,
+        timeout=10,
+        check=False,
+    )
+    assert completed.returncode == 0
+    assert completed.stderr == b""
+    assert completed.stdout.isascii()
+    assert json.loads(completed.stdout.decode("ascii")) == {"output": "gültig"}
 
 
 def test_coma_executor_uses_public_adapter_seam(monkeypatch):
