@@ -37,7 +37,7 @@ jobs:
           setuptools==80.9.0
           wheel==0.45.1
           "tomli==2.2.1; python_version < '3.11'"
-          && python -m pip install -e .
+          && python -m pip install --no-build-isolation -e .
       - name: Test
         run: python -m pytest -q
       - name: Lint
