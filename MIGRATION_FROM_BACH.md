@@ -42,6 +42,11 @@ funktionsreiche Legacy-Quelle, aber nicht die Ziel-Quelle der Wahrheit.
   Zeitplan bleiben unter `_bach` als Provenienz erhalten.
 - `BachSchedulerAdapter` stellt BACH eine schmale API für Status, Jobs,
   Pause/Resume, Tick und Import bereit.
+- Importierte 0.1.x-Jobs bleiben kompatibel und beginnen mit einem leeren
+  Authority-Set. Vor produktiver Umschaltung werden die owner-bestätigten
+  rule/policy/decision/workflow/preference-IDs mit `set-authorities`
+  konfiguriert; anschließend wird die Laufzeit mit `--require-authorities`
+  fail-closed betrieben.
 
 Vor jedem echten Import zuerst:
 

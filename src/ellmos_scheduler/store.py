@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterator
 
+from .authorities import DEFAULT_AUTHORITY_REGISTRY, AuthorityResolverRegistry
 from .schedules import next_after
 
 
@@ -33,6 +34,7 @@ CREATE TABLE IF NOT EXISTS jobs (
     next_due_at TEXT NOT NULL,
     lease_seconds INTEGER NOT NULL DEFAULT 900,
     timeout_seconds INTEGER NOT NULL DEFAULT 600,
+    authorities_json TEXT NOT NULL DEFAULT '[]',
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
 );
@@ -48,7 +50,10 @@ CREATE TABLE IF NOT EXISTS runs (
     finished_at TEXT,
     exit_code INTEGER,
     output TEXT NOT NULL DEFAULT '',
-    error TEXT NOT NULL DEFAULT ''
+    error TEXT NOT NULL DEFAULT '',
+    authority_receipt_json TEXT NOT NULL DEFAULT '[]',
+    authority_set_sha256 TEXT,
+    authority_error TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX IF NOT EXISTS idx_runs_job_time ON runs(job_id, scheduled_for DESC);
 CREATE TABLE IF NOT EXISTS controls (
@@ -66,8 +71,14 @@ CREATE TABLE IF NOT EXISTS meta (
 
 
 class SchedulerStore:
-    def __init__(self, path: str | Path):
+    def __init__(
+        self,
+        path: str | Path,
+        *,
+        authority_registry: AuthorityResolverRegistry | None = None,
+    ):
         self.path = Path(path).expanduser()
+        self.authority_registry = authority_registry or DEFAULT_AUTHORITY_REGISTRY
 
     @contextmanager
     def connect(self) -> Iterator[sqlite3.Connection]:
@@ -85,6 +96,31 @@ class SchedulerStore:
     def init(self) -> None:
         with self.connect() as conn:
             conn.executescript(SCHEMA)
+            self._migrate_schema(conn)
+
+    @staticmethod
+    def _migrate_schema(conn: sqlite3.Connection) -> None:
+        """Add authority fields to 0.1.x databases without rewriting existing rows."""
+        job_columns = {
+            str(row["name"]) for row in conn.execute("PRAGMA table_info(jobs)")
+        }
+        if "authorities_json" not in job_columns:
+            conn.execute(
+                "ALTER TABLE jobs ADD COLUMN authorities_json TEXT NOT NULL DEFAULT '[]'"
+            )
+        run_columns = {
+            str(row["name"]) for row in conn.execute("PRAGMA table_info(runs)")
+        }
+        additions = {
+            "authority_receipt_json": (
+                "TEXT NOT NULL DEFAULT '[]'"
+            ),
+            "authority_set_sha256": "TEXT",
+            "authority_error": "TEXT NOT NULL DEFAULT ''",
+        }
+        for name, definition in additions.items():
+            if name not in run_columns:
+                conn.execute(f"ALTER TABLE runs ADD COLUMN {name} {definition}")
 
     def add_job(
         self,
@@ -98,6 +134,7 @@ class SchedulerStore:
         next_due_at: datetime | None = None,
         lease_seconds: int = 900,
         timeout_seconds: int = 600,
+        authorities: list[dict[str, Any]] | None = None,
     ) -> None:
         now = (now or datetime.now(UTC)).astimezone(UTC)
         if lease_seconds <= 0:
@@ -109,14 +146,16 @@ class SchedulerStore:
             if next_due_at is None
             else next_due_at.astimezone(UTC)
         )
+        authority_specs = self.authority_registry.validate_specs(authorities)
         stamp = iso(now)
         with self.connect() as conn:
             conn.execute(
                 """
                 INSERT INTO jobs(
                     id, schedule_json, executor, payload_json, enabled, next_due_at,
-                    lease_seconds, timeout_seconds, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    lease_seconds, timeout_seconds, authorities_json, created_at,
+                    updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     job_id,
@@ -127,6 +166,7 @@ class SchedulerStore:
                     iso(due),
                     lease_seconds,
                     timeout_seconds,
+                    json.dumps(authority_specs, ensure_ascii=False, sort_keys=True),
                     stamp,
                     stamp,
                 ),
@@ -145,6 +185,31 @@ class SchedulerStore:
             result = conn.execute(
                 "UPDATE jobs SET enabled = ?, updated_at = ? WHERE id = ?",
                 (int(enabled), stamp, job_id),
+            )
+            if result.rowcount != 1:
+                raise KeyError(job_id)
+
+    def set_authorities(
+        self,
+        job_id: str,
+        authorities: list[dict[str, Any]],
+        *,
+        now: datetime | None = None,
+    ) -> None:
+        specs = self.authority_registry.validate_specs(authorities)
+        stamp = iso(now or datetime.now(UTC))
+        with self.connect() as conn:
+            result = conn.execute(
+                """
+                UPDATE jobs
+                SET authorities_json = ?, generation = generation + 1, updated_at = ?
+                WHERE id = ?
+                """,
+                (
+                    json.dumps(specs, ensure_ascii=False, sort_keys=True),
+                    stamp,
+                    job_id,
+                ),
             )
             if result.rowcount != 1:
                 raise KeyError(job_id)
@@ -295,6 +360,59 @@ class SchedulerStore:
             if result.rowcount != 1:
                 raise RuntimeError(f"run cannot start: {run_id}")
 
+    def record_authority_receipt(
+        self,
+        run_id: str,
+        receipts: list[dict[str, Any]] | tuple[dict[str, Any], ...],
+        set_sha256: str,
+        *,
+        error: str = "",
+    ) -> None:
+        with self.connect() as conn:
+            result = conn.execute(
+                """
+                UPDATE runs
+                SET authority_receipt_json = ?, authority_set_sha256 = ?,
+                    authority_error = ?
+                WHERE run_id = ? AND status = 'claimed'
+                """,
+                (
+                    json.dumps(
+                        list(receipts),
+                        ensure_ascii=False,
+                        separators=(",", ":"),
+                        sort_keys=True,
+                    ),
+                    set_sha256,
+                    error,
+                    run_id,
+                ),
+            )
+            if result.rowcount != 1:
+                raise RuntimeError(
+                    f"authority receipt cannot be recorded for run: {run_id}"
+                )
+
+    def fail_claimed_run(
+        self,
+        run_id: str,
+        *,
+        error: str,
+        now: datetime | None = None,
+    ) -> None:
+        stamp = iso(now or datetime.now(UTC))
+        with self.connect() as conn:
+            result = conn.execute(
+                """
+                UPDATE runs
+                SET status = 'failed', finished_at = ?, error = ?
+                WHERE run_id = ? AND status = 'claimed'
+                """,
+                (stamp, error[-20000:], run_id),
+            )
+            if result.rowcount != 1:
+                raise RuntimeError(f"claimed run cannot fail: {run_id}")
+
     def finish_run(
         self,
         run_id: str,
@@ -327,6 +445,23 @@ class SchedulerStore:
                 (limit,),
             ).fetchall()
         return [dict(row) for row in rows]
+
+    def authority_receipt(self, run_id: str) -> dict[str, Any]:
+        with self.connect() as conn:
+            row = conn.execute(
+                """
+                SELECT run_id, job_id, scheduled_for, status,
+                    authority_receipt_json, authority_set_sha256, authority_error
+                FROM runs
+                WHERE run_id = ?
+                """,
+                (run_id,),
+            ).fetchone()
+        if row is None:
+            raise KeyError(run_id)
+        result = dict(row)
+        result["authorities"] = json.loads(result.pop("authority_receipt_json"))
+        return result
 
     def latest_runs_by_job(self) -> dict[str, dict[str, Any]]:
         with self.connect() as conn:
