@@ -81,7 +81,9 @@ def parser() -> argparse.ArgumentParser:
 
 def _print(value: object, as_json: bool) -> None:
     if as_json:
-        print(json.dumps(value, ensure_ascii=False, indent=2))
+        # JSON remains machine-readable even when the Windows console uses a
+        # legacy code page and historical output contains non-ASCII text.
+        print(json.dumps(value, ensure_ascii=True, indent=2))
     elif isinstance(value, list):
         for item in value:
             print(item)

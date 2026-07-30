@@ -5,7 +5,7 @@ ist bewusst **außerhalb von BACH** angelegt. BACH, Wonderland/Riverfall,
 Desktop-Automationen, COMA, MarbleRun/llmauto und swarm-ai können es über
 schmale Adapter konsumieren.
 
-Status: `0.2.0` (Authority-Receipts, 2026-07-30).
+Status: `0.2.1` (Authority-Receipts und strikte Output-Kodierung, 2026-07-30).
 
 ## Verantwortungsgrenze
 
@@ -52,6 +52,16 @@ eine `argv`-Liste und starten ohne Shell. Zusätzlich sind `noop`, `coma` und
 {"executor":"coma","payload":{"provider":"codex","prompt":"Prüfe den Build","cwd":"C:\\repo"}}
 {"executor":"marblerun","payload":{"chain":"review-chain","background":false}}
 ```
+
+Command-Ausgabe ist standardmäßig UTF-8. Python-Kinder erhalten dafür einen
+expliziten `PYTHONIOENCODING`-/UTF-8-Vertrag. Ein nachweislich anders
+kodierender Prozess muss `payload.output_encoding` setzen, etwa `cp1252`.
+Zugelassen sind die streamtauglichen Verträge ASCII, CP437, CP850, CP1252,
+Latin-1, UTF-8/UTF-8-SIG und UTF-16/UTF-16-LE/UTF-16-BE. Ein expliziter
+`PYTHONIOENCODING`-Fehlerhandler muss `strict` sein.
+Nicht dekodierbare Ausgabe lässt den Lauf fail-closed fehlschlagen, statt
+Audit-Text still durch Ersatzzeichen zu verfälschen. JSON-CLI-Ausgabe bleibt
+auch unter älteren Windows-Codepages durch ASCII-Escapes lesbar.
 
 COMA wird erst beim tatsächlichen Lauf importiert. Der MarbleRun-Adapter startet
 die öffentliche CLI als sichere argv-Liste und respektiert den
