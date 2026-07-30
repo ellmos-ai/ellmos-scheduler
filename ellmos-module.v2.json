@@ -2,7 +2,7 @@
   "schema": "ellmos.module.v2",
   "id": "ellmos-scheduler",
   "display_name": "ellmos Scheduler",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "category": "control",
   "kind": "library",
   "status": "experimental",

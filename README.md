@@ -5,7 +5,13 @@ ist bewusst **außerhalb von BACH** angelegt. BACH, Wonderland/Riverfall,
 Desktop-Automationen, COMA, MarbleRun/llmauto und swarm-ai können es über
 schmale Adapter konsumieren.
 
-Status: `0.2.1` (Authority-Receipts und strikte Output-Kodierung, 2026-07-30).
+Status: `0.2.2` (Authority-Receipts, strikte Output-Kodierung und
+Windows-IANA-Zeitzonendaten, 2026-07-31).
+
+Auf Windows installiert das Paket `tzdata` als bedingte Runtime-Abhängigkeit.
+Damit funktionieren IANA-Zeitzonen wie `Europe/Berlin` auch in einem sauberen
+virtuellen Environment, in dem das Betriebssystem keine Zoneinfo-Daten für
+Python bereitstellt.
 
 ## Verantwortungsgrenze
 
