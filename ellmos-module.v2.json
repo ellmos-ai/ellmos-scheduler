@@ -2,7 +2,7 @@
   "schema": "ellmos.module.v2",
   "id": "ellmos-scheduler",
   "display_name": "ellmos Scheduler",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "control",
   "kind": "library",
   "status": "experimental",
@@ -17,6 +17,7 @@
     "automation.schedule",
     "automation.lease",
     "automation.run-history",
+    "automation.authority-receipt",
     "automation.operator-control"
   ],
   "requires": [],

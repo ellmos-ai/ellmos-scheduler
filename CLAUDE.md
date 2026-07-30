@@ -18,5 +18,8 @@ Migrationsquelle.
 - SQLite-Zustand gehört dem Modul und liegt außerhalb des Quellbaums.
 - Claims verhindern Doppelmutation, sind aber kein Erfolgsbeleg; Erfolg benötigt
   einen abgeschlossenen Run-Record.
+- Explizit konfigurierte Autoritätsquellen werden read-only vor dem Executor
+  aufgelöst; required-Fehler blockieren den Lauf und jeder Versuch erhält einen
+  inhaltsfreien Hash-/Readback-Beleg.
 - Keine Shell-Strings im eingebauten Command-Executor; nur `argv`-Listen.
 - BACH-spezifische Imports gehören ausschließlich in einen Adapter.

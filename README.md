@@ -5,7 +5,7 @@ ist bewusst **außerhalb von BACH** angelegt. BACH, Wonderland/Riverfall,
 Desktop-Automationen, COMA, MarbleRun/llmauto und swarm-ai können es über
 schmale Adapter konsumieren.
 
-Status: `0.1.0` (MVP, 2026-07-27).
+Status: `0.2.0` (Authority-Receipts, 2026-07-30).
 
 ## Verantwortungsgrenze
 
@@ -38,9 +38,10 @@ ellmos-scheduler --db "$env:LOCALAPPDATA\ellmos\scheduler.db" add `
   --id sync.daily.cross-system `
   --schedule '{"kind":"daily","time":"09:00","timezone":"Europe/Berlin"}' `
   --executor command `
-  --payload '{"argv":["python","C:\\path\\to\\task.py"],"cwd":"C:\\Users\\lukas"}'
+  --payload '{"argv":["python","C:\\path\\to\\task.py"],"cwd":"C:\\Users\\lukas"}' `
+  --authorities '[{"id":"policy:sync","type":"policy","resolver":"file","required":true,"source":{"path":"C:\\authorities\\SYNC_PROTOCOL.md"}}]'
 ellmos-scheduler --db "$env:LOCALAPPDATA\ellmos\scheduler.db" status --json
-ellmos-scheduler --db "$env:LOCALAPPDATA\ellmos\scheduler.db" serve
+ellmos-scheduler --db "$env:LOCALAPPDATA\ellmos\scheduler.db" serve --require-authorities
 ```
 
 `command` und der gleichwertige Name `subprocess` akzeptieren ausschließlich
@@ -75,6 +76,35 @@ service = SchedulerService(store, registry=registry)
 Eine doppelte Registrierung schlägt fehl. Absichtliches Ersetzen erfordert
 `replace=True`; dadurch können parallel laufende Scheduler-Instanzen getrennte
 Adaptermengen verwenden.
+
+## Kanonische Autoritäten pro Run
+
+Jeder Job kann explizite `rule`, `policy`, `decision`, `workflow` oder
+`user-preference`-Quellen (sowie weitere stabile Typen) deklarieren. Der
+Scheduler liest sie unmittelbar vor dem Executor zweimal read-only, verlangt
+für required Quellen einen identischen SHA-256-Readback und speichert nur
+Authority-ID/-Typ, Requirement, Resolver, sichere Herkunft, Hashes, Bytezahl und
+Status. Rohinhalt oder Secret-Metadaten werden abgewiesen und nicht persistiert.
+
+```powershell
+ellmos-scheduler --db C:\state\scheduler.db set-authorities sync.daily `
+  --authorities '[{"id":"rule:global","type":"rule","resolver":"file","required":true,"source":{"path":"C:\\authorities\\CLAUDE.md"}},{"id":"preference:approved","type":"user-preference","resolver":"file","required":false,"source":{"path":"C:\\authorities\\USER.md"}}]'
+
+ellmos-scheduler --db C:\state\scheduler.db tick --require-authorities --json
+ellmos-scheduler --db C:\state\scheduler.db authority-receipt <run-id> --json
+```
+
+Required `unresolved`/`conflict` stoppt vor der Provider-/Command-Ausführung.
+Optionales Fehlen bleibt typisiert im Receipt. Der Authority-Set-Hash bleibt
+bei identischer Auflösung über Runs stabil; jede einzelne `receipt_id` ist an
+die konkrete `run_id` gebunden. Bestehende 0.1.x-Datenbanken werden additiv
+migriert; alte Jobs laufen im kompatiblen Standardmodus mit leerem Set weiter.
+`--require-authorities` ist das explizite Cutover-Gate nach abgeschlossener
+Jobmigration. Eigene Resolver lassen sich über `AuthorityResolverRegistry`
+injizieren, müssen aber zusammen mit einer Source-Allowlist/Validierung
+registriert werden und denselben secretfreien Hash-/Readback-Vertrag erfüllen.
+Die Auflösung und Receipt-Persistierung geschieht noch im Zustand `claimed`;
+erst ein erfolgreicher Required-Preflight setzt `started_at` und `running`.
 
 ## Sicherheits- und Verfügbarkeitsmodell
 

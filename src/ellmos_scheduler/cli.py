@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 from typing import Sequence
 
+from .authorities import DEFAULT_AUTHORITY_REGISTRY
 from .bach import import_legacy_jobs
 from .executors import executor_names
 from .service import SchedulerService
@@ -27,6 +28,11 @@ def parser() -> argparse.ArgumentParser:
     add.add_argument("--schedule", required=True, help="JSON schedule object")
     add.add_argument("--executor", required=True)
     add.add_argument("--payload", required=True, help="JSON payload object")
+    add.add_argument(
+        "--authorities",
+        default="[]",
+        help="JSON authority-source array; required sources fail closed before execution",
+    )
     add.add_argument("--lease-seconds", type=int, default=900)
     add.add_argument("--timeout-seconds", type=int, default=600)
 
@@ -39,6 +45,14 @@ def parser() -> argparse.ArgumentParser:
     runs.add_argument("--json", action="store_true")
     executors = sub.add_parser("executors")
     executors.add_argument("--json", action="store_true")
+    authority_resolvers = sub.add_parser("authority-resolvers")
+    authority_resolvers.add_argument("--json", action="store_true")
+    authority_receipt = sub.add_parser("authority-receipt")
+    authority_receipt.add_argument("run_id")
+    authority_receipt.add_argument("--json", action="store_true")
+    set_authorities = sub.add_parser("set-authorities")
+    set_authorities.add_argument("job_id")
+    set_authorities.add_argument("--authorities", required=True)
 
     import_bach = sub.add_parser("import-bach")
     import_bach.add_argument("--source-db", type=Path, required=True)
@@ -58,8 +72,10 @@ def parser() -> argparse.ArgumentParser:
 
     tick = sub.add_parser("tick")
     tick.add_argument("--json", action="store_true")
+    tick.add_argument("--require-authorities", action="store_true")
     serve = sub.add_parser("serve")
     serve.add_argument("--poll-seconds", type=float, default=5.0)
+    serve.add_argument("--require-authorities", action="store_true")
     return result
 
 
@@ -77,6 +93,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser().parse_args(argv)
     if args.command == "executors":
         _print(list(executor_names()), args.json)
+        return 0
+    if args.command == "authority-resolvers":
+        _print(list(DEFAULT_AUTHORITY_REGISTRY.names()), args.json)
         return 0
     store = SchedulerStore(args.db)
     if args.command == "import-bach":
@@ -100,6 +119,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             json.loads(args.payload),
             lease_seconds=args.lease_seconds,
             timeout_seconds=args.timeout_seconds,
+            authorities=json.loads(args.authorities),
         )
         print(args.id)
     elif args.command == "jobs":
@@ -108,6 +128,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         _print(store.status(), args.json)
     elif args.command == "runs":
         _print(store.recent_runs(args.limit), args.json)
+    elif args.command == "authority-receipt":
+        _print(store.authority_receipt(args.run_id), args.json)
+    elif args.command == "set-authorities":
+        store.set_authorities(args.job_id, json.loads(args.authorities))
+        print(args.job_id)
     elif args.command in {"enable", "disable"}:
         store.set_enabled(args.job_id, args.command == "enable")
         print(args.job_id)
@@ -116,7 +141,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         store.set_pause(scope, args.command == "pause", args.reason)
         print(scope)
     elif args.command == "tick":
-        _print(SchedulerService(store).tick(), args.json)
+        _print(
+            SchedulerService(
+                store,
+                require_authorities=args.require_authorities,
+            ).tick(),
+            args.json,
+        )
     elif args.command == "serve":
-        SchedulerService(store).serve(args.poll_seconds)
+        SchedulerService(
+            store,
+            require_authorities=args.require_authorities,
+        ).serve(args.poll_seconds)
     return 0
