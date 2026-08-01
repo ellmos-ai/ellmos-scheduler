@@ -1,31 +1,32 @@
 # ellmos Scheduler
 
-Eigenständiger Zeitgeber und Run-Recorder für modulare ellmos-Stacks. Das Modul
-ist bewusst **außerhalb von BACH** angelegt. BACH, Wonderland/Riverfall,
-Desktop-Automationen, COMA, MarbleRun/llmauto und swarm-ai können es über
-schmale Adapter konsumieren.
+[English](README.md) | [Deutsch](README_de.md)
 
-Status: `0.2.2` (Authority-Receipts, strikte Output-Kodierung und
-Windows-IANA-Zeitzonendaten, 2026-07-31).
+Standalone scheduler and run recorder for modular ellmos stacks. The module is
+deliberately located **outside BACH**. BACH, Wonderland/Riverfall, desktop
+automations, COMA, MarbleRun/llmauto, and swarm-ai can consume it through
+narrow adapters.
 
-Auf Windows installiert das Paket `tzdata` als bedingte Runtime-Abhängigkeit.
-Damit funktionieren IANA-Zeitzonen wie `Europe/Berlin` auch in einem sauberen
-virtuellen Environment, in dem das Betriebssystem keine Zoneinfo-Daten für
-Python bereitstellt.
+Status: `0.2.2` (authority receipts, strict output encoding, and Windows IANA
+time-zone data, 2026-07-31).
 
-## Verantwortungsgrenze
+On Windows, the package installs `tzdata` as a conditional runtime dependency.
+This makes IANA time zones such as `Europe/Berlin` work in a clean virtual
+environment even when the operating system does not provide Python zoneinfo
+data.
 
-- ellmos Scheduler: Zeitplan, Due-Ermittlung, Lease/Claim, deduplizierende
-  `run_id`, Pause/Resume, Run-Historie und Heartbeat.
-- COMA: Provider-Prozess starten und Ergebnis abholen.
-- MarbleRun/llmauto: Ketten ausführen.
-- swarm-ai: Agentenmuster ausführen.
-- `.SYNC/automation-exchange`: systemübergreifender Aufgaben-,
-  Abdeckungs- und Vertretungsvertrag.
-- BACH: Consumer über `BachSchedulerAdapter`, nicht Eigentümer der
-  Scheduler-Logik.
+## Responsibility boundary
 
-## Unterstützte Zeitpläne
+- ellmos Scheduler: schedule, due calculation, lease/claim, deduplicating
+  `run_id`, pause/resume, run history, and heartbeat.
+- COMA: starts a provider process and retrieves its result.
+- MarbleRun/llmauto: executes chains.
+- swarm-ai: executes agent patterns.
+- `.SYNC/automation-exchange`: the cross-system contract for jobs, coverage,
+  and representation.
+- BACH: consumer through `BachSchedulerAdapter`, not owner of scheduler logic.
+
+## Supported schedules
 
 ```json
 {"kind": "interval", "seconds": 3600}
@@ -33,9 +34,9 @@ Python bereitstellt.
 {"kind": "cron", "expression": "*/15 * * * *", "timezone": "Europe/Berlin"}
 ```
 
-Cron unterstützt fünf Felder, `*`, Listen, Bereiche und Schritte.
+Cron supports five fields, `*`, lists, ranges, and steps.
 
-## Schnellstart
+## Quick start
 
 ```powershell
 python -m pip install -e ".[dev]"
@@ -50,38 +51,35 @@ ellmos-scheduler --db "$env:LOCALAPPDATA\ellmos\scheduler.db" status --json
 ellmos-scheduler --db "$env:LOCALAPPDATA\ellmos\scheduler.db" serve --require-authorities
 ```
 
-Für vorbereitete Cutover- oder Shadow-Jobs materialisiert `add --disabled` den
-Datensatz atomar deaktiviert. Dadurch entsteht kein Zeitfenster, in dem ein
-parallel laufender Scheduler den neuen Job zwischen `add` und `disable`
-beanspruchen könnte. Aktiviert wird später explizit mit `enable <job-id>`.
+For prepared cutover or shadow jobs, `add --disabled` materializes the record
+atomically in its disabled state. This prevents a parallel scheduler from
+claiming the new job in the interval between `add` and `disable`. Enable it
+later explicitly with `enable <job-id>`.
 
-`command` und der gleichwertige Name `subprocess` akzeptieren ausschließlich
-eine `argv`-Liste und starten ohne Shell. Zusätzlich sind `noop`, `coma` und
-`marblerun` registriert:
+`command` and its equivalent name `subprocess` accept only an `argv` list and
+start without a shell. `noop`, `coma`, and `marblerun` are registered as well:
 
 ```json
-{"executor":"coma","payload":{"provider":"codex","prompt":"Prüfe den Build","cwd":"C:\\repo"}}
+{"executor":"coma","payload":{"provider":"codex","prompt":"Check the build","cwd":"C:\\repo"}}
 {"executor":"marblerun","payload":{"chain":"review-chain","background":false}}
 ```
 
-Command-Ausgabe ist standardmäßig UTF-8. Python-Kinder erhalten dafür einen
-expliziten `PYTHONIOENCODING`-/UTF-8-Vertrag. Ein nachweislich anders
-kodierender Prozess muss `payload.output_encoding` setzen, etwa `cp1252`.
-Zugelassen sind die streamtauglichen Verträge ASCII, CP437, CP850, CP1252,
-Latin-1, UTF-8/UTF-8-SIG und UTF-16/UTF-16-LE/UTF-16-BE. Ein expliziter
-`PYTHONIOENCODING`-Fehlerhandler muss `strict` sein.
-Nicht dekodierbare Ausgabe lässt den Lauf fail-closed fehlschlagen, statt
-Audit-Text still durch Ersatzzeichen zu verfälschen. JSON-CLI-Ausgabe bleibt
-auch unter älteren Windows-Codepages durch ASCII-Escapes lesbar.
+Command output defaults to UTF-8. Python child processes receive an explicit
+`PYTHONIOENCODING`/UTF-8 contract. A process that is demonstrably encoded
+differently must set `payload.output_encoding`, for example `cp1252`. Allowed
+stream-safe contracts are ASCII, CP437, CP850, CP1252, Latin-1, UTF-8/UTF-8-SIG,
+and UTF-16/UTF-16-LE/UTF-16-BE. An explicit `PYTHONIOENCODING` error handler
+must be `strict`. Undecodable output fails the run closed instead of silently
+corrupting audit text with replacement characters. JSON CLI output remains
+readable through ASCII escapes even under older Windows code pages.
 
-COMA wird erst beim tatsächlichen Lauf importiert. Der MarbleRun-Adapter startet
-die öffentliche CLI als sichere argv-Liste und respektiert den
-Scheduler-Timeout. Die jeweiligen Pakete müssen für diese Adapter installiert
-sein. Codex-Custom-Prompts und App-Aufgaben nicht durch einen unbelegten
-`codex exec /command`-Aufruf simulieren; der jeweilige native Einstieg muss
-separat live verifiziert sein.
+COMA is imported only when a run actually occurs. The MarbleRun adapter starts
+the public CLI as a safe argv list and observes the scheduler timeout. The
+respective packages must be installed for these adapters. Do not simulate Codex
+custom prompts and app tasks with an unproven `codex exec /command` invocation;
+the respective native entry point must be verified live separately.
 
-Eigene Integrationen erhalten eine isolierte Registry:
+Custom integrations receive an isolated registry:
 
 ```python
 from ellmos_scheduler import ExecutionResult, ExecutorRegistry, SchedulerService
@@ -94,18 +92,18 @@ registry.register(
 service = SchedulerService(store, registry=registry)
 ```
 
-Eine doppelte Registrierung schlägt fehl. Absichtliches Ersetzen erfordert
-`replace=True`; dadurch können parallel laufende Scheduler-Instanzen getrennte
-Adaptermengen verwenden.
+Duplicate registration fails. Intentional replacement requires `replace=True`;
+this allows concurrently running scheduler instances to use separate adapter
+sets.
 
-## Kanonische Autoritäten pro Run
+## Canonical authorities per run
 
-Jeder Job kann explizite `rule`, `policy`, `decision`, `workflow` oder
-`user-preference`-Quellen (sowie weitere stabile Typen) deklarieren. Der
-Scheduler liest sie unmittelbar vor dem Executor zweimal read-only, verlangt
-für required Quellen einen identischen SHA-256-Readback und speichert nur
-Authority-ID/-Typ, Requirement, Resolver, sichere Herkunft, Hashes, Bytezahl und
-Status. Rohinhalt oder Secret-Metadaten werden abgewiesen und nicht persistiert.
+Each job can declare explicit `rule`, `policy`, `decision`, `workflow`, or
+`user-preference` sources (as well as other stable types). Immediately before
+the executor, the scheduler reads them twice read-only, requires an identical
+SHA-256 readback for required sources, and stores only authority ID/type,
+requirement, resolver, safe origin, hashes, byte count, and status. Raw content
+or secret metadata is rejected and never persisted.
 
 ```powershell
 ellmos-scheduler --db C:\state\scheduler.db set-authorities sync.daily `
@@ -115,34 +113,35 @@ ellmos-scheduler --db C:\state\scheduler.db tick --require-authorities --json
 ellmos-scheduler --db C:\state\scheduler.db authority-receipt <run-id> --json
 ```
 
-Required `unresolved`/`conflict` stoppt vor der Provider-/Command-Ausführung.
-Optionales Fehlen bleibt typisiert im Receipt. Der Authority-Set-Hash bleibt
-bei identischer Auflösung über Runs stabil; jede einzelne `receipt_id` ist an
-die konkrete `run_id` gebunden. Bestehende 0.1.x-Datenbanken werden additiv
-migriert; alte Jobs laufen im kompatiblen Standardmodus mit leerem Set weiter.
-`--require-authorities` ist das explizite Cutover-Gate nach abgeschlossener
-Jobmigration. Eigene Resolver lassen sich über `AuthorityResolverRegistry`
-injizieren, müssen aber zusammen mit einer Source-Allowlist/Validierung
-registriert werden und denselben secretfreien Hash-/Readback-Vertrag erfüllen.
-Die Auflösung und Receipt-Persistierung geschieht noch im Zustand `claimed`;
-erst ein erfolgreicher Required-Preflight setzt `started_at` und `running`.
+Required `unresolved`/`conflict` stops before provider/command execution.
+Optional absence remains typed in the receipt. The authority-set hash remains
+stable across runs with identical resolution; each `receipt_id` is bound to its
+concrete `run_id`. Existing 0.1.x databases are migrated additively; old jobs
+continue in compatible standard mode with an empty set. `--require-authorities`
+is the explicit cutover gate after completed job migration. Custom resolvers
+can be injected through `AuthorityResolverRegistry`, but must be registered
+together with source allowlisting/validation and meet the same secret-free
+hash/readback contract. Resolution and receipt persistence happen while the
+state is still `claimed`; only a successful required preflight sets `started_at`
+and `running`.
 
-## Sicherheits- und Verfügbarkeitsmodell
+## Security and availability model
 
-- Fällige Läufe erhalten atomar eine deterministische `run_id`.
-- Eine Lease verhindert einen zweiten Writer für dasselbe Jobfenster.
-- Ein Claim gilt nicht als Erfolg; erst der abgeschlossene Run-Record zählt.
-- Ausgelaufene Claims werden als `abandoned` markiert und dürfen erneut geplant
-  werden.
-- Globales und jobbezogenes Pause/Resume bleibt getrennt von `enabled`.
-- Status liefert `last_tick_at`, Jobzahlen und Runzahlen maschinenlesbar.
+- Due runs receive an atomic, deterministic `run_id`.
+- A lease prevents a second writer for the same job window.
+- A claim is not success; only the completed run record counts.
+- Expired claims are marked `abandoned` and may be scheduled again.
+- Global and job-specific pause/resume remain separate from `enabled`.
+- Status returns `last_tick_at`, job counts, and run counts in machine-readable
+  form.
 
-## Migration aus BACH
+## Migration from BACH
 
-Siehe [MIGRATION_FROM_BACH.md](MIGRATION_FROM_BACH.md). Der bestehende
-`BACH/system/hub/scheduler.py` bleibt bis zum Betriebsvergleich als
-Legacy-Quelle in Betrieb. Ein Dry-Run zeigt übertragbare und bewusst
-übersprungene Jobs, ohne die Quell- oder Zieldatenbank anzulegen bzw. zu ändern:
+See [MIGRATION_FROM_BACH.md](MIGRATION_FROM_BACH.md). The existing
+`BACH/system/hub/scheduler.py` remains in operation as a legacy source until
+the operational comparison is complete. A dry run shows transferable and
+intentionally skipped jobs without creating or changing the source or target
+database:
 
 ```powershell
 ellmos-scheduler --db C:\state\scheduler.db import-bach `
@@ -152,23 +151,23 @@ ellmos-scheduler --db C:\state\scheduler.db import-bach `
   --dry-run --json
 ```
 
-Der Python-Einstieg `create_bach_adapter(state_db)` liefert die schmale
-Consumer-API, die BACH hinter seiner `scheduler_provider`-Seam verwenden kann.
+The Python entry point `create_bach_adapter(state_db)` provides the narrow
+consumer API that BACH can use behind its `scheduler_provider` seam.
 
-## Bundles und Partner
+## Bundles and partners
 
-`ellmos-scheduler` bleibt ein einzeln nutzbarer Zeitgeber. In der
-V4-Komposition ist es ein erforderlicher Zeit- und Run-Recorder im
-`ellmos-automation-control-bundle`; es entscheidet weiterhin nur **wann**
-etwas fällig ist, nicht welcher Provider, Workflow oder Agent ausführt.
+`ellmos-scheduler` remains a separately usable clock. In the V4 composition it
+is a required time and run recorder in `ellmos-automation-control-bundle`; it
+still decides only **when** something is due, not which provider, workflow, or
+agent executes it.
 
-Direkte Bundlepartner sind die erforderliche Automationsregistry und
-Runtime-Readback-Komponente; die Cloud-Control-Schicht ist empfohlen. Für das
-Profil `self-healing` ist `automation-self-care` der erforderliche
-Skillpartner: Er wird deklarativ aufgelöst und kann bezogen werden, aktiviert
-oder verändert aber ohne die vorgesehenen Freigabe-, Native-Readback- und
-Rollback-Gates keine Automatisierung.
+Direct bundle partners are the required automation registry and runtime
+readback component; the cloud-control layer is recommended. For the
+`self-healing` profile, `automation-self-care` is the required skill partner:
+it is resolved declaratively and can be obtained, but cannot activate or alter
+an automation without the prescribed approval, native-readback, and rollback
+gates.
 
-Die verbindliche Mitgliedschaft, Versionen, Profile und privaten
-Zusammensetzungsrezepte stehen ausschließlich im Bundle-Manifest. Diese
-Übersicht ist öffentlich und dient nur der Partner-Discovery.
+Binding membership, versions, profiles, and private composition recipes reside
+exclusively in the bundle manifest. This public overview serves partner
+discovery only.
