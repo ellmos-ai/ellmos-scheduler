@@ -35,6 +35,11 @@ def parser() -> argparse.ArgumentParser:
     )
     add.add_argument("--lease-seconds", type=int, default=900)
     add.add_argument("--timeout-seconds", type=int, default=600)
+    add.add_argument(
+        "--disabled",
+        action="store_true",
+        help="materialize the job atomically in disabled state",
+    )
 
     jobs = sub.add_parser("jobs")
     jobs.add_argument("--json", action="store_true")
@@ -122,6 +127,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             lease_seconds=args.lease_seconds,
             timeout_seconds=args.timeout_seconds,
             authorities=json.loads(args.authorities),
+            enabled=not args.disabled,
         )
         print(args.id)
     elif args.command == "jobs":

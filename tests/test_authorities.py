@@ -512,6 +512,36 @@ def test_cli_add_tick_and_authority_receipt_readback(tmp_path, capsys):
     assert receipt["authorities"][0]["status"] == "resolved"
 
 
+def test_cli_add_can_materialize_job_atomically_disabled(tmp_path, capsys):
+    db = tmp_path / "scheduler.db"
+    assert (
+        main(
+            [
+                "--db",
+                str(db),
+                "add",
+                "--id",
+                "disabled-job",
+                "--schedule",
+                '{"kind":"interval","seconds":1}',
+                "--executor",
+                "noop",
+                "--payload",
+                "{}",
+                "--disabled",
+            ]
+        )
+        == 0
+    )
+    capsys.readouterr()
+    store = SchedulerStore(db)
+    job = store.list_jobs()[0]
+    due = datetime.fromisoformat(job["next_due_at"].replace("Z", "+00:00"))
+
+    assert job["enabled"] == 0
+    assert SchedulerService(store, "cli-test").tick(now=due) == []
+
+
 def test_set_authorities_updates_existing_job_generation(tmp_path):
     store = SchedulerStore(tmp_path / "scheduler.db")
     store.init()

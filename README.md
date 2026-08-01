@@ -50,6 +50,11 @@ ellmos-scheduler --db "$env:LOCALAPPDATA\ellmos\scheduler.db" status --json
 ellmos-scheduler --db "$env:LOCALAPPDATA\ellmos\scheduler.db" serve --require-authorities
 ```
 
+Für vorbereitete Cutover- oder Shadow-Jobs materialisiert `add --disabled` den
+Datensatz atomar deaktiviert. Dadurch entsteht kein Zeitfenster, in dem ein
+parallel laufender Scheduler den neuen Job zwischen `add` und `disable`
+beanspruchen könnte. Aktiviert wird später explizit mit `enable <job-id>`.
+
 `command` und der gleichwertige Name `subprocess` akzeptieren ausschließlich
 eine `argv`-Liste und starten ohne Shell. Zusätzlich sind `noop`, `coma` und
 `marblerun` registriert:
