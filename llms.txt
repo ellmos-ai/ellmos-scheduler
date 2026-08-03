@@ -1,0 +1,31 @@
+# ellmos-scheduler - Standalone Modular Scheduler & Run Recorder
+
+> [!NOTE]
+> `ellmos-scheduler` is a standalone Python 3.10+ scheduler engine and run recorder designed for modular ellmos stacks and external integrations (BACH, COMA, MarbleRun, swarm-ai).
+
+## Core Capabilities
+- **Flexible Scheduling**: Supports `interval`, `daily` (time zone aware), and 5-field `cron` expressions.
+- **Lease & Claim Concurrency**: Atomic lease mechanism prevents duplicate execution across parallel scheduler workers.
+- **Authority Receipts**: Pre-execution verification of rule/policy/decision files with SHA-256 integrity hashing (`--require-authorities`).
+- **Executors & Adapters**: Native support for `command`/`subprocess`, `coma` AI provider execution, `marblerun` chains, and custom Python executor registries.
+- **Fail-Closed Encoding**: Strict UTF-8 and configurable stream-safe encodings (CP1252, Latin-1, ASCII) with strict error handling.
+- **Windows Timezone Support**: Ships with `tzdata` fallback for reliable IANA time zones (e.g., `Europe/Berlin`) on Windows.
+
+## Directory Structure
+- `src/ellmos_scheduler/`: Core Python package (CLI, service, store, executors, authorities).
+- `tests/`: Comprehensive Pytest test suite (90 tests passing).
+- `ARCHITECTURE.md`: Technical design and internal state machine documentation.
+- `MIGRATION_FROM_BACH.md`: Migration guide and adapter interface for legacy BACH scheduler replacement.
+
+## CLI Usage Quick Reference
+- `ellmos-scheduler --db <path> init`: Initialize SQLite state database.
+- `ellmos-scheduler --db <path> add --id <job_id> --schedule <json> --executor <name>`: Register scheduled job (optional `--disabled`).
+- `ellmos-scheduler --db <path> status --json`: Report last tick, active leases, job/run stats.
+- `ellmos-scheduler --db <path> tick --require-authorities`: Run single due-job tick pass.
+- `ellmos-scheduler --db <path> serve --require-authorities`: Start daemon service.
+
+## Integration & Metadata
+- **Ecosystem**: `ellmos-ai`
+- **Umbrella**: `open-bricks`
+- **License**: MIT
+- **Last-checked**: 2026-08-03

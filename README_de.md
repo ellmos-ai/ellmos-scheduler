@@ -1,6 +1,16 @@
 # ellmos Scheduler
 
+[![PyPI Version](https://img.shields.io/badge/version-0.2.2-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Tests: 90 Passed](https://img.shields.io/badge/tests-90%20passed-brightgreen.svg)](tests/)
+[![Ecosystem: ellmos-ai](https://img.shields.io/badge/ecosystem-ellmos--ai-purple.svg)](https://github.com/ellmos-ai)
+[![Umbrella: open-bricks](https://img.shields.io/badge/umbrella-open--bricks-blueviolet.svg)](https://github.com/open-bricks)
+
 [English](README.md) | [Deutsch](README_de.md)
+
+> [!NOTE]
+> **Für KI-Agenten & LLM-Tools:** Dieses Repository bietet einen maschinenlesbaren Index unter [`llms.txt`](llms.txt) für automatisierte Exploration, Funktionsübersichten und CLI-Schnittstellen.
 
 Eigenständiger Zeitgeber und Run-Recorder für modulare ellmos-Stacks. Das Modul
 ist bewusst **außerhalb von BACH** angelegt. BACH, Wonderland/Riverfall,
@@ -14,6 +24,50 @@ Auf Windows installiert das Paket `tzdata` als bedingte Runtime-Abhängigkeit.
 Damit funktionieren IANA-Zeitzonen wie `Europe/Berlin` auch in einem sauberen
 virtuellen Environment, in dem das Betriebssystem keine Zoneinfo-Daten für
 Python bereitstellt.
+
+## Architektur & Systemübersicht
+
+```mermaid
+graph TD
+    subgraph Trigger ["Auslöser / Zeitpläne"]
+        Interval["Intervall (Sekunden)"]
+        Daily["Täglich (Uhrzeit / Zeitzone)"]
+        Cron["Cron (5-Felder-Ausdruck)"]
+    end
+
+    subgraph Core ["ellmos Scheduler Core Engine"]
+        Engine["Tick & Claim Engine"]
+        DB[("SQLite State Store<br/>(Jobs, Leases, Runs)")]
+        AuthorityCheck["Authority Preflight Guard<br/>(SHA-256 Hash-Verifikation)"]
+    end
+
+    subgraph Executors ["Ausführungs-Adapter"]
+        Subprocess["Subprocess / Command"]
+        COMA["COMA AI Provider"]
+        MarbleRun["MarbleRun Kette"]
+        Custom["Custom Python Registry"]
+    end
+
+    subgraph Integrations ["Ökosystem-Konsumenten"]
+        BACH["BACH Adapter"]
+        Swarm["swarm-ai"]
+        Desktop["Desktop-Automationen"]
+    end
+
+    Interval --> Engine
+    Daily --> Engine
+    Cron --> Engine
+    Engine <--> DB
+    Engine --> AuthorityCheck
+    AuthorityCheck --> Subprocess
+    AuthorityCheck --> COMA
+    AuthorityCheck --> MarbleRun
+    AuthorityCheck --> Custom
+    Subprocess --> Integrations
+    COMA --> Integrations
+    MarbleRun --> Integrations
+    Custom --> Integrations
+```
 
 ## Verantwortungsgrenze
 

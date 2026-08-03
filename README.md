@@ -1,6 +1,16 @@
 # ellmos Scheduler
 
+[![PyPI Version](https://img.shields.io/badge/version-0.2.2-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Tests: 90 Passed](https://img.shields.io/badge/tests-90%20passed-brightgreen.svg)](tests/)
+[![Ecosystem: ellmos-ai](https://img.shields.io/badge/ecosystem-ellmos--ai-purple.svg)](https://github.com/ellmos-ai)
+[![Umbrella: open-bricks](https://img.shields.io/badge/umbrella-open--bricks-blueviolet.svg)](https://github.com/open-bricks)
+
 [English](README.md) | [Deutsch](README_de.md)
+
+> [!NOTE]
+> **For AI Agents & LLM Tools:** This repository maintains an [`llms.txt`](llms.txt) machine-readable index for automated discovery, capability summaries, and CLI interfaces.
 
 Standalone scheduler and run recorder for modular ellmos stacks. The module is
 deliberately located **outside BACH**. BACH, Wonderland/Riverfall, desktop
@@ -14,6 +24,50 @@ On Windows, the package installs `tzdata` as a conditional runtime dependency.
 This makes IANA time zones such as `Europe/Berlin` work in a clean virtual
 environment even when the operating system does not provide Python zoneinfo
 data.
+
+## Architecture & System Overview
+
+```mermaid
+graph TD
+    subgraph Trigger ["Schedule Triggers"]
+        Interval["Interval (seconds)"]
+        Daily["Daily (HH:MM / Timezone)"]
+        Cron["Cron (5-field expression)"]
+    end
+
+    subgraph Core ["ellmos Scheduler Engine"]
+        Engine["Tick & Claim Engine"]
+        DB[("SQLite State Store<br/>(Jobs, Leases, Runs)")]
+        AuthorityCheck["Authority Preflight Guard<br/>(SHA-256 Hash Verification)"]
+    end
+
+    subgraph Executors ["Execution Adapters"]
+        Subprocess["Subprocess / Command"]
+        COMA["COMA AI Provider"]
+        MarbleRun["MarbleRun Chain"]
+        Custom["Custom Python Registry"]
+    end
+
+    subgraph Integrations ["Ecosystem Consumers"]
+        BACH["BACH Adapter"]
+        Swarm["swarm-ai"]
+        Desktop["Desktop Automations"]
+    end
+
+    Interval --> Engine
+    Daily --> Engine
+    Cron --> Engine
+    Engine <--> DB
+    Engine --> AuthorityCheck
+    AuthorityCheck --> Subprocess
+    AuthorityCheck --> COMA
+    AuthorityCheck --> MarbleRun
+    AuthorityCheck --> Custom
+    Subprocess --> Integrations
+    COMA --> Integrations
+    MarbleRun --> Integrations
+    Custom --> Integrations
+```
 
 ## Responsibility boundary
 
