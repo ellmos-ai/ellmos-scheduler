@@ -171,6 +171,18 @@ ellmos-scheduler --db C:\state\scheduler.db tick --require-authorities --json
 ellmos-scheduler --db C:\state\scheduler.db authority-receipt <run-id> --json
 ```
 
+Für einen isolierten Carrier- oder Operatorlauf begrenzt wiederholbares
+`--job` Claiming, Lease-Recovery, Authority-Auflösung und Ausführung auf
+ausdrücklich benannte Job-IDs:
+
+```powershell
+ellmos-scheduler --db C:\state\scheduler.db tick `
+  --job sync.daily --require-authorities --json
+```
+
+Nicht genannte fällige Jobs und ihre ausgelaufenen Leases bleiben unverändert.
+Ohne `--job` bleibt das globale Tick-Verhalten bestehen.
+
 Required `unresolved`/`conflict` stoppt vor der Provider-/Command-Ausführung.
 Optionales Fehlen bleibt typisiert im Receipt. Der Authority-Set-Hash bleibt
 bei identischer Auflösung über Runs stabil; jede einzelne `receipt_id` ist an

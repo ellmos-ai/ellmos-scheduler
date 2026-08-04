@@ -47,4 +47,4 @@ jobs:
       - name: Install wheel into isolated target
         run: python -c "import pathlib, subprocess, sys; wheel = next(pathlib.Path('dist').glob('*.whl')); subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--target', '.wheel-smoke', str(wheel)])"
       - name: Smoke-test installed wheel and IANA timezone
-        run: python -c "import sys; sys.path.insert(0, '.wheel-smoke'); import ellmos_scheduler; from zoneinfo import ZoneInfo; assert ellmos_scheduler.__version__ == '0.2.2'; assert ZoneInfo('Europe/Berlin').key == 'Europe/Berlin'"
+        run: python -c "import sys; sys.path.insert(0, '.wheel-smoke'); import ellmos_scheduler; from importlib.metadata import version; from zoneinfo import ZoneInfo; assert ellmos_scheduler.__version__ == version('ellmos-scheduler'); assert ZoneInfo('Europe/Berlin').key == 'Europe/Berlin'"

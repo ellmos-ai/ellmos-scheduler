@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 import pytest
 
+from ellmos_scheduler.cli import parser
 from ellmos_scheduler.executors import command_executor
 from ellmos_scheduler.schedules import next_after
 from ellmos_scheduler.service import SchedulerService
@@ -12,6 +13,21 @@ from ellmos_scheduler.store import SchedulerStore
 
 
 UTC = timezone.utc
+
+
+def test_tick_cli_accepts_repeatable_job_filter():
+    args = parser().parse_args(
+        ["tick", "--job", "a", "--job", "b", "--require-authorities", "--json"]
+    )
+    assert args.job_ids == ["a", "b"]
+    assert args.require_authorities is True
+    assert args.json is True
+
+
+@pytest.mark.parametrize("job_id", ["", "   "])
+def test_tick_cli_rejects_empty_job_filter(job_id):
+    with pytest.raises(SystemExit, match="2"):
+        parser().parse_args(["tick", "--job", job_id])
 
 
 def test_interval_schedule():
@@ -180,6 +196,73 @@ def test_job_pause_does_not_block_other_job(tmp_path):
     store.set_pause("job:a", True, now=base)
     claims = store.claim_due("worker", now=datetime(2026, 7, 27, 10, 1, tzinfo=UTC))
     assert [claim["id"] for claim in claims] == ["b"]
+
+
+def test_targeted_tick_claims_only_requested_due_job(tmp_path):
+    store = SchedulerStore(tmp_path / "scheduler.db")
+    store.init()
+    base = datetime(2026, 7, 27, 10, 0, tzinfo=UTC)
+    for job_id in ("a", "b"):
+        store.add_job(
+            job_id,
+            {"kind": "interval", "seconds": 60},
+            "noop",
+            {"message": job_id},
+            now=base,
+        )
+
+    due = datetime(2026, 7, 27, 10, 1, tzinfo=UTC)
+    targeted = SchedulerService(store, "targeted").tick(
+        now=due,
+        job_ids=["b"],
+    )
+    global_tick = SchedulerService(store, "global").tick(now=due)
+
+    assert [item["job_id"] for item in targeted] == ["b"]
+    assert [item["job_id"] for item in global_tick] == ["a"]
+
+
+def test_targeted_claim_recovers_only_requested_expired_lease(tmp_path):
+    store = SchedulerStore(tmp_path / "scheduler.db")
+    store.init()
+    base = datetime(2026, 7, 27, 10, 0, tzinfo=UTC)
+    for job_id in ("a", "b"):
+        store.add_job(
+            job_id,
+            {"kind": "interval", "seconds": 60},
+            "noop",
+            {},
+            now=base,
+            lease_seconds=30,
+        )
+    first = store.claim_due(
+        "dead-worker",
+        now=datetime(2026, 7, 27, 10, 1, tzinfo=UTC),
+    )
+
+    recovered = store.claim_due(
+        "targeted-recovery",
+        now=datetime(2026, 7, 27, 10, 2, tzinfo=UTC),
+        job_ids=["a"],
+    )
+    runs = {item["run_id"]: item for item in store.recent_runs()}
+
+    assert [item["id"] for item in recovered] == ["a"]
+    old_a = next(item for item in first if item["id"] == "a")
+    old_b = next(item for item in first if item["id"] == "b")
+    assert runs[old_a["run_id"]]["status"] == "abandoned"
+    assert runs[old_b["run_id"]]["status"] == "claimed"
+
+
+def test_targeted_claim_rejects_invalid_job_ids(tmp_path):
+    store = SchedulerStore(tmp_path / "scheduler.db")
+    store.init()
+    with pytest.raises(ValueError, match="sequence"):
+        store.claim_due("worker", job_ids="a")
+    with pytest.raises(ValueError, match="non-empty"):
+        store.claim_due("worker", job_ids=[])
+    with pytest.raises(ValueError, match="non-empty"):
+        store.claim_due("worker", job_ids=[""])
 
 
 def test_disabled_job_not_claimed(tmp_path):

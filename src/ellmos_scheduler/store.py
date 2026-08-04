@@ -6,7 +6,7 @@ import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, Iterator, Sequence
 
 from .authorities import DEFAULT_AUTHORITY_REGISTRY, AuthorityResolverRegistry
 from .schedules import next_after
@@ -254,26 +254,46 @@ class SchedulerStore:
         *,
         now: datetime | None = None,
         limit: int = 20,
+        job_ids: Sequence[str] | None = None,
     ) -> list[dict[str, Any]]:
+        if job_ids is None:
+            targets: tuple[str, ...] = ()
+        else:
+            if isinstance(job_ids, (str, bytes)):
+                raise ValueError("job_ids must be a sequence of job IDs")
+            values = tuple(job_ids)
+            if not values or any(
+                not isinstance(job_id, str) or not job_id.strip()
+                for job_id in values
+            ):
+                raise ValueError("job_ids must contain non-empty strings")
+            targets = tuple(dict.fromkeys(values))
+        placeholders = ", ".join("?" for _ in targets)
+        run_target_clause = (
+            f" AND job_id IN ({placeholders})" if targets else ""
+        )
+        job_target_clause = f" AND id IN ({placeholders})" if targets else ""
         now = (now or datetime.now(UTC)).astimezone(UTC)
         claimed: list[dict[str, Any]] = []
         with self.connect() as conn:
             conn.execute("BEGIN IMMEDIATE")
             expired = conn.execute(
-                """
+                f"""
                 SELECT job_id, scheduled_for
                 FROM runs
                 WHERE status IN ('claimed', 'running') AND lease_expires_at < ?
+                {run_target_clause}
                 """,
-                (iso(now),),
+                (iso(now), *targets),
             ).fetchall()
             conn.execute(
-                """
+                f"""
                 UPDATE runs
                 SET status = 'abandoned', finished_at = ?
                 WHERE status IN ('claimed', 'running') AND lease_expires_at < ?
+                {run_target_clause}
                 """,
-                (iso(now), iso(now)),
+                (iso(now), iso(now), *targets),
             )
             for expired_run in expired:
                 current = conn.execute(
@@ -288,13 +308,14 @@ class SchedulerStore:
                         (expired_run["scheduled_for"], iso(now), expired_run["job_id"]),
                     )
             rows = conn.execute(
-                """
+                f"""
                 SELECT * FROM jobs
                 WHERE enabled = 1 AND next_due_at <= ?
+                {job_target_clause}
                 ORDER BY next_due_at, id
                 LIMIT ?
                 """,
-                (iso(now), limit),
+                (iso(now), *targets, limit),
             ).fetchall()
             for row in rows:
                 if self.is_paused(conn, row["id"]):
