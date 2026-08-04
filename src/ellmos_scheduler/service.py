@@ -4,6 +4,7 @@ import hashlib
 import json
 import socket
 import time
+from collections.abc import Sequence
 from datetime import datetime
 
 from .authorities import (
@@ -36,8 +37,19 @@ class SchedulerService:
         )
         self.require_authorities = require_authorities
 
-    def tick(self, *, now: datetime | None = None, limit: int = 20) -> list[dict]:
-        claimed = self.store.claim_due(self.worker_id, now=now, limit=limit)
+    def tick(
+        self,
+        *,
+        now: datetime | None = None,
+        limit: int = 20,
+        job_ids: Sequence[str] | None = None,
+    ) -> list[dict]:
+        claimed = self.store.claim_due(
+            self.worker_id,
+            now=now,
+            limit=limit,
+            job_ids=job_ids,
+        )
         results: list[dict] = []
         for job in claimed:
             run_id = job["run_id"]

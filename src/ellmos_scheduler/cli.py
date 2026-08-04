@@ -12,6 +12,13 @@ from .service import SchedulerService
 from .store import SchedulerStore
 
 
+def _non_empty_job_id(value: str) -> str:
+    job_id = value.strip()
+    if not job_id:
+        raise argparse.ArgumentTypeError("job ID must not be empty")
+    return job_id
+
+
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(prog="ellmos-scheduler")
     result.add_argument(
@@ -78,6 +85,13 @@ def parser() -> argparse.ArgumentParser:
     tick = sub.add_parser("tick")
     tick.add_argument("--json", action="store_true")
     tick.add_argument("--require-authorities", action="store_true")
+    tick.add_argument(
+        "--job",
+        dest="job_ids",
+        action="append",
+        type=_non_empty_job_id,
+        help="claim only this job ID; repeat to target more than one job",
+    )
     serve = sub.add_parser("serve")
     serve.add_argument("--poll-seconds", type=float, default=5.0)
     serve.add_argument("--require-authorities", action="store_true")
@@ -153,7 +167,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             SchedulerService(
                 store,
                 require_authorities=args.require_authorities,
-            ).tick(),
+            ).tick(job_ids=args.job_ids),
             args.json,
         )
     elif args.command == "serve":
