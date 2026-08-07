@@ -1,9 +1,9 @@
 # ellmos Scheduler
 
-[![PyPI Version](https://img.shields.io/badge/version-0.2.2-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
+[![PyPI Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests: 90 Passed](https://img.shields.io/badge/tests-90%20passed-brightgreen.svg)](tests/)
+[![Tests: 96 Passed](https://img.shields.io/badge/tests-96%20passed-brightgreen.svg)](tests/)
 [![Ecosystem: ellmos-ai](https://img.shields.io/badge/ecosystem-ellmos--ai-purple.svg)](https://github.com/ellmos-ai)
 [![Umbrella: open-bricks](https://img.shields.io/badge/umbrella-open--bricks-blueviolet.svg)](https://github.com/open-bricks)
 
@@ -17,8 +17,8 @@ ist bewusst **außerhalb von BACH** angelegt. BACH, Wonderland/Riverfall,
 Desktop-Automationen, COMA, MarbleRun/llmauto und swarm-ai können es über
 schmale Adapter konsumieren.
 
-Status: `0.2.2` (Authority-Receipts, strikte Output-Kodierung und
-Windows-IANA-Zeitzonendaten, 2026-07-31).
+Status: `0.3.0` (gezielte Tick-Begrenzung, Authority-Receipts, strikte
+Output-Kodierung und Windows-IANA-Zeitzonendaten, 2026-08-07).
 
 Auf Windows installiert das Paket `tzdata` als bedingte Runtime-Abhängigkeit.
 Damit funktionieren IANA-Zeitzonen wie `Europe/Berlin` auch in einem sauberen

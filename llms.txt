@@ -13,7 +13,7 @@
 
 ## Directory Structure
 - `src/ellmos_scheduler/`: Core Python package (CLI, service, store, executors, authorities).
-- `tests/`: Comprehensive Pytest test suite (90 tests passing).
+- `tests/`: Comprehensive Pytest test suite (96 tests passing).
 - `ARCHITECTURE.md`: Technical design and internal state machine documentation.
 - `MIGRATION_FROM_BACH.md`: Migration guide and adapter interface for legacy BACH scheduler replacement.
 
@@ -28,4 +28,4 @@
 - **Ecosystem**: `ellmos-ai`
 - **Umbrella**: `open-bricks`
 - **License**: MIT
-- **Last-checked**: 2026-08-03
+- **Last-checked**: 2026-08-07
