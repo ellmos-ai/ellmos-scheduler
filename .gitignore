@@ -12,3 +12,6 @@ build/
 .claude/.cache/
 .claude/state/
 LOCK*.txt
+
+# Internal Plan-D working pointer (local development bookkeeping, not published)
+PLAN_D_POINTER.md
