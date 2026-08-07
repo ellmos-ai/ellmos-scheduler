@@ -1,5 +1,7 @@
 # ellmos Scheduler
 
+<img src="assets/banner.png" width="100%" alt="ellmos Scheduler banner">
+
 [![PyPI Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
