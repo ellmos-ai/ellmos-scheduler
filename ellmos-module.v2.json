@@ -6,7 +6,7 @@
   "category": "control",
   "kind": "library",
   "status": "experimental",
-  "visibility": "public-candidate",
+  "visibility": "public",
   "description": "Eigenstaendiger Zeitgeber, Lease-/Claim-Manager und Run-Recorder fuer ellmos-Stacks mit BACH-Consumer- und Executor-Adaptern.",
   "package": "ellmos-scheduler",
   "entrypoints": {
@@ -48,7 +48,7 @@
   "source_of_truth": {
     "type": "git-repository",
     "path": ".",
-    "repository": "https://github.com/dev-bricks/ellmos-scheduler"
+    "repository": "https://github.com/ellmos-ai/ellmos-scheduler"
   },
   "adapters": [
     {
