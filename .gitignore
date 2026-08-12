@@ -15,3 +15,6 @@ LOCK*.txt
 
 # Internal Plan-D working pointer (local development bookkeeping, not published)
 PLAN_D_POINTER.md
+
+# Internal business reports (local, not published)
+_reports/internal-business/
