@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Maintenance
 - Synchronized README badges and status text with the package version.
 - Updated AI discovery metadata to the current 96-test verification baseline.
+- Reverified the public repository metadata after the visibility manifest update.
+- Refreshed `llms.txt` with the 2026-08-12 technical hygiene readback.
 
 ## [0.2.2] - 2026-08-03
 
