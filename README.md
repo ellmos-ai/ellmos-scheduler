@@ -2,7 +2,7 @@
 
 <img src="assets/banner.png" width="100%" alt="ellmos Scheduler banner">
 
-[![PyPI Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
+[![PyPI Version](https://img.shields.io/badge/version-0.3.1-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Tests: 96 Passed](https://img.shields.io/badge/tests-96%20passed-brightgreen.svg)](tests/)
@@ -19,8 +19,8 @@ deliberately located **outside BACH**. BACH, Wonderland/Riverfall, desktop
 automations, COMA, MarbleRun/llmauto, and swarm-ai can consume it through
 narrow adapters.
 
-Status: `0.3.0` (targeted tick controls, authority receipts, strict output
-encoding, and Windows IANA time-zone data, 2026-08-07).
+Status: `0.3.1` (targeted tick controls, authority receipts, strict output
+encoding, and Windows IANA time-zone data, 2026-08-14).
 
 On Windows, the package installs `tzdata` as a conditional runtime dependency.
 This makes IANA time zones such as `Europe/Berlin` work in a clean virtual
