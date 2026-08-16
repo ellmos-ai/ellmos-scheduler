@@ -28,4 +28,4 @@
 - **Ecosystem**: `ellmos-ai`
 - **Umbrella**: `open-bricks`
 - **License**: MIT
-- **Last-checked**: 2026-08-14
+- **Last-checked**: 2026-08-16
