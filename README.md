@@ -2,12 +2,15 @@
 
 <img src="assets/banner.png" width="100%" alt="ellmos Scheduler banner">
 
-[![PyPI Version](https://img.shields.io/badge/version-0.3.1-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
+[![Version](https://img.shields.io/badge/version-0.3.1-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests: 96 Passed](https://img.shields.io/badge/tests-96%20passed-brightgreen.svg)](tests/)
+[![Tests: 103 Passed](https://img.shields.io/badge/tests-103%20passed-brightgreen.svg)](tests/)
+[![Security: Local--First](https://img.shields.io/badge/security-Local--First-green.svg)](SECURITY.md)
 [![Ecosystem: ellmos-ai](https://img.shields.io/badge/ecosystem-ellmos--ai-purple.svg)](https://github.com/ellmos-ai)
 [![Umbrella: open-bricks](https://img.shields.io/badge/umbrella-open--bricks-blueviolet.svg)](https://github.com/open-bricks)
+[![LLM-Ready: llms.txt](https://img.shields.io/badge/LLM--Ready-llms.txt-orange.svg)](llms.txt)
 
 [English](README.md) | [Deutsch](README_de.md)
 
@@ -69,6 +72,39 @@ graph TD
     COMA --> Integrations
     MarbleRun --> Integrations
     Custom --> Integrations
+```
+
+### Execution & Authority Preflight Lifecycle
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant CLI as CLI / Daemon Service
+    participant Engine as Tick Engine
+    participant Store as SQLite State Store
+    participant Guard as Authority Preflight Guard
+    participant Exec as Executor Adapter (Subprocess/COMA/Custom)
+
+    CLI->>Engine: tick() / serve() pass
+    Engine->>Store: Query due jobs & acquire atomic lease
+    alt Job not due or lease active
+        Store-->>Engine: Skip / Leased by another worker
+    else Lease acquired
+        Engine->>Store: Mark state as 'claimed' (deterministic run_id)
+        opt --require-authorities active
+            Engine->>Guard: Preflight verify required authority sources
+            Guard->>Guard: Dual read-only passes + SHA-256 hash check
+            alt Hash mismatch or missing required source
+                Guard-->>Engine: Resolution failed (conflict / unresolved)
+                Engine->>Store: Persist failed authority receipt & mark run failed
+            else Authority verified
+                Guard-->>Engine: Authority resolution validated
+            end
+        end
+        Engine->>Exec: Dispatch payload (strict UTF-8 / safe argv)
+        Exec-->>Engine: Return ExecutionResult (succeeded / failed)
+        Engine->>Store: Persist run record, authority receipt & release lease
+    end
 ```
 
 ## Responsibility boundary
@@ -199,8 +235,8 @@ and `running`.
 - A claim is not success; only the completed run record counts.
 - Expired claims are marked `abandoned` and may be scheduled again.
 - Global and job-specific pause/resume remain separate from `enabled`.
-- Status returns `last_tick_at`, job counts, and run counts in machine-readable
-  form.
+- Status returns `last_tick_at`, job counts, and run counts in machine-readable form.
+- Full security policy and boundary specifications are documented in [`SECURITY.md`](SECURITY.md).
 
 ## Migration from BACH
 
@@ -238,3 +274,37 @@ gates.
 Binding membership, versions, profiles, and private composition recipes reside
 exclusively in the bundle manifest. This public overview serves partner
 discovery only.
+
+## Ecosystem & Sibling Tools
+
+Part of the [ellmos-ai](https://github.com/ellmos-ai) multi-agent infrastructure and the overarching [open-bricks](https://github.com/open-bricks) open-source software ecosystem:
+
+| Tool | Organization | Description |
+|------|--------------|-------------|
+| [ellmos-core](https://github.com/ellmos-ai/ellmos-core) | ellmos-ai | Modular AI runtime, task dispatching & agent state substrate |
+| [ellmos-scheduler](https://github.com/ellmos-ai/ellmos-scheduler) | ellmos-ai | Local cron, interval & scheduled task execution engine |
+| [clutch](https://github.com/ellmos-ai/clutch) | ellmos-ai | Adaptive multi-model LLM router & agent execution gear |
+| [coma](https://github.com/ellmos-ai/coma) | ellmos-ai | Single-binary multi-agent orchestrator & execution coordinator |
+| [gardener](https://github.com/ellmos-ai/gardener) | ellmos-ai | Local-first autonomous session and context memory engine |
+| [prompt-evidence-collector](https://github.com/ellmos-ai/prompt-evidence-collector) | ellmos-ai | Audit-ready LLM interaction capture & cryptographic evidence store |
+| [lock-master](https://github.com/ellmos-ai/lock-master) | ellmos-ai | Multi-agent file locking and concurrency control protocol |
+| [ticket-master](https://github.com/ellmos-ai/ticket-master) | ellmos-ai | Autonomous ticket routing and task dispatching triage console |
+| [ellmos-controlcenter-mcp](https://github.com/ellmos-ai/ellmos-controlcenter-mcp) | ellmos-ai | MCP runtime supervision, skill routing & tool bundle discovery |
+| [ellmos-filecommander-mcp](https://github.com/ellmos-ai/ellmos-filecommander-mcp) | ellmos-ai | MCP file management, safe delete & archive operations server |
+| [ellmos-codecommander-mcp](https://github.com/ellmos-ai/ellmos-codecommander-mcp) | ellmos-ai | MCP code analysis, AST transformations & format server |
+| [ellmos-clatcher-mcp](https://github.com/ellmos-ai/ellmos-clatcher-mcp) | ellmos-ai | MCP clipboard & scratchpad manager with dry-run safety |
+| [n8n-manager-mcp](https://github.com/ellmos-ai/n8n-manager-mcp) | ellmos-ai | MCP n8n workflow management, execution monitoring & node introspection |
+| [skills](https://github.com/ellmos-ai/skills) | ellmos-ai | Multi-agent canonical capability library & agent catalog |
+| [usb-podcast-studio](https://github.com/entertain-and-more/usb-podcast-studio) | entertain-and-more | Desktop audio workstation, soundboard & recording suite (Klangpult) |
+| [companion-for-agy](https://github.com/ellmos-ai/companion-for-agy) | ellmos-ai | Terminal companion & PTY wrapper for Google Antigravity |
+| [safe-start-for-codex](https://github.com/dev-bricks/safe-start-for-codex) | dev-bricks | Safe starter and permission isolator for Codex CLI sessions |
+| [automizer-for-claude-desktop](https://github.com/dev-bricks/automizer-for-claude-desktop) | dev-bricks | Scheduled task automation manager for Claude Desktop |
+| [DevCenter](https://github.com/dev-bricks/DevCenter) | dev-bricks | Developer control plane, repository dashboard & environment manager |
+| [CodeBox](https://github.com/dev-bricks/CodeBox) | dev-bricks | Polyglot code snippet manager & developer workbench |
+| [open-bricks](https://github.com/open-bricks) | open-bricks | Umbrella catalog for open-source bricks, tools, and libraries |
+
+---
+
+## License
+
+MIT License. See [LICENSE](LICENSE) for details.

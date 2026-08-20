@@ -11,10 +11,11 @@
 - **Fail-Closed Encoding**: Strict UTF-8 and configurable stream-safe encodings (CP1252, Latin-1, ASCII) with strict error handling.
 - **Windows Timezone Support**: Ships with `tzdata` fallback for reliable IANA time zones (e.g., `Europe/Berlin`) on Windows.
 
-## Directory Structure
+## Directory Structure & Key Files
 - `src/ellmos_scheduler/`: Core Python package (CLI, service, store, executors, authorities).
-- `tests/`: Comprehensive Pytest test suite (96 tests passing).
-- `ARCHITECTURE.md`: Technical design and internal state machine documentation.
+- `tests/`: Comprehensive Pytest test suite (96+ tests passing, including metadata parity).
+- `SECURITY.md`: Local-first, zero-egress, authority preflight, and lease security policies.
+- `ARCHITECTURE.md`: Technical design, execution sequence, and internal state machine documentation.
 - `MIGRATION_FROM_BACH.md`: Migration guide and adapter interface for legacy BACH scheduler replacement.
 
 ## CLI Usage Quick Reference
@@ -28,4 +29,5 @@
 - **Ecosystem**: `ellmos-ai`
 - **Umbrella**: `open-bricks`
 - **License**: MIT
-- **Last-checked**: 2026-08-16
+- **Test-Suite**: 103 passed tests (100% green)
+- **Last-checked**: 2026-08-20

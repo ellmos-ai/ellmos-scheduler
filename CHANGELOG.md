@@ -5,12 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.2] - 2026-08-16
+## [0.3.1] - 2026-08-20
 
-### Maintenance & Technical Hygiene (Pfad A)
-- Standardized linting configuration: integrated `[tool.ruff]` and `[tool.ruff.lint]` configuration in `pyproject.toml` (`target-version = "py310"`, `line-length = 120`, `E402`/`E501` ignore).
-- Verified full test suite passing (96/96 Pytest tests, 0 ruff errors, 100% `compileall`).
-- Refreshed `llms.txt` discovery index and metadata to 2026-08-16 baseline.
+### Discoverability, README-Design, Badges & Metadata Parity (Pfad B)
+- **Badges Synchronization**: Updated badges in `README.md` and `README_de.md` for Platform (`Windows | macOS | Linux`), Python (`>=3.10`), Security (`Local-First`), Test Suite (`103 Passed`), License (`MIT`), Ecosystem (`ellmos-ai`), Umbrella (`open-bricks`), and AI Discovery (`llms.txt`).
+- **Execution Lifecycle Visualization**: Integrated interactive Mermaid sequence diagram for the complete Execution & Authority Preflight Lifecycle (Tick -> Lease Claim -> Dual Read-Only SHA-256 Authority Preflight -> Executor Dispatch -> Receipt Persistence).
+- **Security Policy**: Added comprehensive bilingual [`SECURITY.md`](SECURITY.md) documenting Local-First, Zero-Egress, Authority Preflight verification, Fail-Closed stream decoding, and private vulnerability reporting workflows.
+- **Ecosystem & Sibling Matrix**: Added structured cross-linking table to 20+ sibling projects across `ellmos-ai`, `dev-bricks`, `doc-bricks`, `entertain-and-more`, and `open-bricks`.
+- **Automated Metadata Parity Testsuite**: Implemented [`tests/test_metadata.py`](tests/test_metadata.py) covering version alignment, badge parity, language links, Mermaid diagrams, sibling matrix links, `llms.txt` schema, `SECURITY.md` invariants, and module manifest validity (7/7 passed).
+- **AI Discovery Index**: Refreshed [`llms.txt`](llms.txt) with `2026-08-20` timestamp, test suite status, and repository key file map.
 
 ## [0.3.1] - 2026-08-14
 
