@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-08-21
+
+### Technical Hygiene & Packaging Parity
+- **PEP 621 Packaging Standards**: Enhanced `pyproject.toml` with standard PEP 621 classifiers (Beta status, OS Independent, Python 3.10-3.13 support, System Monitoring topic) and explicit `[project.urls]` (Homepage, Repository, Issues).
+- **AI Modules Care Alignment**: Refreshed `llms.txt` and `test_metadata.py` verification timestamp to 2026-08-21 baseline.
+- **Ecosystem Mirror Synchronization**: Synchronized OneDrive module mirror `.CONTROL/ellmos-scheduler` with complete 0.3.1 package code, authority receipts, test suites, and updated `PLAN_D_POINTER.md`.
+
 ## [0.3.1] - 2026-08-20
 
 ### Discoverability, README-Design, Badges & Metadata Parity (Pfad B)

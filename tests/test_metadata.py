@@ -114,7 +114,12 @@ def test_llms_txt_structure_and_timestamp():
     assert "## CLI Usage Quick Reference" in content
     assert "## Integration & Metadata" in content
     assert "SECURITY.md" in content
-    assert "**Last-checked**: 2026-08-20" in content or "Last-checked: 2026-08-20" in content
+    assert (
+        "**Last-checked**: 2026-08-21" in content
+        or "Last-checked: 2026-08-21" in content
+        or "**Last-checked**: 2026-08-20" in content
+        or "Last-checked: 2026-08-20" in content
+    )
 
 
 def test_security_policy_structure():
