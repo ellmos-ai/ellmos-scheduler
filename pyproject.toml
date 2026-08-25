@@ -31,6 +31,11 @@ classifiers = [
 Homepage = "https://github.com/ellmos-ai/ellmos-scheduler"
 Repository = "https://github.com/ellmos-ai/ellmos-scheduler.git"
 Issues = "https://github.com/ellmos-ai/ellmos-scheduler/issues"
+Changelog = "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/CHANGELOG.md"
+Documentation = "https://github.com/ellmos-ai/ellmos-scheduler#readme"
+Security = "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/SECURITY.md"
+"Parent Organization" = "https://github.com/ellmos-ai"
+"Umbrella Ecosystem" = "https://github.com/open-bricks"
 
 [project.optional-dependencies]
 dev = [

@@ -48,7 +48,7 @@ def test_readme_badges_and_language_parity():
         "python-3.10%2B-blue.svg",
         "platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg",
         "License-MIT-yellow.svg",
-        "tests-103%20passed-brightgreen.svg",
+        "tests-106%20passed-brightgreen.svg",
         "security-Local--First-green.svg",
         "ecosystem-ellmos--ai-purple.svg",
         "umbrella-open--bricks-blueviolet.svg",
@@ -114,12 +114,7 @@ def test_llms_txt_structure_and_timestamp():
     assert "## CLI Usage Quick Reference" in content
     assert "## Integration & Metadata" in content
     assert "SECURITY.md" in content
-    assert (
-        "**Last-checked**: 2026-08-21" in content
-        or "Last-checked: 2026-08-21" in content
-        or "**Last-checked**: 2026-08-20" in content
-        or "Last-checked: 2026-08-20" in content
-    )
+    assert "2026-08-25" in content
 
 
 def test_security_policy_structure():
@@ -133,6 +128,10 @@ def test_security_policy_structure():
     assert "Local-First & Zero-Egress Invariant" in content
     assert "Local-First & Zero-Egress-Invariante" in content
     assert "security@ellmos.ai" in content
+    assert "support@lukasgeiger.com" in content
+    assert "lukas@open-bricks.org" in content
+    assert "48 hours" in content or "48 Stunden" in content
+    assert "0.3.x" in content
 
 
 def test_module_manifest_validity():
@@ -147,3 +146,51 @@ def test_module_manifest_validity():
     assert "automation.schedule" in manifest.get("provides", [])
     assert "automation.lease" in manifest.get("provides", [])
     assert "automation.authority-receipt" in manifest.get("provides", [])
+
+
+def test_github_actions_workflow_concurrency_and_matrix():
+    """Verify GitHub Actions CI workflow configures concurrency control and multi-OS matrix."""
+    workflow_path = ROOT / ".github" / "workflows" / "test.yml"
+    assert workflow_path.is_file(), "test.yml workflow must exist"
+
+    content = workflow_path.read_text(encoding="utf-8")
+    assert "concurrency:" in content
+    assert "cancel-in-progress: true" in content
+    assert "ubuntu-latest" in content
+    assert "windows-latest" in content
+    assert "macos-latest" in content
+    assert "actions/checkout@v4" in content
+    assert "actions/setup-python@v5" in content
+
+
+def test_pep621_project_urls_and_metadata():
+    """Verify PEP 621 pyproject.toml declares standard ecosystem URLs and metadata."""
+    pyproject_path = ROOT / "pyproject.toml"
+    assert pyproject_path.is_file(), "pyproject.toml must exist"
+
+    pyproject = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+    urls = pyproject.get("project", {}).get("urls", {})
+    assert "Homepage" in urls
+    assert "Repository" in urls
+    assert "Issues" in urls
+    assert "Changelog" in urls
+    assert "Documentation" in urls
+    assert "Security" in urls
+    assert urls.get("Parent Organization") == "https://github.com/ellmos-ai"
+    assert urls.get("Umbrella Ecosystem") == "https://github.com/open-bricks"
+
+
+def test_gitignore_hygiene():
+    """Verify .gitignore includes sync conflict, lock, and test cache patterns."""
+    gitignore_path = ROOT / ".gitignore"
+    assert gitignore_path.is_file(), ".gitignore must exist"
+
+    content = gitignore_path.read_text(encoding="utf-8")
+    assert "*.sync-conflict-*" in content
+    assert "*.conflict" in content
+    assert "*-CONFLIT-*" in content
+    assert "LOCK*.txt" in content
+    assert ".pytest_cache/" in content
+    assert ".ruff_cache/" in content
+    assert ".coverage" in content
+    assert ".wheel-smoke/" in content

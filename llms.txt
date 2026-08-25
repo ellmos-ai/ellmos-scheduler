@@ -29,5 +29,5 @@
 - **Ecosystem**: `ellmos-ai`
 - **Umbrella**: `open-bricks`
 - **License**: MIT
-- **Test-Suite**: 103 passed tests (100% green)
-- **Last-checked**: 2026-08-21
+- **Test-Suite**: 106 passed tests (100% green)
+- **Last-checked**: 2026-08-25

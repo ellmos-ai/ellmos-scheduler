@@ -39,7 +39,7 @@
 If you discover a security vulnerability or boundary violation in `ellmos-scheduler`:
 
 1. **Do not open a public issue.**
-2. Report the vulnerability privately via GitHub Security Advisories or by contacting the maintainers directly at [security@ellmos.ai](mailto:security@ellmos.ai).
+2. Report the vulnerability privately via [GitHub Security Advisories](https://github.com/ellmos-ai/ellmos-scheduler/security/advisories) or by contacting the maintainers directly at [security@ellmos.ai](mailto:security@ellmos.ai) (fallback: [support@lukasgeiger.com](mailto:support@lukasgeiger.com), [lukas@open-bricks.org](mailto:lukas@open-bricks.org)).
 3. Please provide a clear description of the vulnerability, reproduction steps, affected platform/environment, and impact assessment.
 4. We aim to acknowledge receipt within 48 hours and provide a coordinated remediation release.
 
@@ -80,6 +80,6 @@ If you discover a security vulnerability or boundary violation in `ellmos-schedu
 Sollten Sie eine Sicherheitslücke oder eine Verletzung der Sicherheitsrichtlinien in `ellmos-scheduler` feststellen:
 
 1. **Bitte erstellen Sie kein öffentliches Issue.**
-2. Melden Sie die Schwachstelle vertraulich über GitHub Security Advisories oder per E-Mail an [security@ellmos.ai](mailto:security@ellmos.ai).
+2. Melden Sie die Schwachstelle vertraulich über [GitHub Security Advisories](https://github.com/ellmos-ai/ellmos-scheduler/security/advisories) oder per E-Mail an [security@ellmos.ai](mailto:security@ellmos.ai) (Fallback: [support@lukasgeiger.com](mailto:support@lukasgeiger.com), [lukas@open-bricks.org](mailto:lukas@open-bricks.org)).
 3. Bitte fügen Sie eine Beschreibung, Reproduktionsschritte und eine Einschätzung der Auswirkungen bei.
 4. Wir bestätigen den Eingang in der Regel innerhalb von 48 Stunden und stellen ein koordiniertes Update bereit.

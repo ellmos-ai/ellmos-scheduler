@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-08-25
+
+### Technical Hygiene, Multi-OS CI Matrix & Contract Testsuite (Pfad A)
+- **CI Workflow Concurrency & Multi-OS Matrix**: Hardened `.github/workflows/test.yml` with concurrency control (`cancel-in-progress: true`), expanded matrix with `macos-latest` (Ubuntu, Windows, macOS across Python 3.10 and 3.13), and standard action references (`actions/checkout@v4`, `actions/setup-python@v5`).
+- **PEP 621 Standard Ecosystem URLs**: Expanded `[project.urls]` in `pyproject.toml` with `Changelog`, `Documentation`, `Security`, `Parent Organization` (`https://github.com/ellmos-ai`), and `Umbrella Ecosystem` (`https://github.com/open-bricks`).
+- **Bilingual Security Policy Enhancement**: Updated `SECURITY.md` with direct security fallback contacts (`support@lukasgeiger.com`, `lukas@open-bricks.org`), advisory workflow link, and reinforced 48h response SLA.
+- **Repository Hygiene & .gitignore**: Augmented `.gitignore` with synchronization conflict patterns (`*.sync-conflict-*`, `*.conflict`, `*-CONFLIT-*`), coverage directories, lockfiles, temporary files, and isolated test wheel targets (`.wheel-smoke/`).
+- **Automated Contract Test Suite**: Expanded `tests/test_metadata.py` with 4 new contract tests validating CI workflow concurrency, PEP 621 ecosystem URLs, security policy structure/contacts, and gitignore hygiene patterns (106/106 Pytest tests passed, 100% green).
+- **Metadata & LLM Discovery Index**: Refreshed `llms.txt` and README badges to `2026-08-25` baseline and 106 passed tests.
+
 ## [0.3.1] - 2026-08-21
 
 ### Technical Hygiene & Packaging Parity

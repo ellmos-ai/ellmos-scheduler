@@ -10,10 +10,27 @@ build/
 *.db
 *.db-shm
 *.db-wal
+.coverage
+coverage/
+htmlcov/
+*.lcov
+.wheel-smoke/
 .claude/settings.local.json
 .claude/.cache/
 .claude/state/
 LOCK*.txt
+*.lock
+
+# Synchronization conflict patterns
+*.sync-conflict-*
+*.conflict
+*-CONFLIT-*
+
+# Temporary and patch artifacts
+*.tmp
+*.bak
+*.orig
+*.rej
 
 # Internal Plan-D working pointer (local development bookkeeping, not published)
 PLAN_D_POINTER.md
