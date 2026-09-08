@@ -3,16 +3,36 @@
 <img src="assets/banner.png" width="100%" alt="ellmos Scheduler banner">
 
 [![Version](https://img.shields.io/badge/version-0.3.1-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
+[![CI](https://github.com/ellmos-ai/ellmos-scheduler/actions/workflows/test.yml/badge.svg)](https://github.com/ellmos-ai/ellmos-scheduler/actions)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests: 106 Passed](https://img.shields.io/badge/tests-106%20passed-brightgreen.svg)](tests/)
+[![Tests: 111 Passed](https://img.shields.io/badge/tests-111%20passed-brightgreen.svg)](tests/)
+[![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Security: Local--First](https://img.shields.io/badge/security-Local--First-green.svg)](SECURITY.md)
+[![Privacy: Zero--Egress](https://img.shields.io/badge/privacy-Zero--Egress-success.svg)](SECURITY.md)
 [![Ecosystem: ellmos-ai](https://img.shields.io/badge/ecosystem-ellmos--ai-purple.svg)](https://github.com/ellmos-ai)
 [![Umbrella: open-bricks](https://img.shields.io/badge/umbrella-open--bricks-blueviolet.svg)](https://github.com/open-bricks)
 [![LLM-Ready: llms.txt](https://img.shields.io/badge/LLM--Ready-llms.txt-orange.svg)](llms.txt)
 
 [English](README.md) | [Deutsch](README_de.md)
+
+## Schnellnavigation
+
+- [Übersicht](#ellmos-scheduler)
+- [Architektur & Systemübersicht](#architektur--systemübersicht)
+- [Ausführungs- & Authority-Preflight-Lebenszyklus](#ausführungs--authority-preflight-lebenszyklus)
+- [Governance & Laufzeit-Invarianten](#governance--laufzeit-invarianten)
+- [Zuständigkeitsgrenzen](#verantwortungsgrenze)
+- [Unterstützte Zeitpläne](#unterstützte-zeitpläne)
+- [Schnellstart](#schnellstart)
+- [Kanonische Autoritäten pro Lauf](#kanonische-autoritäten-pro-lauf)
+- [Sicherheits- und Verfügbarkeitsmodell](#sicherheits--und-verfügbarkeitsmodell)
+- [Migration von BACH](#migration-von-bach)
+- [Bundles und Partner](#bundles-und-partner)
+- [Ökosystem & Geschwister-Werkzeuge](#ökosystem--geschwister-werkzeuge)
+- [Änderungsprotokoll](#änderungsprotokoll)
+- [Lizenz](#lizenz)
 
 > [!NOTE]
 > **Für KI-Agenten & LLM-Tools:** Dieses Repository bietet einen maschinenlesbaren Index unter [`llms.txt`](llms.txt) für automatisierte Exploration, Funktionsübersichten und CLI-Schnittstellen.
@@ -106,6 +126,23 @@ sequenceDiagram
         Engine->>Store: Run-Datensatz & Authority-Receipt speichern, Lease freigeben
     end
 ```
+
+## Governance & Laufzeit-Invarianten
+
+`ellmos-scheduler` erfüllt 10 verbindliche System- und Betriebsinvarianten, um eine deterministische, sichere und auditierbare Aufgabenplanung im lokalen Multi-Agenten-Ökosystem zu garantieren:
+
+| Invariante | Bereich | Garantie & Verifikation |
+|---|---|---|
+| **1. 100% Local-First & Zero-Egress** | Systemarchitektur | Arbeitet vollständig offline auf dem lokalen System; garantiert keine externen Telemetrie- oder Netzwerkanfragen. |
+| **2. Unprivilegierter User-Mode Betrieb** | Sicherheitsgrenze | Vollständig im unprivilegierten Anwendermodus ausführbar, erfordert keinerlei Administrator- oder Root-Rechte (`RunAsInvoker`). |
+| **3. Atomare SQLite-Leases & Deduplizierung** | Nebenläufigkeitskontrolle | Deterministische `run_id` und atomare SQLite-Transaktionen verhindern doppelte Ausführung paralleler Worker zuverlässig. |
+| **4. Zweifache Read-Only Authority-Prüfung** | Integritätsschutz | Verbindliche Autorisierungsdateien werden vor Start zweifach schreibgeschützt gelesen und per SHA-256-Prüfsumme validiert. |
+| **5. Strikte UTF-8- & Fail-Closed Kodierung** | Datenstrom-Hygiene | Ausgabeströme werden mit strikter Fehlerbehandlung (`utf-8:strict`) dekodiert; unlesbare Daten brechen sicher ab. |
+| **6. Shell-freie sichere Prozessausführung** | Ausführungssicherheit | Befehle akzeptieren ausschließlich strukturierte `argv`-Listen ohne Shell-Interpolation (`shell=False`). |
+| **7. Fail-Closed Timeout & Lease-Wiederherstellung** | Prozess-Resilienz | Hängende oder abgestürzte Prozesse werden über Timeouts beendet und verwaiste Leases als `abandoned` freigegeben. |
+| **8. Deklarative modulare Entkopplung** | Systemarchitektur | Steckbare Ausführungs-Registries und Authority-Resolver ohne Bindung an Monolithen (z. B. BACH). |
+| **9. Plattformübergreifende Parität** | Portabilität | Vollständige Kompatibilität auf Windows (inkl. IANA `tzdata`), Linux und macOS. |
+| **10. Kryptographische Receipt-Persistenz** | Auditierbarkeit | Unveränderliche Belege mit SHA-256 Hashwerten und geheimnisfreien Metadaten zur lückenlosen Nachvollziehbarkeit. |
 
 ## Verantwortungsgrenze
 
@@ -307,6 +344,12 @@ Bestandteil der [ellmos-ai](https://github.com/ellmos-ai) Multi-Agenten-Infrastr
 | [DevCenter](https://github.com/dev-bricks/DevCenter) | dev-bricks | Entwickler-Leitstand, Repository-Dashboard & Umgebungsmanager |
 | [CodeBox](https://github.com/dev-bricks/CodeBox) | dev-bricks | Polyglotte Code-Snippet-Verwaltung & Entwickler-Werkbank |
 | [open-bricks](https://github.com/open-bricks) | open-bricks | Dachkatalog für Open-Source-Bausteine, Werkzeuge und Bibliotheken |
+
+---
+
+## Änderungsprotokoll
+
+Siehe [`CHANGELOG.md`](CHANGELOG.md) für die vollständige Versionshistorie, Migrationshinweise und technische Notizen.
 
 ---
 

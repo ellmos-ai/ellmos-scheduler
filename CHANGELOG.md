@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-09-08
+
+### Discoverability, Visual Architecture, Governance Invariants & Metadata Parity (Pfad B)
+- **Bilingual 14-Point Quick Navigation**: Added structured table of contents navigation in `README.md` and `README_de.md` linking directly to all 14 architectural and operational documentation sections.
+- **Governance & Runtime Invariants Matrix**: Formulated comprehensive bilingual matrix defining 10 foundational system invariants (100% Local-First & Zero-Egress, Unprivileged Non-Elevation Execution / RunAsInvoker, Atomic SQLite Leases & Deduplicated Claims, Double Read-Only Authority Preflight with SHA-256 integrity, Strict UTF-8 & Fail-Closed Stream Decoding, Shell-Free Safe Process Invocation, Fail-Closed Timeout & Abandoned Lease Recovery, Declarative Modular Integration Outside Monoliths, Multi-OS Cross-Platform Parity, and Cryptographic Receipt Persistence).
+- **Shields.io Badges Enhancement**: Added badges for CI status (Multi-OS GitHub Actions workflow), Code Style (Ruff), and Privacy (Zero-Egress), with test badge synchronized to 111 passed tests.
+- **Security Policy Hardening**: Refined `SECURITY.md` in English and German with explicit 48h acknowledgement SLA and 5-business-day triage SLA.
+- **Local Marketing & Discoverability Log**: Established repository-local `MARKETING-LOG.txt` tracking discoverability audits, architecture parity, and non-automated distribution steps.
+- **Contract Testsuite Expansion**: Expanded `tests/test_metadata.py` with 5 new automated tests verifying quick navigation anchors, governance invariants tables, CI/quality badges, local marketing log existence, and changelog recency (111/111 Pytest tests passed, 100% green).
+- **AI Discovery Index**: Refreshed `llms.txt` to `2026-09-08` baseline with references to governance invariants, test suite count, and local marketing register.
+
 ## [0.3.1] - 2026-08-25
 
 ### Technical Hygiene, Multi-OS CI Matrix & Contract Testsuite (Pfad A)

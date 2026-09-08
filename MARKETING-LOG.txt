@@ -1,0 +1,73 @@
+# MARKETING-LOG: ellmos-scheduler
+Date: 2026-09-08
+Operator: Antigravity / Gemini (via GITHUBBOT Pfad B)
+Target Repo: ellmos-ai/ellmos-scheduler
+Canonical Path: C:\_Local_DEV\repos\ellmos-scheduler
+Version: 0.3.1
+
+================================================================================
+1. REPOSITORY AUDIT & DISCOVERABILITY BASELINE
+================================================================================
+- Organization: ellmos-ai
+- Ecosystem: open-bricks (umbrella)
+- Target Audience: Multi-agent framework developers, local AI orchestrators, system automation engineers
+- Previous State:
+  * 106 passed tests across multi-OS CI matrix
+  * Standalone outside BACH with narrow consumer adapter
+  * Initial Mermaid diagrams present
+  * Missing 14-point quick navigation in English & German READMEs
+  * Missing structured Governance & Runtime Invariants table
+  * Missing local MARKETING-LOG.txt tracking discoverability and next steps
+
+================================================================================
+2. IMPLEMENTED PFAD B ENHANCEMENTS (2026-09-08)
+================================================================================
+[x] Bilingual 14-Point Quick Navigation:
+    - Added structured anchor links in README.md (English) and README_de.md (German)
+    - Full parity across all 14 core sections: Overview, Architecture, Sequence, Invariants,
+      Boundaries, Schedules, Quick Start, Authorities, Security, Migration, Bundles,
+      Ecosystem, Changelog, License.
+
+[x] Shields.io Badges Enhancement:
+    - Added CI Multi-OS test badge pointing to GitHub Actions workflow
+    - Added Code Style (Ruff) badge
+    - Added Privacy (Zero-Egress) badge
+    - Synchronized verified test badge to 111 passed tests (100% green)
+
+[x] Governance & Runtime Invariants Matrix (10 Invariants):
+    - 1. 100% Local-First & Zero-Egress (System Architecture)
+    - 2. Unprivileged Non-Elevation Execution / RunAsInvoker (Security Boundary)
+    - 3. Atomic SQLite Leases & Deduplicated Claim Semantics (Concurrency Control)
+    - 4. Double Read-Only Authority Preflight / SHA-256 (Integrity Guard)
+    - 5. Strict UTF-8 & Fail-Closed Stream Decoding (Stream Hygiene)
+    - 6. Shell-Free Safe Process Invocation / argv-only (Execution Security)
+    - 7. Fail-Closed Timeout & Abandoned Lease Recovery (Process Resilience)
+    - 8. Declarative Modular Integration Outside Monoliths (Decoupled Architecture)
+    - 9. Multi-OS Cross-Platform Parity (Windows, Linux, macOS)
+    - 10. Cryptographic Receipt Persistence & Audit Integrity (Auditability)
+
+[x] Security Policy Hardening (SECURITY.md):
+    - Documented dual SLAs: 48h initial acknowledgment SLA + 5 business days triage SLA
+    - Private advisory disclosure link and maintainer contacts
+
+[x] Contract Testsuite Expansion (tests/test_metadata.py):
+    - Added contract tests for quick navigation anchors in EN & DE
+    - Added contract tests for governance invariants table parity in EN & DE
+    - Added contract tests for CI status & Ruff badges
+    - Added contract test for local MARKETING-LOG.txt audit
+    - Added contract test for CHANGELOG.md Pfad B entry
+    - Total test suite count increased to 111 passed tests (100% passing)
+
+[x] Machine-Readable Context (llms.txt) & Changelog:
+    - Synchronized timestamp to 2026-09-08
+    - Documented Pfad B discoverability release in CHANGELOG.md
+
+================================================================================
+3. MANUAL / NON-AUTOMATED NEXT STEPS
+================================================================================
+1. PyPI Release Publication:
+   - When ready for 0.4.0 or next release, trigger PyPI publish workflow.
+2. Glama / Smithery / Awesome-MCP Listing:
+   - For agent tool discoverability, cross-link ellmos-scheduler inside agent orchestrator registries.
+3. GitHub Release Tagging:
+   - Tag commit with v0.3.1 release notes referencing the expanded invariants and visual architecture.

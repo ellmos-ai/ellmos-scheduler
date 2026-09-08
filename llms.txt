@@ -10,13 +10,15 @@
 - **Executors & Adapters**: Native support for `command`/`subprocess`, `coma` AI provider execution, `marblerun` chains, and custom Python executor registries.
 - **Fail-Closed Encoding**: Strict UTF-8 and configurable stream-safe encodings (CP1252, Latin-1, ASCII) with strict error handling.
 - **Windows Timezone Support**: Ships with `tzdata` fallback for reliable IANA time zones (e.g., `Europe/Berlin`) on Windows.
+- **Governance & Runtime Invariants**: Guarantees 10 foundational invariants including zero-egress, non-elevation, atomic leases, and safe execution.
 
 ## Directory Structure & Key Files
 - `src/ellmos_scheduler/`: Core Python package (CLI, service, store, executors, authorities).
-- `tests/`: Comprehensive Pytest test suite (96+ tests passing, including metadata parity).
+- `tests/`: Comprehensive Pytest test suite (111 passed tests, 100% green).
 - `SECURITY.md`: Local-first, zero-egress, authority preflight, and lease security policies.
 - `ARCHITECTURE.md`: Technical design, execution sequence, and internal state machine documentation.
 - `MIGRATION_FROM_BACH.md`: Migration guide and adapter interface for legacy BACH scheduler replacement.
+- `MARKETING-LOG.txt`: Local discoverability, architecture audit, and marketing status log.
 
 ## CLI Usage Quick Reference
 - `ellmos-scheduler --db <path> init`: Initialize SQLite state database.
@@ -29,5 +31,5 @@
 - **Ecosystem**: `ellmos-ai`
 - **Umbrella**: `open-bricks`
 - **License**: MIT
-- **Test-Suite**: 106 passed tests (100% green)
-- **Last-checked**: 2026-08-25
+- **Test-Suite**: 111 passed tests (100% green)
+- **Last-checked**: 2026-09-08
