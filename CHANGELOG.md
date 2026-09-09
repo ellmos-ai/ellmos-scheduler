@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2026-09-09
+
+### Repository Hygiene, CI Bytecode Preflight, Gitignore Hardening & Metadata Parity (Pfad A)
+- **CI Workflow Hardening & Bytecode Compilation**: Integrated `python -m compileall -q src tests` bytecode compilation preflight gate in `.github/workflows/test.yml` and standardized test execution command to `python -m pytest -ra -v`.
+- **PEP 621 Standard Classifiers & Pytest Options**: Added explicit operating system classifiers (`Operating System :: Microsoft :: Windows`, `Operating System :: POSIX :: Linux`, `Operating System :: MacOS`) and standardized `[tool.pytest.ini_options]` with `addopts = "-ra -v"` in `pyproject.toml`.
+- **Multi-Host Gitignore Defense**: Augmented `.gitignore` with multi-host synchronization conflict patterns (`*-conflict-*`, `*.sync-conflict-*`, `*.conflict`, `*-CONFLIT-*`, `*.sync-temp-*`, `*-ASUS-GEI.*`), multi-agent lock patterns (`LOCK`, `LOCK.*`, `LOCK*.txt`, `*.lock`, `LOCK.permissions.json`), and build/editor artifacts (`wheelhouse/`, `*.swp`, `*.log`).
+- **Bilingual Security Policy Contact Alignment**: Added umbrella security contact `security@open-bricks.org` across English and German vulnerability reporting sections in `SECURITY.md`.
+- **Contract Testsuite Expansion**: Expanded `tests/test_metadata.py` with contract tests verifying CI bytecode compilation preflight, pytest options, OS classifiers, security contacts, and changelog recency (113/113 passed tests, 100% green).
+- **Metadata Parity & Version Synchronization**: Bumped version to `0.3.2` across `pyproject.toml`, `src/ellmos_scheduler/__init__.py`, `ellmos-module.v2.json`, `README.md`, `README_de.md`, and `llms.txt`.
+
 ## [0.3.1] - 2026-09-08
 
 ### Discoverability, Visual Architecture, Governance Invariants & Metadata Parity (Pfad B)

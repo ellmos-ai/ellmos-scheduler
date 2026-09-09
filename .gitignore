@@ -6,6 +6,7 @@ __pycache__/
 .venv/
 dist/
 build/
+wheelhouse/
 *.egg-info/
 *.db
 *.db-shm
@@ -18,19 +19,30 @@ htmlcov/
 .claude/settings.local.json
 .claude/.cache/
 .claude/state/
+
+# Multi-agent lock patterns (preserving explicit build requirements if present)
+LOCK
+LOCK.*
 LOCK*.txt
 *.lock
+LOCK.permissions.json
 
 # Synchronization conflict patterns
+*-conflict-*
 *.sync-conflict-*
 *.conflict
 *-CONFLIT-*
+*.sync-temp-*
+*-ASUS-GEI.*
 
-# Temporary and patch artifacts
+# Temporary, patch, editor and log artifacts
 *.tmp
 *.bak
 *.orig
 *.rej
+*.swp
+*~
+*.log
 
 # Internal Plan-D working pointer (local development bookkeeping, not published)
 PLAN_D_POINTER.md

@@ -48,7 +48,7 @@ def test_readme_badges_and_language_parity():
         "python-3.10%2B-blue.svg",
         "platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg",
         "License-MIT-yellow.svg",
-        "tests-111%20passed-brightgreen.svg",
+        "tests-113%20passed-brightgreen.svg",
         "code%20style-ruff-000000.svg",
         "security-Local--First-green.svg",
         "privacy-Zero--Egress-success.svg",
@@ -116,7 +116,7 @@ def test_llms_txt_structure_and_timestamp():
     assert "## CLI Usage Quick Reference" in content
     assert "## Integration & Metadata" in content
     assert "SECURITY.md" in content
-    assert "2026-09-08" in content
+    assert "2026-09-09" in content
     assert "Governance & Runtime Invariants" in content
 
 
@@ -131,6 +131,7 @@ def test_security_policy_structure():
     assert "Local-First & Zero-Egress Invariant" in content
     assert "Local-First & Zero-Egress-Invariante" in content
     assert "security@ellmos.ai" in content
+    assert "security@open-bricks.org" in content
     assert "support@lukasgeiger.com" in content
     assert "lukas@open-bricks.org" in content
     assert "48 hours" in content or "48 Stunden" in content
@@ -165,6 +166,8 @@ def test_github_actions_workflow_concurrency_and_matrix():
     assert "macos-latest" in content
     assert "actions/checkout@v4" in content
     assert "actions/setup-python@v5" in content
+    assert "python -m compileall -q src tests" in content
+    assert "python -m pytest -ra -v" in content
 
 
 def test_pep621_project_urls_and_metadata():
@@ -190,14 +193,24 @@ def test_gitignore_hygiene():
     assert gitignore_path.is_file(), ".gitignore must exist"
 
     content = gitignore_path.read_text(encoding="utf-8")
+    assert "*-conflict-*" in content
     assert "*.sync-conflict-*" in content
     assert "*.conflict" in content
     assert "*-CONFLIT-*" in content
+    assert "*.sync-temp-*" in content
+    assert "LOCK" in content
+    assert "LOCK.*" in content
     assert "LOCK*.txt" in content
+    assert "*.lock" in content
+    assert "LOCK.permissions.json" in content
     assert ".pytest_cache/" in content
     assert ".ruff_cache/" in content
     assert ".coverage" in content
+    assert "wheelhouse/" in content
     assert ".wheel-smoke/" in content
+    assert "*.tmp" in content
+    assert "*.bak" in content
+    assert "*~" in content
 
 
 def test_readme_quick_navigation_anchors():
@@ -318,3 +331,29 @@ def test_changelog_recent_pfad_b_entry():
     content = changelog_path.read_text(encoding="utf-8")
     assert "## [0.3.1] - 2026-09-08" in content
     assert "Discoverability, Visual Architecture, Governance Invariants & Metadata Parity (Pfad B)" in content
+
+
+def test_changelog_recent_pfad_a_entry():
+    """Verify CHANGELOG.md contains the 2026-09-09 Pfad A release entry."""
+    changelog_path = ROOT / "CHANGELOG.md"
+    assert changelog_path.is_file(), "CHANGELOG.md must exist"
+
+    content = changelog_path.read_text(encoding="utf-8")
+    assert "## [0.3.2] - 2026-09-09" in content
+    assert "Repository Hygiene, CI Bytecode Preflight, Gitignore Hardening & Metadata Parity (Pfad A)" in content
+
+
+def test_pytest_ini_options_and_os_classifiers():
+    """Verify pytest options are configured with -ra -v and OS classifiers are complete."""
+    pyproject_path = ROOT / "pyproject.toml"
+    pyproject = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+
+    pytest_opts = pyproject.get("tool", {}).get("pytest", {}).get("ini_options", {})
+    assert "-ra" in pytest_opts.get("addopts", "")
+    assert "-v" in pytest_opts.get("addopts", "")
+
+    classifiers = pyproject.get("project", {}).get("classifiers", [])
+    assert "Operating System :: OS Independent" in classifiers
+    assert "Operating System :: Microsoft :: Windows" in classifiers
+    assert "Operating System :: POSIX :: Linux" in classifiers
+    assert "Operating System :: MacOS" in classifiers

@@ -43,8 +43,10 @@ jobs:
           wheel==0.45.1
           "tomli==2.2.1; python_version < '3.11'"
           && python -m pip install --no-build-isolation -e .
+      - name: Bytecode compilation preflight
+        run: python -m compileall -q src tests
       - name: Test
-        run: python -m pytest -q
+        run: python -m pytest -ra -v
       - name: Lint
         run: python -m ruff check .
       - name: Build wheel

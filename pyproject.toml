@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ellmos-scheduler"
-version = "0.3.1"
+version = "0.3.2"
 description = "Standalone, modular scheduler for ellmos stacks and BACH adapters"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -18,6 +18,9 @@ classifiers = [
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: MacOS",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
@@ -52,7 +55,7 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
-addopts = "-q"
+addopts = "-ra -v"
 
 [tool.ruff]
 line-length = 120
