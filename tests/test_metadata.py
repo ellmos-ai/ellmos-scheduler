@@ -48,10 +48,12 @@ def test_readme_badges_and_language_parity():
         "python-3.10%2B-blue.svg",
         "platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg",
         "License-MIT-yellow.svg",
-        "tests-113%20passed-brightgreen.svg",
+        "tests-118%20passed-brightgreen.svg",
         "code%20style-ruff-000000.svg",
         "security-Local--First-green.svg",
         "privacy-Zero--Egress-success.svg",
+        "third--party-audited-success.svg",
+        "marketing-logged-blue.svg",
         "ecosystem-ellmos--ai-purple.svg",
         "umbrella-open--bricks-blueviolet.svg",
         "LLM--Ready-llms.txt-orange.svg",
@@ -116,7 +118,8 @@ def test_llms_txt_structure_and_timestamp():
     assert "## CLI Usage Quick Reference" in content
     assert "## Integration & Metadata" in content
     assert "SECURITY.md" in content
-    assert "2026-09-09" in content
+    assert "THIRD_PARTY_LICENSES.md" in content
+    assert "2026-09-11" in content
     assert "Governance & Runtime Invariants" in content
 
 
@@ -214,7 +217,7 @@ def test_gitignore_hygiene():
 
 
 def test_readme_quick_navigation_anchors():
-    """Verify both README files provide complete 14-point quick navigation blocks with matching anchors."""
+    """Verify both README files provide complete 15-point quick navigation blocks with matching anchors."""
     readme_en = (ROOT / "README.md").read_text(encoding="utf-8")
     readme_de = (ROOT / "README_de.md").read_text(encoding="utf-8")
 
@@ -231,8 +234,9 @@ def test_readme_quick_navigation_anchors():
         "(#migration-from-bach)",
         "(#bundles-and-partners)",
         "(#ecosystem--sibling-tools)",
-        "(#changelog)",
-        "(#license)",
+        "(#third-party-licenses--transparency)",
+        "(#marketing--target-personas)",
+        "(#development-security--license)",
     ]
 
     de_anchors = [
@@ -248,8 +252,9 @@ def test_readme_quick_navigation_anchors():
         "(#migration-von-bach)",
         "(#bundles-und-partner)",
         "(#ökosystem--geschwister-werkzeuge)",
-        "(#änderungsprotokoll)",
-        "(#lizenz)",
+        "(#drittanbieter-lizenzen--transparenz)",
+        "(#marketing--zielgruppen)",
+        "(#entwicklung-sicherheit--lizenz)",
     ]
 
     for anchor in en_anchors:
@@ -317,10 +322,10 @@ def test_local_marketing_log_audit():
     assert log_path.is_file(), "MARKETING-LOG.txt must exist in repo root"
 
     content = log_path.read_text(encoding="utf-8")
-    assert "2026-09-08" in content
+    assert "2026-09-11" in content
     assert "ellmos-scheduler" in content
     assert "Pfad B" in content
-    assert "Governance & Runtime Invariants Matrix" in content
+    assert "5-WAY COMPETITIVE POSITIONING MATRIX" in content
 
 
 def test_changelog_recent_pfad_b_entry():
@@ -357,3 +362,84 @@ def test_pytest_ini_options_and_os_classifiers():
     assert "Operating System :: Microsoft :: Windows" in classifiers
     assert "Operating System :: POSIX :: Linux" in classifiers
     assert "Operating System :: MacOS" in classifiers
+
+
+def test_third_party_licenses_inventory():
+    """Verify THIRD_PARTY_LICENSES.md exists, inventories dependencies, and asserts key invariants."""
+    lic_path = ROOT / "THIRD_PARTY_LICENSES.md"
+    assert lic_path.is_file(), "THIRD_PARTY_LICENSES.md must exist in repo root"
+
+    content = lic_path.read_text(encoding="utf-8")
+    assert "2026-09-11" in content
+    assert "tzdata" in content
+    assert "Python Standard Library" in content
+    assert "pytest" in content
+    assert "tomli" in content
+    assert "ruff" in content
+    assert "setuptools" in content
+    assert "INV-LOCAL-01" in content
+    assert "INV-PRIV-02" in content
+    assert "INV-STRM-05" in content
+    assert "100% Permissive" in content
+
+
+def test_pep621_extended_project_urls():
+    """Verify pyproject.toml defines Third-Party Licenses, Marketing Log, and LLM Ready URLs."""
+    pyproject_path = ROOT / "pyproject.toml"
+    assert pyproject_path.is_file(), "pyproject.toml must exist"
+
+    pyproject = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+    urls = pyproject.get("project", {}).get("urls", {})
+    assert urls.get("Third-Party Licenses") == "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/THIRD_PARTY_LICENSES.md"
+    assert urls.get("Marketing Log") == "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/MARKETING-LOG.txt"
+    assert urls.get("LLM Ready") == "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/llms.txt"
+
+
+def test_canonical_invariant_identifiers():
+    """Verify canonical invariant identifiers INV-LOCAL-01 to INV-SLA-10 are documented across docs and marketing log."""
+    readme_en = (ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (ROOT / "README_de.md").read_text(encoding="utf-8")
+    mkt_log = (ROOT / "MARKETING-LOG.txt").read_text(encoding="utf-8")
+
+    expected_ids = [
+        "INV-LOCAL-01",
+        "INV-PRIV-02",
+        "INV-CONC-03",
+        "INV-AUTH-04",
+        "INV-STRM-05",
+        "INV-EXEC-06",
+        "INV-RES-07",
+        "INV-MOD-08",
+        "INV-PLAT-09",
+        "INV-SLA-10",
+    ]
+
+    for inv_id in expected_ids:
+        assert inv_id in readme_en, f"README.md missing canonical invariant ID: {inv_id}"
+        assert inv_id in readme_de, f"README_de.md missing canonical invariant ID: {inv_id}"
+        assert inv_id in mkt_log, f"MARKETING-LOG.txt missing canonical invariant ID: {inv_id}"
+
+
+def test_changelog_recent_pfad_b_033_entry():
+    """Verify CHANGELOG.md contains the 2026-09-11 Pfad B release entry."""
+    changelog_path = ROOT / "CHANGELOG.md"
+    assert changelog_path.is_file(), "CHANGELOG.md must exist"
+
+    content = changelog_path.read_text(encoding="utf-8")
+    assert "## [0.3.3] - 2026-09-11" in content
+    assert "Discoverability, Visual Architecture, Bilingual Parity, Third-Party Licenses & Metadata Contract (Pfad B)" in content
+
+
+def test_marketing_log_positioning_matrix():
+    """Verify MARKETING-LOG.txt contains 4 personas and 5-way competitive matrix."""
+    log_path = ROOT / "MARKETING-LOG.txt"
+    assert log_path.is_file(), "MARKETING-LOG.txt must exist in repo root"
+
+    content = log_path.read_text(encoding="utf-8")
+    assert "2026-09-11" in content
+    assert "0.3.3" in content
+    assert "Autonomous Multi-Agent Swarm Engineers" in content
+    assert "Local-First & Zero-Egress Tool Builders" in content
+    assert "DevOps & Site Reliability Engineers" in content
+    assert "Enterprise Compliance & Security Auditors" in content
+    assert "5-WAY COMPETITIVE POSITIONING MATRIX" in content

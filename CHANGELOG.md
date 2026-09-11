@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3] - 2026-09-11
+
+### Discoverability, Visual Architecture, Bilingual Parity, Third-Party Licenses & Metadata Contract (Pfad B)
+- **Bilingual 15-Point Quick Navigation Parity**: Expanded table of contents navigation in `README.md` and `README_de.md` to full 15-point quick navigation with dedicated anchors for Third-Party Licenses & Transparency and Marketing & Target Personas.
+- **Third-Party Licenses & Dependency Transparency**: Added repository-level `THIRD_PARTY_LICENSES.md` inventory detailing runtime (`tzdata`, Python standard library) and development dependencies (`pytest`, `tomli`, `ruff`, `setuptools`), certifying 100% OSI-approved permissive licensing and verifying compliance with zero-egress (`INV-LOCAL-01`) and non-elevation (`INV-PRIV-02`).
+- **Canonical Governance & Runtime Invariant IDs**: Integrated standardized identifiers (`INV-LOCAL-01` through `INV-SLA-10`) into the bilingual Governance & Runtime Invariants matrices in `README.md`, `README_de.md`, and `MARKETING-LOG.txt`.
+- **Target Personas & Competitive Positioning**: Overhauled `MARKETING-LOG.txt` with 4 detailed user journeys (Autonomous Multi-Agent Swarm Engineers, Local-First Builders, DevOps/SREs, and Security Auditors), bilingual high-intent keyword matrices, and a 5-way competitive positioning matrix comparing ellmos-scheduler to OS Cron, Celery, APScheduler, and Cloud Schedulers.
+- **PEP 621 Standard Ecosystem Project URLs**: Augmented `[project.urls]` in `pyproject.toml` with `Third-Party Licenses`, `Marketing Log`, and `LLM Ready` endpoints.
+- **Shields.io Badges Enhancement**: Added badges for Third-Party Audited (100% Permissive) and Marketing Log, synchronized version badge to `0.3.3`, and updated test suite badge to 118+ passed tests.
+- **Metadata Parity & Version Alignment**: Synchronized version `0.3.3` across `pyproject.toml`, `src/ellmos_scheduler/__init__.py`, `ellmos-module.v2.json`, `README.md`, `README_de.md`, and `llms.txt`.
+- **Contract Testsuite Expansion**: Expanded `tests/test_metadata.py` with contract tests verifying `THIRD_PARTY_LICENSES.md` inventory, extended PEP 621 URLs, 15-point quick navigation anchors, canonical invariant IDs, and changelog recency (118/118 passed tests, 100% green).
+
 ## [0.3.2] - 2026-09-09
 
 ### Repository Hygiene, CI Bytecode Preflight, Gitignore Hardening & Metadata Parity (Pfad A)

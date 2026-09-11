@@ -2,15 +2,17 @@
 
 <img src="assets/banner.png" width="100%" alt="ellmos Scheduler banner">
 
-[![Version](https://img.shields.io/badge/version-0.3.2-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
+[![Version](https://img.shields.io/badge/version-0.3.3-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
 [![CI](https://github.com/ellmos-ai/ellmos-scheduler/actions/workflows/test.yml/badge.svg)](https://github.com/ellmos-ai/ellmos-scheduler/actions)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests: 113 Passed](https://img.shields.io/badge/tests-113%20passed-brightgreen.svg)](tests/)
+[![Tests: 118 Passed](https://img.shields.io/badge/tests-118%20passed-brightgreen.svg)](tests/)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Security: Local--First](https://img.shields.io/badge/security-Local--First-green.svg)](SECURITY.md)
 [![Privacy: Zero--Egress](https://img.shields.io/badge/privacy-Zero--Egress-success.svg)](SECURITY.md)
+[![Third-Party: Audited](https://img.shields.io/badge/third--party-audited-success.svg)](THIRD_PARTY_LICENSES.md)
+[![Marketing: Logged](https://img.shields.io/badge/marketing-logged-blue.svg)](MARKETING-LOG.txt)
 [![Ecosystem: ellmos-ai](https://img.shields.io/badge/ecosystem-ellmos--ai-purple.svg)](https://github.com/ellmos-ai)
 [![Umbrella: open-bricks](https://img.shields.io/badge/umbrella-open--bricks-blueviolet.svg)](https://github.com/open-bricks)
 [![LLM-Ready: llms.txt](https://img.shields.io/badge/LLM--Ready-llms.txt-orange.svg)](llms.txt)
@@ -31,8 +33,9 @@
 - [Migration from BACH](#migration-from-bach)
 - [Bundles and Partners](#bundles-and-partners)
 - [Ecosystem & Sibling Tools](#ecosystem--sibling-tools)
-- [Changelog](#changelog)
-- [License](#license)
+- [Third-Party Licenses & Transparency](#third-party-licenses--transparency)
+- [Marketing & Target Personas](#marketing--target-personas)
+- [Development, Security & License](#development-security--license)
 
 > [!NOTE]
 > **For AI Agents & LLM Tools:** This repository maintains an [`llms.txt`](llms.txt) machine-readable index for automated discovery, capability summaries, and CLI interfaces.
@@ -42,8 +45,7 @@ deliberately located **outside BACH**. BACH, Wonderland/Riverfall, desktop
 automations, COMA, MarbleRun/llmauto, and swarm-ai can consume it through
 narrow adapters.
 
-Status: `0.3.2` (targeted tick controls, authority receipts, strict output
-encoding, and Windows IANA time-zone data, 2026-08-14).
+Status: `0.3.3` (Pfad B discoverability, third-party license audit, canonical invariants, and marketing log parity, 2026-09-11).
 
 On Windows, the package installs `tzdata` as a conditional runtime dependency.
 This makes IANA time zones such as `Europe/Berlin` work in a clean virtual
@@ -133,16 +135,16 @@ sequenceDiagram
 
 | Invariant | Scope | Guarantee & Verification |
 |---|---|---|
-| **1. 100% Local-First & Zero-Egress** | System Architecture | Operates completely offline on localhost; strictly zero telemetry, analytics, external network sockets, or unauthorized cloud beacons. |
-| **2. Unprivileged Non-Elevation Execution** | Security Boundary | Executes strictly in unprivileged user-mode (`RunAsInvoker`), never requiring administrative or root privileges. |
-| **3. Atomic SQLite Leases & Deduplication** | Concurrency Control | Deterministic, content-addressed `run_id` generation and atomic SQLite state leases prevent parallel double-execution across workers. |
-| **4. Double Read-Only Authority Preflight** | Integrity Guard | Mandatory authority files are read twice and validated against cryptographic SHA-256 integrity checksums prior to job dispatch. |
-| **5. Strict UTF-8 & Fail-Closed Decoding** | Stream Hygiene | Subprocess output decoding enforces strict error handling (`utf-8:strict`), terminating corrupted outputs cleanly instead of corrupting audit logs. |
-| **6. Shell-Free Safe Process Invocation** | Execution Security | Process invocations accept explicit `argv` lists only, completely avoiding shell string interpolation (`shell=False`). |
-| **7. Fail-Closed Timeout & Abandoned Leases** | Process Resilience | Overdue, hanging, or crashed workers have their leases marked `abandoned` and reclaimed safely without deadlocks. |
-| **8. Declarative Modular Integration** | Decoupled Architecture | Pluggable executor registry, external authority resolvers, and clean decoupling outside monoliths (e.g. BACH). |
-| **9. Multi-OS Cross-Platform Parity** | Platform Portability | Complete operational parity on Windows (with `tzdata` fallback for IANA time zones), Linux, and macOS. |
-| **10. Cryptographic Receipt Persistence** | Auditability | Full audit records with immutable receipts, SHA-256 authority sets, and secret-free execution metadata. |
+| `INV-LOCAL-01` **1. 100% Local-First & Zero-Egress** | System Architecture | Operates completely offline on localhost; strictly zero telemetry, analytics, external network sockets, or unauthorized cloud beacons. |
+| `INV-PRIV-02` **2. Unprivileged Non-Elevation Execution** | Security Boundary | Executes strictly in unprivileged user-mode (`RunAsInvoker`), never requiring administrative or root privileges. |
+| `INV-CONC-03` **3. Atomic SQLite Leases & Deduplication** | Concurrency Control | Deterministic, content-addressed `run_id` generation and atomic SQLite state leases prevent parallel double-execution across workers. |
+| `INV-AUTH-04` **4. Double Read-Only Authority Preflight** | Integrity Guard | Mandatory authority files are read twice and validated against cryptographic SHA-256 integrity checksums prior to job dispatch. |
+| `INV-STRM-05` **5. Strict UTF-8 & Fail-Closed Decoding** | Stream Hygiene | Subprocess output decoding enforces strict error handling (`utf-8:strict`), terminating corrupted outputs cleanly instead of corrupting audit logs. |
+| `INV-EXEC-06` **6. Shell-Free Safe Process Invocation** | Execution Security | Process invocations accept explicit `argv` lists only, completely avoiding shell string interpolation (`shell=False`). |
+| `INV-RES-07` **7. Fail-Closed Timeout & Abandoned Leases** | Process Resilience | Overdue, hanging, or crashed workers have their leases marked `abandoned` and reclaimed safely without deadlocks. |
+| `INV-MOD-08` **8. Declarative Modular Integration** | Decoupled Architecture | Pluggable executor registry, external authority resolvers, and clean decoupling outside monoliths (e.g. BACH). |
+| `INV-PLAT-09` **9. Multi-OS Cross-Platform Parity** | Platform Portability | Complete operational parity on Windows (with `tzdata` fallback for IANA time zones), Linux, and macOS. |
+| `INV-SLA-10` **10. Cryptographic Receipt Persistence** | Auditability | Full audit records with immutable receipts, SHA-256 authority sets, and secret-free execution metadata. |
 
 ## Responsibility boundary
 
@@ -342,12 +344,30 @@ Part of the [ellmos-ai](https://github.com/ellmos-ai) multi-agent infrastructure
 
 ---
 
-## Changelog
+## Third-Party Licenses & Transparency
 
-See [`CHANGELOG.md`](CHANGELOG.md) for full release history, migrations, and technical notes.
+`ellmos-scheduler` strictly complies with Open Source standards and runtime transparency:
+- **100% Permissive Dependencies**: All runtime (`tzdata`, Python standard library) and development packages (`pytest`, `tomli`, `ruff`, `setuptools`) utilize OSI-approved permissive licenses (MIT, Apache-2.0, PSFL, Public Domain).
+- **Zero-Egress Invariant (`INV-LOCAL-01`)**: No dependency transmits analytics, telemetry, or external network calls.
+- **Unprivileged Execution (`INV-PRIV-02`)**: Executes entirely within user-mode permissions (`RunAsInvoker`).
+- Full audit details, component license terms, and upstream sources are documented in [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md).
 
 ---
 
-## License
+## Marketing & Target Personas
 
-MIT License. See [LICENSE](LICENSE) for details.
+Engineered for autonomous agent workflows, deterministic automation, and enterprise environments:
+1. **Autonomous Multi-Agent Swarm Engineers & Orchestrators**: Non-overlapping execution for agentic loops, periodic memory compaction, and evaluation routines via atomic SQLite lease claiming.
+2. **Local-First & Zero-Egress Tool Builders**: Completely offline scheduling without cloud phone-home APIs or telemetry beacons.
+3. **DevOps & Site Reliability Engineers**: Unified cross-platform scheduling across Windows, Linux, and macOS with bundled Windows IANA timezone data.
+4. **Enterprise Compliance & Security Auditors**: Dual preflight authority checks (SHA-256) and immutable cryptographic execution receipts.
+
+For competitive benchmarks against Celery, APScheduler, Cron, and Cloud Schedulers, see [`MARKETING-LOG.txt`](MARKETING-LOG.txt).
+
+---
+
+## Development, Security & License
+
+- **Security & Vulnerability Disclosure**: See [`SECURITY.md`](SECURITY.md) for vulnerability reporting procedures (48h initial acknowledgment SLA, 5 business days triage SLA).
+- **Changelog**: Comprehensive release and architecture notes are maintained in [`CHANGELOG.md`](CHANGELOG.md).
+- **License**: MIT License. See [LICENSE](LICENSE) for details.

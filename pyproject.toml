@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ellmos-scheduler"
-version = "0.3.2"
+version = "0.3.3"
 description = "Standalone, modular scheduler for ellmos stacks and BACH adapters"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -37,6 +37,9 @@ Issues = "https://github.com/ellmos-ai/ellmos-scheduler/issues"
 Changelog = "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/CHANGELOG.md"
 Documentation = "https://github.com/ellmos-ai/ellmos-scheduler#readme"
 Security = "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/SECURITY.md"
+"Third-Party Licenses" = "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/THIRD_PARTY_LICENSES.md"
+"Marketing Log" = "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/MARKETING-LOG.txt"
+"LLM Ready" = "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/llms.txt"
 "Parent Organization" = "https://github.com/ellmos-ai"
 "Umbrella Ecosystem" = "https://github.com/open-bricks"
 
