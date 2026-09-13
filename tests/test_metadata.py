@@ -48,7 +48,7 @@ def test_readme_badges_and_language_parity():
         "python-3.10%2B-blue.svg",
         "platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg",
         "License-MIT-yellow.svg",
-        "tests-118%20passed-brightgreen.svg",
+        "tests-124%20passed-brightgreen.svg",
         "code%20style-ruff-000000.svg",
         "security-Local--First-green.svg",
         "privacy-Zero--Egress-success.svg",
@@ -119,7 +119,7 @@ def test_llms_txt_structure_and_timestamp():
     assert "## Integration & Metadata" in content
     assert "SECURITY.md" in content
     assert "THIRD_PARTY_LICENSES.md" in content
-    assert "2026-09-11" in content
+    assert "2026-09-13" in content
     assert "Governance & Runtime Invariants" in content
 
 
@@ -443,3 +443,84 @@ def test_marketing_log_positioning_matrix():
     assert "DevOps & Site Reliability Engineers" in content
     assert "Enterprise Compliance & Security Auditors" in content
     assert "5-WAY COMPETITIVE POSITIONING MATRIX" in content
+
+
+def test_ci_timeout_minutes_configured():
+    """Verify GitHub Actions CI test job defines explicit timeout-minutes ceiling."""
+    workflow_path = ROOT / ".github" / "workflows" / "test.yml"
+    assert workflow_path.is_file(), "test.yml workflow must exist"
+
+    content = workflow_path.read_text(encoding="utf-8")
+    assert "timeout-minutes: 15" in content
+
+
+def test_ci_stale_workflow_present():
+    """Verify scheduled stale issues and pull requests workflow is configured with proper permissions."""
+    workflow_path = ROOT / ".github" / "workflows" / "stale.yml"
+    assert workflow_path.is_file(), "stale.yml workflow must exist"
+
+    content = workflow_path.read_text(encoding="utf-8")
+    assert "actions/stale@v9" in content
+    assert "issues: write" in content
+    assert "pull-requests: write" in content
+    assert "timeout-minutes: 10" in content
+
+
+def test_gitignore_multihost_conflict_patterns():
+    """Verify .gitignore includes multi-host sync conflict copies, tokens, uv.lock, and test caches."""
+    gitignore_path = ROOT / ".gitignore"
+    assert gitignore_path.is_file(), ".gitignore must exist"
+
+    content = gitignore_path.read_text(encoding="utf-8")
+    expected_patterns = [
+        "*-conflict-*",
+        "*.sync-conflict-*",
+        "* (kopie)*",
+        "* (Kopie)*",
+        "* (copy)*",
+        "* (Copy)*",
+        "*conflicted copy*",
+        "*-WORKSTATION*",
+        "*-WORKSTATION-LG*",
+        "*-ASUS*",
+        "*-ASUS-GEI*",
+        "*-LAPTOP*",
+        "uv.lock",
+        "!package-lock.json",
+        ".tox/",
+        ".turbo/",
+    ]
+    for pattern in expected_patterns:
+        assert pattern in content, f".gitignore missing pattern: {pattern}"
+
+
+def test_pep621_license_files_and_ruff_lint_rules():
+    """Verify pyproject.toml defines license-files and broad Ruff lint rulesets."""
+    pyproject_path = ROOT / "pyproject.toml"
+    assert pyproject_path.is_file(), "pyproject.toml must exist"
+
+    pyproject = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+    license_files = pyproject.get("project", {}).get("license-files", [])
+    assert "LICENSE" in license_files
+
+    select_rules = pyproject.get("tool", {}).get("ruff", {}).get("lint", {}).get("select", [])
+    for rule in ["E", "F", "W", "B", "SIM", "C4", "RUF"]:
+        assert rule in select_rules, f"Ruff lint rules missing: {rule}"
+
+
+def test_sorted_all_export_contract():
+    """Verify __all__ in ellmos_scheduler package __init__.py is sorted according to RUF022."""
+    from ellmos_scheduler import __all__ as exports
+
+    expected = sorted(exports, key=lambda s: (0 if s.isupper() else (1 if s[0].isupper() else 2), s))
+    assert exports == expected
+
+
+def test_changelog_recent_pfad_a_034_entry():
+    """Verify CHANGELOG.md contains the 2026-09-13 Pfad A release entry."""
+    changelog_path = ROOT / "CHANGELOG.md"
+    assert changelog_path.is_file(), "CHANGELOG.md must exist"
+
+    content = changelog_path.read_text(encoding="utf-8")
+    assert "## [0.3.4] - 2026-09-13" in content
+    assert "Repository Hygiene, CI Timeout & Stale Workflow, Gitignore Hardening & Metadata Parity (Pfad A)" in content

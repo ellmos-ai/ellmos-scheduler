@@ -138,8 +138,7 @@ def _cron_date_matches(
 
 
 def _cron_matches(local: datetime, expression: str) -> bool:
-    minute, hour, day, month, weekday, minutes, hours, months = _parse_cron(expression)
-    del minute, hour
+    _, _, day, _, weekday, minutes, hours, months = _parse_cron(expression)
     return (
         local.minute in minutes
         and local.hour in hours

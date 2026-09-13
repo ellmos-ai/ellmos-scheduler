@@ -26,6 +26,8 @@ LOCK.*
 LOCK*.txt
 *.lock
 LOCK.permissions.json
+uv.lock
+!package-lock.json
 
 # Synchronization conflict patterns
 *-conflict-*
@@ -33,7 +35,22 @@ LOCK.permissions.json
 *.conflict
 *-CONFLIT-*
 *.sync-temp-*
-*-ASUS-GEI.*
+* (kopie)*
+* (Kopie)*
+* (copy)*
+* (Copy)*
+*conflicted copy*
+
+# Multi-host tokens
+*-WORKSTATION*
+*-WORKSTATION-LG*
+*-ASUS*
+*-ASUS-GEI*
+*-LAPTOP*
+
+# Environment and packaging caches
+.tox/
+.turbo/
 
 # Temporary, patch, editor and log artifacts
 *.tmp

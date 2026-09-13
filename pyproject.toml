@@ -4,11 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ellmos-scheduler"
-version = "0.3.3"
+version = "0.3.4"
 description = "Standalone, modular scheduler for ellmos stacks and BACH adapters"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
-license = { text = "MIT" }
 authors = [{ name = "Lukas Geiger" }]
 dependencies = [
   "tzdata>=2024.1; platform_system == 'Windows'",
@@ -16,7 +17,6 @@ dependencies = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
-  "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Operating System :: Microsoft :: Windows",
   "Operating System :: POSIX :: Linux",
@@ -65,6 +65,6 @@ line-length = 120
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E", "F", "W"]
-ignore = ["E501", "E402"]
+select = ["E", "F", "W", "B", "SIM", "C4", "RUF"]
+ignore = ["E501"]
 

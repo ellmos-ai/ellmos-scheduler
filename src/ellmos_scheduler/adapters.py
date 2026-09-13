@@ -77,10 +77,7 @@ def coma_executor(payload: dict[str, Any], timeout_seconds: int) -> ExecutionRes
     returncode = raw.get("returncode")
     exit_code = returncode if isinstance(returncode, int) else None
     timed_out = timed_out_value or exit_code == -1
-    if timed_out:
-        status = "timed_out"
-    else:
-        status = "succeeded" if success else "failed"
+    status = "timed_out" if timed_out else ("succeeded" if success else "failed")
     return ExecutionResult(
         status,
         exit_code=exit_code,

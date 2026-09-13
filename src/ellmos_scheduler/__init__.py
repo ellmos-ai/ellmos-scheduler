@@ -21,23 +21,23 @@ from .service import SchedulerService
 from .store import SchedulerStore
 
 __all__ = [
-    "BachSchedulerAdapter",
+    "DEFAULT_AUTHORITY_REGISTRY",
+    "DEFAULT_REGISTRY",
     "AuthorityConfigurationError",
     "AuthorityResolution",
     "AuthorityResolverRegistry",
     "AuthoritySetResult",
-    "DEFAULT_AUTHORITY_REGISTRY",
-    "DEFAULT_REGISTRY",
+    "BachSchedulerAdapter",
     "ExecutionResult",
     "ExecutorRegistry",
     "SchedulerService",
     "SchedulerStore",
-    "executor_names",
     "create_bach_adapter",
+    "executor_names",
     "import_legacy_jobs",
     "register_executor",
     "unregister_executor",
     "validate_authority_specs",
 ]
 
-__version__ = "0.3.3"
+__version__ = "0.3.4"

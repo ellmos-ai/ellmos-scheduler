@@ -2,12 +2,12 @@
 
 <img src="assets/banner.png" width="100%" alt="ellmos Scheduler banner">
 
-[![Version](https://img.shields.io/badge/version-0.3.3-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
+[![Version](https://img.shields.io/badge/version-0.3.4-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
 [![CI](https://github.com/ellmos-ai/ellmos-scheduler/actions/workflows/test.yml/badge.svg)](https://github.com/ellmos-ai/ellmos-scheduler/actions)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests: 118 Passed](https://img.shields.io/badge/tests-118%20passed-brightgreen.svg)](tests/)
+[![Tests: 124 Passed](https://img.shields.io/badge/tests-124%20passed-brightgreen.svg)](tests/)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Security: Local--First](https://img.shields.io/badge/security-Local--First-green.svg)](SECURITY.md)
 [![Privacy: Zero--Egress](https://img.shields.io/badge/privacy-Zero--Egress-success.svg)](SECURITY.md)
@@ -45,7 +45,7 @@ deliberately located **outside BACH**. BACH, Wonderland/Riverfall, desktop
 automations, COMA, MarbleRun/llmauto, and swarm-ai can consume it through
 narrow adapters.
 
-Status: `0.3.3` (Pfad B discoverability, third-party license audit, canonical invariants, and marketing log parity, 2026-09-11).
+Status: `0.3.4` (Pfad A repository hygiene, CI timeout & stale workflow, .gitignore hardening & metadata contract parity, 2026-09-13).
 
 On Windows, the package installs `tzdata` as a conditional runtime dependency.
 This makes IANA time zones such as `Europe/Berlin` work in a clean virtual

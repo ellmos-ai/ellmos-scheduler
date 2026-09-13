@@ -134,11 +134,40 @@ Long-Tail / Architecture Intent:
     - Added contract tests for canonical invariant IDs (INV-LOCAL-01 to INV-SLA-10).
 
 ================================================================================
-8. MANUAL / NON-AUTOMATED NEXT STEPS
+8. IMPLEMENTED PFAD A REPOSITORY HYGIENE & CI HARDENING (2026-09-13)
+================================================================================
+[x] CI Workflow Hardening (.github/workflows/test.yml):
+    - Configured explicit timeout-minutes: 15 on multi-OS matrix testing jobs.
+    - Prevents runaway hanging runners on stalled tests or build steps.
+
+[x] Automated Lifecycle Management (.github/workflows/stale.yml):
+    - Added scheduled and dispatchable stale workflow with strict permissions (issues: write, pull-requests: write).
+    - 30-day stale inactivity threshold and 7-day automated closing window.
+
+[x] Multi-Host Sync & Lock Defense (.gitignore):
+    - Hardened .gitignore against cross-device conflict markers (*conflicted copy*, * (kopie)*, * (copy)*, *-WORKSTATION*, *-ASUS*).
+    - Hardened against modern multi-agent lockfiles (uv.lock, !package-lock.json).
+    - Added environment and build cache ignore patterns (.tox/, .turbo/).
+
+[x] PEP 621 Standard License Files & Extended Linter (pyproject.toml):
+    - Declared explicit license-files = ["LICENSE"].
+    - Broadened Ruff rulesets to E, F, W, B, SIM, C4, RUF with zero errors.
+
+[x] Codebase Hygiene:
+    - Applied alphabetical isort-style sorting to __all__ in src/ellmos_scheduler/__init__.py (RUF022).
+    - Cleaned up cron tuple unpacking in schedules.py (RUF059).
+    - Streamlined COMA adapter status determination in adapters.py.
+
+[x] Contract Testsuite Expansion (tests/test_metadata.py):
+    - Added contract tests for CI timeouts, stale workflow, multi-host sync patterns, PEP 621 license files, sorted exports, and release recency.
+    - Test suite expanded to 124 passed tests (100% green).
+
+================================================================================
+9. MANUAL / NON-AUTOMATED NEXT STEPS
 ================================================================================
 1. PyPI Release Publication:
    - When ready for 0.4.0 or next release, trigger PyPI publish workflow.
 2. Glama / Smithery / Awesome-MCP Listing:
    - For agent tool discoverability, cross-link ellmos-scheduler inside agent orchestrator registries.
 3. GitHub Release Tagging:
-   - Tag commit with v0.3.3 release notes referencing the expanded invariants, third-party licenses, and visual architecture.
+   - Tag commit with v0.3.4 release notes referencing the expanded invariants, third-party licenses, and visual architecture.

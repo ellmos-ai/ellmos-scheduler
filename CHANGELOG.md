@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.4] - 2026-09-13
+
+### Repository Hygiene, CI Timeout & Stale Workflow, Gitignore Hardening & Metadata Parity (Pfad A)
+- **CI Workflow Hardening**: Configured explicit `timeout-minutes: 15` ceiling on multi-OS matrix testing jobs in `.github/workflows/test.yml` to prevent runaway hanging runners.
+- **Automated Lifecycle Management**: Added scheduled and dispatchable `.github/workflows/stale.yml` workflow for automated triage and marking of inactive issues and pull requests with strict permissions (`issues: write`, `pull-requests: write`).
+- **Multi-Host Sync & Lock Defense**: Hardened `.gitignore` against cross-device conflict markers (`*conflicted copy*`, `* (kopie)*`, `* (copy)*`, `*-WORKSTATION*`, `*-WORKSTATION-LG*`, `*-ASUS*`, `*-LAPTOP*`), multi-agent lock variants (`uv.lock`, `!package-lock.json`), and test caches (`.tox/`, `.turbo/`).
+- **PEP 621 Standard License Files & Ruff Extension**: Declared explicit `license-files = ["LICENSE"]` in `pyproject.toml` and broadened Ruff linter rulesets to `E`, `F`, `W`, `B`, `SIM`, `C4`, `RUF` while maintaining zero warnings.
+- **Codebase Hygiene**: Applied alphabetical isort-style sorting to `__all__` in `src/ellmos_scheduler/__init__.py` (RUF022), eliminated unused cron parsing unpack variables in `schedules.py` (RUF059), and streamlined COMA adapter status determination in `adapters.py`.
+- **Contract Testsuite Expansion**: Added 6 new automated contract tests in `tests/test_metadata.py` verifying CI timeouts, stale workflow presence, multi-host conflict patterns, PEP 621 license files, sorted exports, and release recency.
+- **Metadata Parity & Version Synchronization**: Synchronized version `0.3.4` across `pyproject.toml`, `src/ellmos_scheduler/__init__.py`, `ellmos-module.v2.json`, `README.md`, `README_de.md`, and `llms.txt`.
+
 ## [0.3.3] - 2026-09-11
 
 ### Discoverability, Visual Architecture, Bilingual Parity, Third-Party Licenses & Metadata Contract (Pfad B)
