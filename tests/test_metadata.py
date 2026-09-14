@@ -48,7 +48,7 @@ def test_readme_badges_and_language_parity():
         "python-3.10%2B-blue.svg",
         "platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg",
         "License-MIT-yellow.svg",
-        "tests-124%20passed-brightgreen.svg",
+        "tests-128%20passed-brightgreen.svg",
         "code%20style-ruff-000000.svg",
         "security-Local--First-green.svg",
         "privacy-Zero--Egress-success.svg",
@@ -119,7 +119,7 @@ def test_llms_txt_structure_and_timestamp():
     assert "## Integration & Metadata" in content
     assert "SECURITY.md" in content
     assert "THIRD_PARTY_LICENSES.md" in content
-    assert "2026-09-13" in content
+    assert "2026-09-14" in content
     assert "Governance & Runtime Invariants" in content
 
 
@@ -217,7 +217,7 @@ def test_gitignore_hygiene():
 
 
 def test_readme_quick_navigation_anchors():
-    """Verify both README files provide complete 15-point quick navigation blocks with matching anchors."""
+    """Verify both README files provide complete 16-point quick navigation blocks with matching anchors."""
     readme_en = (ROOT / "README.md").read_text(encoding="utf-8")
     readme_de = (ROOT / "README_de.md").read_text(encoding="utf-8")
 
@@ -236,6 +236,7 @@ def test_readme_quick_navigation_anchors():
         "(#ecosystem--sibling-tools)",
         "(#third-party-licenses--transparency)",
         "(#marketing--target-personas)",
+        "(#comparative-matrix-vs-alternatives)",
         "(#development-security--license)",
     ]
 
@@ -254,6 +255,7 @@ def test_readme_quick_navigation_anchors():
         "(#ökosystem--geschwister-werkzeuge)",
         "(#drittanbieter-lizenzen--transparenz)",
         "(#marketing--zielgruppen)",
+        "(#vergleichsmatrix-gegenüber-alternativen)",
         "(#entwicklung-sicherheit--lizenz)",
     ]
 
@@ -370,7 +372,7 @@ def test_third_party_licenses_inventory():
     assert lic_path.is_file(), "THIRD_PARTY_LICENSES.md must exist in repo root"
 
     content = lic_path.read_text(encoding="utf-8")
-    assert "2026-09-11" in content
+    assert "2026-09-14" in content
     assert "tzdata" in content
     assert "Python Standard Library" in content
     assert "pytest" in content
@@ -524,3 +526,75 @@ def test_changelog_recent_pfad_a_034_entry():
     content = changelog_path.read_text(encoding="utf-8")
     assert "## [0.3.4] - 2026-09-13" in content
     assert "Repository Hygiene, CI Timeout & Stale Workflow, Gitignore Hardening & Metadata Parity (Pfad A)" in content
+
+
+def test_readme_comparative_matrix_vs_alternatives():
+    """Verify that both README files provide the 10-dimension comparative matrix vs. 4 alternatives."""
+    readme_en = (ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (ROOT / "README_de.md").read_text(encoding="utf-8")
+
+    assert "## Comparative Matrix vs. Alternatives" in readme_en
+    assert "## Vergleichsmatrix gegenüber Alternativen" in readme_de
+
+    # Ensure 4 key competitor alternatives are present
+    competitors = [
+        "OS Cron / Windows Task Scheduler",
+        "Celery Beat / Redis Queue",
+        "APScheduler",
+        "Cloud Schedulers (AWS/GCP)",
+    ]
+    for comp in competitors:
+        assert comp in readme_en, f"README.md missing competitor: {comp}"
+        assert comp in readme_de, f"README_de.md missing competitor: {comp}"
+
+    # Ensure 10 comparison dimensions / invariant guarantees are verified
+    dimensions = [
+        "INV-LOCAL-01",
+        "INV-CONC-03",
+        "INV-AUTH-04",
+        "INV-PRIV-02",
+        "INV-SLA-10",
+        "INV-PLAT-09",
+        "INV-MOD-08",
+        "INV-EXEC-06",
+        "INV-STRM-05",
+        "INV-RES-07",
+    ]
+    for dim in dimensions:
+        assert dim in readme_en, f"README.md missing dimension: {dim}"
+        assert dim in readme_de, f"README_de.md missing dimension: {dim}"
+
+
+def test_readme_high_intent_seo_keywords():
+    """Verify both README files embed high-intent SEO queries for search discovery."""
+    readme_en = (ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (ROOT / "README_de.md").read_text(encoding="utf-8")
+
+    assert "python deterministic local scheduler" in readme_en
+    assert "sqlite lease claim scheduler" in readme_en
+    assert "zero-egress task scheduler" in readme_en
+
+    assert "Python deterministischer lokaler Zeitplaner" in readme_de
+    assert "SQLite Lease Job Scheduler" in readme_de
+    assert "Zero-Egress Aufgabenplaner" in readme_de
+
+
+def test_changelog_recent_pfad_b_035_entry():
+    """Verify CHANGELOG.md contains the 2026-09-14 Pfad B 0.3.5 release entry."""
+    changelog_path = ROOT / "CHANGELOG.md"
+    assert changelog_path.is_file(), "CHANGELOG.md must exist"
+
+    content = changelog_path.read_text(encoding="utf-8")
+    assert "## [0.3.5] - 2026-09-14" in content
+    assert "Discoverability, 10-Dimension Comparative Matrix, 16-Point Navigation Parity & Metadata Contract (Pfad B)" in content
+
+
+def test_marketing_log_recent_pfad_b_035_audit():
+    """Verify MARKETING-LOG.txt contains the 2026-09-14 Pfad B 0.3.5 audit entry."""
+    log_path = ROOT / "MARKETING-LOG.txt"
+    assert log_path.is_file(), "MARKETING-LOG.txt must exist in repo root"
+
+    content = log_path.read_text(encoding="utf-8")
+    assert "2026-09-14" in content
+    assert "0.3.5" in content
+    assert "9. IMPLEMENTED PFAD B DISCOVERABILITY & 16-POINT PARITY (2026-09-14)" in content

@@ -2,12 +2,12 @@
 
 <img src="assets/banner.png" width="100%" alt="ellmos Scheduler banner">
 
-[![Version](https://img.shields.io/badge/version-0.3.4-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
+[![Version](https://img.shields.io/badge/version-0.3.5-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
 [![CI](https://github.com/ellmos-ai/ellmos-scheduler/actions/workflows/test.yml/badge.svg)](https://github.com/ellmos-ai/ellmos-scheduler/actions)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests: 124 Passed](https://img.shields.io/badge/tests-124%20passed-brightgreen.svg)](tests/)
+[![Tests: 128 Passed](https://img.shields.io/badge/tests-128%20passed-brightgreen.svg)](tests/)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Security: Local--First](https://img.shields.io/badge/security-Local--First-green.svg)](SECURITY.md)
 [![Privacy: Zero--Egress](https://img.shields.io/badge/privacy-Zero--Egress-success.svg)](SECURITY.md)
@@ -35,6 +35,7 @@
 - [Ökosystem & Geschwister-Werkzeuge](#ökosystem--geschwister-werkzeuge)
 - [Drittanbieter-Lizenzen & Transparenz](#drittanbieter-lizenzen--transparenz)
 - [Marketing & Zielgruppen](#marketing--zielgruppen)
+- [Vergleichsmatrix gegenüber Alternativen](#vergleichsmatrix-gegenüber-alternativen)
 - [Entwicklung, Sicherheit & Lizenz](#entwicklung-sicherheit--lizenz)
 
 > [!NOTE]
@@ -45,7 +46,7 @@ ist bewusst **außerhalb von BACH** angelegt. BACH, Wonderland/Riverfall,
 Desktop-Automationen, COMA, MarbleRun/llmauto und swarm-ai können es über
 schmale Adapter konsumieren.
 
-Status: `0.3.4` (Pfad A Repository-Hygiene, CI-Timeout & Stale-Workflow, .gitignore-Härtung und Metadaten-Vertragsparität, 2026-09-13).
+Status: `0.3.5` (Pfad B Discoverability, 16-Punkte zweisprachige Schnellnavigations-Parität, 10-Dimensionen-Vergleichsmatrix gegenüber 4 Alternativen, SEO-Suchbegriffe, Drittanbieter-Lizenzaudit und Vertragstestsuite, 2026-09-14).
 
 Auf Windows installiert das Paket `tzdata` als bedingte Runtime-Abhängigkeit.
 Damit funktionieren IANA-Zeitzonen wie `Europe/Berlin` auch in einem sauberen
@@ -367,7 +368,29 @@ Konzipiert für autonome Agentensysteme, deterministische Workflows und unterneh
 3. **DevOps- & System-Administratoren**: Einheitliche Zeitsteuerung über Windows, Linux und macOS hinweg mit nativer Windows-IANA-Zeitzonenunterstützung.
 4. **Compliance-Beauftragte & Audit-Verantwortliche**: Zweifache kryptographische Preflight-Prüfung (SHA-256) und unveränderliche Ausführungsbelege.
 
-Detaillierte Vergleichsmatrizen zu Celery, APScheduler, Cron und Cloud-Schedulern sind in [`MARKETING-LOG.txt`](MARKETING-LOG.txt) dokumentiert.
+### High-Intent Suchbegriffe & Auffindbarkeit
+
+- **Primäre Suchintention**: `Python deterministischer lokaler Zeitplaner`, `SQLite Lease Job Scheduler`, `Zero-Egress Aufgabenplaner`, `Multi-Agenten Task Scheduler`, `lokaler Cron Dienst ohne Redis`
+- **Architektur & Long-Tail**: `Offline Aufgabenplanung ohne Cloud`, `Python Zeitsteuerung ohne externe Dienste`, `Aufgabenplaner mit Revisionsnachweisen`, `sichere Subprozess Ausfuehrung ohne Shell`, `Agenten Speicher Kompaktierung Scheduler`
+
+---
+
+## Vergleichsmatrix gegenüber Alternativen
+
+| Dimension / Fähigkeit | `ellmos-scheduler` | OS Cron / Windows Task Scheduler | Celery Beat / Redis Queue | APScheduler | Cloud Schedulers (AWS/GCP) |
+|---|---|---|---|---|---|
+| **Zero-Egress / Local-First (`INV-LOCAL-01`)** | **100% Offline & Lokal** | Lokaler OS-Dienst | Benötigt Netzwerk-Broker | In-Process Dienst | Cloud SaaS-Abhängigkeit |
+| **Parallelität & Leases (`INV-CONC-03`)** | **Atomare SQLite-Leases** | Keine (Überlappung) | Verteilter Redis-Lock | In-Memory Locks | Verteilter Cloud-Lock |
+| **Authority-Preflight-Gate (`INV-AUTH-04`)** | **SHA-256 Dual-Check** | Keine | Keine | Keine | IAM-Richtlinienprüfung |
+| **Rechte- & Prozessmodell (`INV-PRIV-02`)** | **Unprivilegiert (RunAsInvoker)** | Oft root / SYSTEM | Benutzer oder Daemon | In-Process Thread | Cloud-IAM-Rolle |
+| **Audit-Trail & Nachweise (`INV-SLA-10`)** | **Unveränderliche DB-Belege** | Syslog / Event-Log | Task-Status in Broker | Flüchtig im Speicher | CloudWatch / Cloud Audit |
+| **Plattformübergreifend (`INV-PLAT-09`)** | **Voll (Win/Mac/Linux + tzdata)**| Unterschiedliche Syntax | Hoch | Hoch | N/A (Cloud-Dienst) |
+| **Agenten- & Swarm-Ready (`INV-MOD-08`)** | **Nativ (COMA/MarbleRun)** | Benötigt Skripte | Generische Worker | Generische Callables | Webhooks / Lambdas |
+| **Shell-Injektionsschutz (`INV-EXEC-06`)** | **Strikte argv (`shell=False`)** | Shell-String-Ausführung| Gemischt | Python Callables | Container Entrypoint |
+| **Stream-Kodierungshygiene (`INV-STRM-05`)**| **Striktes UTF-8 Fail-Closed** | OS-Standard / Verlustbehaftet | Serialisierte Strings | Prozess-Stdout | Cloud-Log-Streams |
+| **Fehler- & Lease-Recovery (`INV-RES-07`)** | **Auto-Abandoned-Recovery** | Deadlocks / Hänger | Worker-Heartbeat-Verlust| Keine / Speicherverlust | Dead-Letter-Queues |
+
+Detaillierte Vergleichsmatrizen und architektonische Benchmark-Profile finden sich in [`MARKETING-LOG.txt`](MARKETING-LOG.txt).
 
 ---
 

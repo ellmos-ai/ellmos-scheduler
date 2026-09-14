@@ -1,9 +1,9 @@
 # MARKETING-LOG: ellmos-scheduler
-Date: 2026-09-11
+Latest Run: 2026-09-14 (Version: 0.3.5)
+Initial Baseline: 2026-09-11 (Version: 0.3.3)
 Operator: Antigravity / Gemini (via GITHUBBOT Pfad B)
 Target Repo: ellmos-ai/ellmos-scheduler
 Canonical Path: C:\_Local_DEV\repos\ellmos-scheduler
-Version: 0.3.3
 
 ================================================================================
 1. REPOSITORY AUDIT & DISCOVERABILITY BASELINE
@@ -163,11 +163,49 @@ Long-Tail / Architecture Intent:
     - Test suite expanded to 124 passed tests (100% green).
 
 ================================================================================
-9. MANUAL / NON-AUTOMATED NEXT STEPS
+9. IMPLEMENTED PFAD B DISCOVERABILITY & 16-POINT PARITY (2026-09-14)
+================================================================================
+[x] 16-Point Quick Navigation Parity:
+    - Upgraded README.md and README_de.md navigation from 15 to 16 points.
+    - Synchronized mutual anchor parity for (#comparative-matrix-vs-alternatives)
+      and (#vergleichsmatrix-gegenüber-alternativen).
+
+[x] 10-Dimension Comparative Matrix vs. 4 Alternatives:
+    - Directly integrated the 10-dimension competitive matrix into both README.md
+      and README_de.md.
+    - Compares ellmos-scheduler against OS Cron / Windows Task Scheduler,
+      Celery Beat / Redis Queue, APScheduler, and Cloud Schedulers (AWS/GCP).
+    - Highlights Zero-Egress (INV-LOCAL-01), Atomic SQLite Leases (INV-CONC-03),
+      SHA-256 Preflight (INV-AUTH-04), RunAsInvoker (INV-PRIV-02), and SLA-10 receipts.
+
+[x] Embedded High-Intent SEO Keywords:
+    - Directly embedded primary intent and long-tail architecture queries into
+      both English and German documentation.
+    - Targeted keywords: python deterministic local scheduler, sqlite lease claim,
+      zero-egress task scheduler, offline cron runner without redis, safe argv executor.
+
+[x] Third-Party Licenses Audit & Governance Update:
+    - Updated THIRD_PARTY_LICENSES.md to Stand: 2026-09-14.
+    - Extended Section 4 invariant assurances to explicitly verify all 10
+      foundational Governance and Runtime Invariants (INV-LOCAL-01 to INV-SLA-10).
+
+[x] Version Bump & Metadata Alignment (0.3.5):
+    - Synchronized version 0.3.5 across pyproject.toml, src/ellmos_scheduler/__init__.py,
+      ellmos-module.v2.json, README.md, README_de.md, and llms.txt.
+    - Updated test count badge to 128 passed tests (100% green).
+
+[x] Contract Testsuite Expansion (tests/test_metadata.py):
+    - Added automated contract tests verifying 16-point navigation anchor parity,
+      presence of 10-dimension comparative matrix and 4 alternatives in both READMEs,
+      embedded SEO search queries, license audit recency (2026-09-14), and changelog 0.3.5 entry.
+    - Test suite expanded to 128 passed tests (100% green).
+
+================================================================================
+10. MANUAL / NON-AUTOMATED NEXT STEPS
 ================================================================================
 1. PyPI Release Publication:
    - When ready for 0.4.0 or next release, trigger PyPI publish workflow.
 2. Glama / Smithery / Awesome-MCP Listing:
    - For agent tool discoverability, cross-link ellmos-scheduler inside agent orchestrator registries.
 3. GitHub Release Tagging:
-   - Tag commit with v0.3.4 release notes referencing the expanded invariants, third-party licenses, and visual architecture.
+   - Tag commit with v0.3.5 release notes referencing the expanded 16-point navigation, 10-dimension comparative matrix, and 128 contract tests.

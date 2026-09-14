@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.5] - 2026-09-14
+
+### Discoverability, 10-Dimension Comparative Matrix, 16-Point Navigation Parity & Metadata Contract (Pfad B)
+- **16-Point Bilingual Quick Navigation Parity**: Expanded table of contents navigation in `README.md` and `README_de.md` to 16 points, adding dedicated mutual anchor parity for Comparative Matrix vs. Alternatives (`#comparative-matrix-vs-alternatives` and `#vergleichsmatrix-gegenüber-alternativen`).
+- **10-Dimension Comparative Matrix vs. 4 Alternatives**: Directly integrated the architectural comparison table into both `README.md` and `README_de.md`, benchmarking ellmos-scheduler against OS Cron / Windows Task Scheduler, Celery Beat / Redis Queue, APScheduler, and Cloud Schedulers across 10 dimensions (Zero-Egress, Atomic SQLite Leases, Preflight Authority Gate, Privilege Model, Audit Receipts, Multi-OS Parity, Agent Ready, Shell Safety, Stream Encoding, and Lease Fault Recovery).
+- **High-Intent Search Queries & Discoverability**: Embedded primary intent and long-tail architecture keyword matrices in English and German in both READMEs to boost discoverability for agent swarms, zero-egress pipelines, and local cron alternatives.
+- **Third-Party Licenses & Governance Update**: Updated `THIRD_PARTY_LICENSES.md` to Stand `2026-09-14`, affirming compliance across all 10 Governance and Runtime Invariants (`INV-LOCAL-01` to `INV-SLA-10`).
+- **Marketing Log Audit Section**: Expanded `MARKETING-LOG.txt` with Section 9 detailing the 2026-09-14 Pfad B enhancements, 16-point navigation, and positioning matrix.
+- **Metadata Parity & Version Synchronization**: Synchronized version `0.3.5` across `pyproject.toml`, `src/ellmos_scheduler/__init__.py`, `ellmos-module.v2.json`, `README.md`, `README_de.md`, and `llms.txt`.
+- **Contract Testsuite Expansion**: Added 4 automated contract tests in `tests/test_metadata.py` verifying 16-point navigation parity, comparative matrix presence, embedded SEO keywords, license audit recency, and changelog release entry (128/128 passed tests, 100% green).
+
 ## [0.3.4] - 2026-09-13
 
 ### Repository Hygiene, CI Timeout & Stale Workflow, Gitignore Hardening & Metadata Parity (Pfad A)

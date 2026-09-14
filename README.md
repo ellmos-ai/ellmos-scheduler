@@ -2,12 +2,12 @@
 
 <img src="assets/banner.png" width="100%" alt="ellmos Scheduler banner">
 
-[![Version](https://img.shields.io/badge/version-0.3.4-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
+[![Version](https://img.shields.io/badge/version-0.3.5-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
 [![CI](https://github.com/ellmos-ai/ellmos-scheduler/actions/workflows/test.yml/badge.svg)](https://github.com/ellmos-ai/ellmos-scheduler/actions)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests: 124 Passed](https://img.shields.io/badge/tests-124%20passed-brightgreen.svg)](tests/)
+[![Tests: 128 Passed](https://img.shields.io/badge/tests-128%20passed-brightgreen.svg)](tests/)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Security: Local--First](https://img.shields.io/badge/security-Local--First-green.svg)](SECURITY.md)
 [![Privacy: Zero--Egress](https://img.shields.io/badge/privacy-Zero--Egress-success.svg)](SECURITY.md)
@@ -35,6 +35,7 @@
 - [Ecosystem & Sibling Tools](#ecosystem--sibling-tools)
 - [Third-Party Licenses & Transparency](#third-party-licenses--transparency)
 - [Marketing & Target Personas](#marketing--target-personas)
+- [Comparative Matrix vs. Alternatives](#comparative-matrix-vs-alternatives)
 - [Development, Security & License](#development-security--license)
 
 > [!NOTE]
@@ -45,7 +46,7 @@ deliberately located **outside BACH**. BACH, Wonderland/Riverfall, desktop
 automations, COMA, MarbleRun/llmauto, and swarm-ai can consume it through
 narrow adapters.
 
-Status: `0.3.4` (Pfad A repository hygiene, CI timeout & stale workflow, .gitignore hardening & metadata contract parity, 2026-09-13).
+Status: `0.3.5` (Pfad B Discoverability, 16-point bilingual quick navigation parity, 10-dimension comparative matrix vs. 4 alternatives, SEO keywords, third-party license audit & contract testsuite, 2026-09-14).
 
 On Windows, the package installs `tzdata` as a conditional runtime dependency.
 This makes IANA time zones such as `Europe/Berlin` work in a clean virtual
@@ -362,7 +363,29 @@ Engineered for autonomous agent workflows, deterministic automation, and enterpr
 3. **DevOps & Site Reliability Engineers**: Unified cross-platform scheduling across Windows, Linux, and macOS with bundled Windows IANA timezone data.
 4. **Enterprise Compliance & Security Auditors**: Dual preflight authority checks (SHA-256) and immutable cryptographic execution receipts.
 
-For competitive benchmarks against Celery, APScheduler, Cron, and Cloud Schedulers, see [`MARKETING-LOG.txt`](MARKETING-LOG.txt).
+### High-Intent Search Queries & Discoverability
+
+- **Primary Intent**: `python deterministic local scheduler`, `sqlite lease claim scheduler`, `zero-egress task scheduler`, `agentic swarm periodic job runner`, `cron interval scheduler python stdlib`
+- **Long-Tail & Architecture**: `standalone cron runner without redis`, `local agent memory compaction scheduler`, `offline task runner python zoneinfo`, `authority preflight execution gate`, `safe subprocess argv executor`
+
+---
+
+## Comparative Matrix vs. Alternatives
+
+| Dimension / Capability | `ellmos-scheduler` | OS Cron / Windows Task Scheduler | Celery Beat / Redis Queue | APScheduler | Cloud Schedulers (AWS/GCP) |
+|---|---|---|---|---|---|
+| **Zero-Egress / Local-First (`INV-LOCAL-01`)** | **100% Offline & Local** | Local OS daemon | Requires network broker | In-process daemon | Cloud SaaS dependent |
+| **Concurrency & Leases (`INV-CONC-03`)** | **Atomic SQLite Leases** | None (runs overlap) | Distributed Redis lock | In-memory locks | Distributed cloud lock |
+| **Authority Preflight Gate (`INV-AUTH-04`)** | **SHA-256 Dual-Check** | None | None | None | IAM Policy checks |
+| **Privilege Model (`INV-PRIV-02`)** | **Unprivileged (RunAsInvoker)** | Often root / SYSTEM | User or daemon | In-process thread | Cloud IAM role |
+| **Audit Trail & Receipts (`INV-SLA-10`)** | **Immutable DB Receipts** | System syslog / Event Log | Task results in broker | Ephemeral in-memory | CloudWatch / Cloud Audit |
+| **Multi-OS Parity (`INV-PLAT-09`)** | **Full (Win/Mac/Linux + tzdata)**| Disparate syntax/tools | High | High | N/A (Cloud managed) |
+| **Agent & Swarm Ready (`INV-MOD-08`)** | **Native (COMA/MarbleRun)** | Requires custom scripts | Generic workers | Generic callables | Webhooks / Lambdas |
+| **Shell Injection Safety (`INV-EXEC-06`)** | **Strict argv (`shell=False`)** | Shell string execution | Mixed | Python callables | Container entrypoint |
+| **Stream Encoding Hygiene (`INV-STRM-05`)**| **Strict UTF-8 Fail-Closed** | OS default / Lossy | Serialized strings | Process stdout | Cloud logging streams |
+| **Fault Recovery & Leases (`INV-RES-07`)** | **Auto-Abandoned Recovery** | Deadlocks / Overlaps | Worker heartbeat loss | None / Memory loss | Dead-letter queues |
+
+For detailed competitive positioning benchmarks and architectural evaluations, see [`MARKETING-LOG.txt`](MARKETING-LOG.txt).
 
 ---
 

@@ -1,6 +1,6 @@
 # Third-Party Licenses & Dependency Transparency
 
-Stand: 2026-09-11  
+Stand: 2026-09-14
 Project: **ellmos-scheduler** (`ellmos-ai/ellmos-scheduler`)  
 Maintainer: Lukas Geiger / ellmos-ai Core Team  
 Ecosystem: [open-bricks](https://github.com/open-bricks)
@@ -39,9 +39,17 @@ Ecosystem: [open-bricks](https://github.com/open-bricks)
 
 ## 4. Invariant Compliance Assurances
 
+All declared dependencies and runtime behaviors strictly comply with the 10 Governance & Runtime Invariants:
 - **INV-LOCAL-01 (100% Local-First & Zero-Egress)**: None of the declared runtime or dev dependencies transmit network payloads, metrics, or telemetry across localhost boundaries.
-- **INV-PRIV-02 (Unprivileged Non-Elevation Execution)**: Neither runtime nor build components require elevated administrator, root, or kernel permissions.
+- **INV-PRIV-02 (Unprivileged Non-Elevation Execution)**: Neither runtime nor build components require elevated administrator, root, or kernel permissions (`RunAsInvoker`).
+- **INV-CONC-03 (Atomic SQLite Leases & Deduplication)**: Standard library `sqlite3` manages atomic concurrency without external network brokers.
+- **INV-AUTH-04 (Double Read-Only Authority Preflight)**: Authority files verified via standard library `hashlib` SHA-256 before any job execution.
 - **INV-STRM-05 (Strict UTF-8 & Fail-Closed Decoding)**: All textual IO, process stream decoding, and receipt handling rely on strict encoding standards without silent data loss.
+- **INV-EXEC-06 (Shell-Free Safe Process Invocation)**: Execution uses `subprocess` with explicit argv lists and `shell=False`.
+- **INV-RES-07 (Fail-Closed Timeout & Abandoned Leases)**: Expired or hanging executions are reclaimed safely without deadlock.
+- **INV-MOD-08 (Declarative Modular Integration)**: Completely decoupled outside monoliths with narrow adapters for BACH and COMA.
+- **INV-PLAT-09 (Multi-OS Cross-Platform Parity)**: Uniform cross-platform execution on Windows, Linux, and macOS (with `tzdata` fallback).
+- **INV-SLA-10 (Cryptographic Receipt Persistence & Security SLAs)**: Cryptographic execution receipts persisted locally in SQLite; 48h initial response SLA for vulnerabilities.
 
 ---
 

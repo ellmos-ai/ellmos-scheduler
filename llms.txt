@@ -14,12 +14,12 @@
 
 ## Directory Structure & Key Files
 - `src/ellmos_scheduler/`: Core Python package (CLI, service, store, executors, authorities).
-- `tests/`: Comprehensive Pytest test suite (124 passed tests, 100% green).
+- `tests/`: Comprehensive Pytest test suite (128 passed tests, 100% green).
 - `SECURITY.md`: Local-first, zero-egress, authority preflight, and lease security policies.
 - `THIRD_PARTY_LICENSES.md`: Dependency transparency, inventory, and 100% permissive license certification.
 - `ARCHITECTURE.md`: Technical design, execution sequence, and internal state machine documentation.
 - `MIGRATION_FROM_BACH.md`: Migration guide and adapter interface for legacy BACH scheduler replacement.
-- `MARKETING-LOG.txt`: Local discoverability, architecture audit, competitive positioning, and marketing status log.
+- `MARKETING-LOG.txt`: Local discoverability, architecture audit, 10-dimension competitive matrix, and marketing status log.
 
 ## CLI Usage Quick Reference
 - `ellmos-scheduler --db <path> init`: Initialize SQLite state database.
@@ -29,8 +29,9 @@
 - `ellmos-scheduler --db <path> serve --require-authorities`: Start daemon service.
 
 ## Integration & Metadata
+- **Version**: 0.3.5
 - **Ecosystem**: `ellmos-ai`
 - **Umbrella**: `open-bricks`
 - **License**: MIT
-- **Test-Suite**: 124 passed tests (100% green)
-- **Last-checked**: 2026-09-13
+- **Test-Suite**: 128 passed tests (100% green)
+- **Last-checked**: 2026-09-14
