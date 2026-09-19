@@ -1,6 +1,6 @@
 # ellmos Scheduler
 
-<img src="assets/banner.png" width="100%" alt="ellmos Scheduler banner">
+<img src="assets/banner.svg" width="100%" alt="ellmos Scheduler banner">
 
 [![Version](https://img.shields.io/badge/version-0.3.5-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
 [![CI](https://github.com/ellmos-ai/ellmos-scheduler/actions/workflows/test.yml/badge.svg)](https://github.com/ellmos-ai/ellmos-scheduler/actions)
