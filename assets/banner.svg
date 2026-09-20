@@ -1,0 +1,658 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 680" width="2400" height="680">
+  <defs>
+    <!-- ==================== SKY GRADIENTS ==================== -->
+    <!-- Continuous Day-to-Night Sky Background -->
+    <linearGradient id="skyCycle" x1="0%" y1="0%" x2="100%" y2="0%">
+      <!-- Morning Dawn (0 - 600) -->
+      <stop offset="0%" stop-color="#ff7e5f"/>
+      <stop offset="8%" stop-color="#feb47b"/>
+      <stop offset="18%" stop-color="#fde047"/>
+      <stop offset="25%" stop-color="#7dd3fc"/>
+      <!-- Midday Azure (600 - 1200) -->
+      <stop offset="35%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#0284c7"/>
+      <!-- Evening Dusk (1200 - 1800) -->
+      <stop offset="62%" stop-color="#8b5cf6"/>
+      <stop offset="72%" stop-color="#d946ef"/>
+      <stop offset="80%" stop-color="#ea580c"/>
+      <!-- Deep Starry Night (1800 - 2400) -->
+      <stop offset="88%" stop-color="#312e81"/>
+      <stop offset="94%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+
+    <!-- Sky Vertical Atmosphere Overlay -->
+    <linearGradient id="skyAtmosphere" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.15"/>
+      <stop offset="40%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="75%" stop-color="#000000" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.35"/>
+    </linearGradient>
+
+    <!-- Morning Sun Radial Glow -->
+    <radialGradient id="morningSunGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fffbeb" stop-opacity="1"/>
+      <stop offset="30%" stop-color="#fef08a" stop-opacity="0.8"/>
+      <stop offset="65%" stop-color="#fb923c" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#f97316" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Midday Sun Radial Glow -->
+    <radialGradient id="middaySunGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="25%" stop-color="#fef08a" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#38bdf8" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Evening Sun Radial Glow -->
+    <radialGradient id="eveningSunGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fed7aa" stop-opacity="1"/>
+      <stop offset="35%" stop-color="#f97316" stop-opacity="0.75"/>
+      <stop offset="70%" stop-color="#c026d3" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#581c87" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Moonlight Radial Glow -->
+    <radialGradient id="moonlightGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f8fafc" stop-opacity="0.9"/>
+      <stop offset="35%" stop-color="#e0f2fe" stop-opacity="0.4"/>
+      <stop offset="70%" stop-color="#38bdf8" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ==================== TERRAIN & PATH GRADIENTS ==================== -->
+    <!-- Distant Mountain Ridge Gradient -->
+    <linearGradient id="mountainsGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fb7185" stop-opacity="0.7"/>
+      <stop offset="25%" stop-color="#0284c7" stop-opacity="0.6"/>
+      <stop offset="50%" stop-color="#0369a1" stop-opacity="0.7"/>
+      <stop offset="75%" stop-color="#701a75" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#090d16" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <!-- Midground Rolling Hills Gradient -->
+    <linearGradient id="hillsGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#15803d"/>
+      <stop offset="25%" stop-color="#16a34a"/>
+      <stop offset="50%" stop-color="#22c55e"/>
+      <stop offset="75%" stop-color="#854d0e"/>
+      <stop offset="88%" stop-color="#3b1f48"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+
+    <!-- Foreground Earth Gradient -->
+    <linearGradient id="groundGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#166534"/>
+      <stop offset="25%" stop-color="#15803d"/>
+      <stop offset="50%" stop-color="#16a34a"/>
+      <stop offset="72%" stop-color="#713f12"/>
+      <stop offset="85%" stop-color="#4c1d95"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+
+    <!-- Winding Running Track Ribbon Gradient -->
+    <linearGradient id="pathGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fed7aa"/>
+      <stop offset="25%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#fde047"/>
+      <stop offset="75%" stop-color="#f97316"/>
+      <stop offset="88%" stop-color="#64748b"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+
+    <!-- Running Path Border Shadow Gradient -->
+    <linearGradient id="pathBorderGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="25%" stop-color="#ca8a04"/>
+      <stop offset="50%" stop-color="#a16207"/>
+      <stop offset="75%" stop-color="#c2410c"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+
+    <!-- ==================== CLOCK CHARACTER GRADIENTS ==================== -->
+    <!-- Vintage Enamel Red Clock Body -->
+    <linearGradient id="clockBodyGrad" x1="20%" y1="10%" x2="80%" y2="90%">
+      <stop offset="0%" stop-color="#fb7185"/>
+      <stop offset="25%" stop-color="#f43f5e"/>
+      <stop offset="70%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#9f1239"/>
+    </linearGradient>
+
+    <!-- Polished Gold / Brass Bell Domes -->
+    <linearGradient id="goldBellGrad" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#fef9c3"/>
+      <stop offset="25%" stop-color="#fef08a"/>
+      <stop offset="55%" stop-color="#f59e0b"/>
+      <stop offset="85%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#92400e"/>
+    </linearGradient>
+
+    <!-- Warm Cream Antique Dial Face -->
+    <radialGradient id="dialFaceGrad" cx="48%" cy="46%" r="52%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="65%" stop-color="#fffbeb"/>
+      <stop offset="90%" stop-color="#fef3c7"/>
+      <stop offset="100%" stop-color="#fde68a"/>
+    </radialGradient>
+
+    <!-- Sneaker Red Gradient -->
+    <linearGradient id="sneakerRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fb7185"/>
+      <stop offset="50%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#9f1239"/>
+    </linearGradient>
+
+    <!-- Sneaker White Rubber Sole -->
+    <linearGradient id="sneakerWhite" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="70%" stop-color="#f1f5f9"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </linearGradient>
+
+    <!-- ==================== FILTERS ==================== -->
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#020617" flood-opacity="0.25"/>
+    </filter>
+    <filter id="characterShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="14" stdDeviation="14" flood-color="#090d16" flood-opacity="0.32"/>
+    </filter>
+    <filter id="glowSubtle" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- ==================== LAYER 1: MASTER CONTINUOUS SKY ==================== -->
+  <rect x="0" y="0" width="2400" height="680" fill="url(#skyCycle)"/>
+  <rect x="0" y="0" width="2400" height="680" fill="url(#skyAtmosphere)"/>
+
+  <!-- ==================== LAYER 2: CELESTIAL ELEMENTS & TIME ZONES ==================== -->
+
+  <!-- ZONE 1: MORNING (X: 0 - 600) -->
+  <!-- Morning Low Sun & Radiance -->
+  <circle cx="210" cy="360" r="140" fill="url(#morningSunGlow)"/>
+  <circle cx="210" cy="360" r="54" fill="#fffbeb" stroke="#fde047" stroke-width="4"/>
+  <!-- Morning Soft Sun Rays -->
+  <g stroke="#ffffff" stroke-width="2.5" opacity="0.4" stroke-linecap="round">
+    <line x1="210" y1="280" x2="210" y2="245"/>
+    <line x1="265" y1="305" x2="295" y2="280"/>
+    <line x1="290" y1="360" x2="330" y2="360"/>
+    <line x1="155" y1="305" x2="125" y2="280"/>
+    <line x1="130" y1="360" x2="90" y2="360"/>
+  </g>
+  <!-- Morning Distant Birds -->
+  <g fill="none" stroke="#be185d" stroke-width="2.2" stroke-linecap="round" opacity="0.6">
+    <path d="M 360 210 Q 370 202 380 210 Q 390 202 400 210"/>
+    <path d="M 395 185 Q 403 178 411 185 Q 419 178 427 185"/>
+    <path d="M 440 225 Q 447 219 454 225 Q 461 219 468 225"/>
+  </g>
+  <!-- Morning Clouds (Peach / Warm White) -->
+  <g fill="#fff7ed" opacity="0.82">
+    <path d="M 70 290 Q 95 260 135 268 Q 165 245 200 265 Q 230 255 250 280 Q 275 285 270 305 Q 240 315 110 315 Q 65 315 70 290 Z"/>
+    <path d="M 380 320 Q 405 295 440 302 Q 465 285 495 300 Q 520 310 515 330 Q 480 338 400 338 Q 370 338 380 320 Z" opacity="0.6"/>
+  </g>
+
+  <!-- ZONE 2: MIDDAY (X: 600 - 1200) -->
+  <!-- High Midday Radiant Sun -->
+  <circle cx="820" cy="140" r="160" fill="url(#middaySunGlow)"/>
+  <circle cx="820" cy="140" r="48" fill="#ffffff" stroke="#fef08a" stroke-width="5"/>
+  <!-- Crisp Midday Sun Rays -->
+  <g stroke="#fef08a" stroke-width="3" stroke-linecap="round" opacity="0.75">
+    <line x1="820" y1="70" x2="820" y2="45"/>
+    <line x1="820" y1="210" x2="820" y2="235"/>
+    <line x1="750" y1="140" x2="725" y2="140"/>
+    <line x1="890" y1="140" x2="915" y2="140"/>
+    <line x1="770" y1="90" x2="750" y2="70"/>
+    <line x1="870" y1="190" x2="890" y2="210"/>
+    <line x1="870" y1="90" x2="890" y2="70"/>
+    <line x1="770" y1="190" x2="750" y2="210"/>
+  </g>
+  <!-- Fluffy Fair-Weather Cumulus Clouds -->
+  <g fill="#ffffff" opacity="0.9" filter="url(#softShadow)">
+    <path d="M 640 240 Q 660 215 690 220 Q 715 200 745 210 Q 770 205 785 225 Q 805 230 800 250 Q 775 260 670 260 Q 630 260 640 240 Z"/>
+    <path d="M 940 180 Q 965 150 1000 158 Q 1030 135 1065 150 Q 1095 145 1115 170 Q 1135 180 1125 200 Q 1090 210 970 210 Q 930 210 940 180 Z"/>
+  </g>
+
+  <!-- ZONE 3: EVENING / DUSK (X: 1200 - 1800) -->
+  <!-- Setting Sun Dipping at Horizon -->
+  <circle cx="1600" cy="380" r="160" fill="url(#eveningSunGlow)"/>
+  <circle cx="1600" cy="380" r="58" fill="#fb923c" stroke="#fed7aa" stroke-width="4"/>
+  <!-- Evening Twilight Clouds (Violet & Fiery Amber) -->
+  <g opacity="0.85">
+    <path d="M 1370 270 Q 1400 245 1445 250 Q 1475 230 1515 245 Q 1550 240 1575 265 Q 1545 285 1400 285 Z" fill="#f43f5e"/>
+    <path d="M 1480 310 Q 1520 285 1575 292 Q 1620 275 1665 290 Q 1705 295 1720 315 Q 1675 330 1510 330 Z" fill="#fb923c"/>
+    <path d="M 1660 220 Q 1690 195 1730 202 Q 1765 185 1795 205 Q 1825 210 1820 230 Q 1775 240 1680 240 Z" fill="#c026d3" opacity="0.6"/>
+  </g>
+  <!-- Evening Star (Venus) -->
+  <g transform="translate(1770, 150)" filter="url(#glowSubtle)">
+    <path d="M 0 -12 Q 1 -2 10 0 Q 1 2 0 12 Q -1 2 -10 0 Q -1 -2 0 -12 Z" fill="#fef08a"/>
+    <circle cx="0" cy="0" r="3" fill="#ffffff"/>
+  </g>
+
+  <!-- ZONE 4: STARRY NIGHT (X: 1800 - 2400) -->
+  <!-- Night Sky Stars & Sparkles -->
+  <g fill="#ffffff" opacity="0.85">
+    <!-- 4-Point Storybook Stars -->
+    <g transform="translate(1860, 90) scale(0.9)">
+      <path d="M 0 -10 Q 1 -2 9 0 Q 1 2 0 10 Q -1 2 -9 0 Q -1 -2 0 -10 Z" fill="#fef08a"/>
+    </g>
+    <g transform="translate(1960, 210) scale(0.7)">
+      <path d="M 0 -10 Q 1 -2 9 0 Q 1 2 0 10 Q -1 2 -9 0 Q -1 -2 0 -10 Z" fill="#e0f2fe"/>
+    </g>
+    <g transform="translate(2040, 75) scale(1.1)">
+      <path d="M 0 -10 Q 1 -2 9 0 Q 1 2 0 10 Q -1 2 -9 0 Q -1 -2 0 -10 Z" fill="#ffffff"/>
+    </g>
+    <g transform="translate(2280, 85) scale(1)">
+      <path d="M 0 -10 Q 1 -2 9 0 Q 1 2 0 10 Q -1 2 -9 0 Q -1 -2 0 -10 Z" fill="#fef08a"/>
+    </g>
+    <g transform="translate(2330, 230) scale(0.8)">
+      <path d="M 0 -10 Q 1 -2 9 0 Q 1 2 0 10 Q -1 2 -9 0 Q -1 -2 0 -10 Z" fill="#e0f2fe"/>
+    </g>
+    <g transform="translate(1910, 270) scale(0.6)">
+      <path d="M 0 -10 Q 1 -2 9 0 Q 1 2 0 10 Q -1 2 -9 0 Q -1 -2 0 -10 Z" fill="#fde047"/>
+    </g>
+
+    <!-- Tiny Twinkle Dots -->
+    <circle cx="1830" cy="180" r="1.8"/>
+    <circle cx="1890" cy="120" r="2.2" fill="#fef08a"/>
+    <circle cx="1940" cy="60" r="1.5"/>
+    <circle cx="2000" cy="160" r="2"/>
+    <circle cx="2060" cy="240" r="1.5"/>
+    <circle cx="2110" cy="90" r="2"/>
+    <circle cx="2220" cy="65" r="1.8" fill="#fef08a"/>
+    <circle cx="2250" cy="190" r="2.2"/>
+    <circle cx="2300" cy="140" r="1.5"/>
+    <circle cx="2360" cy="110" r="2" fill="#fef08a"/>
+    <circle cx="2375" cy="180" r="1.5"/>
+  </g>
+
+  <!-- Glowing Crescent Moon -->
+  <g transform="translate(2170, 145)" filter="url(#glowSubtle)">
+    <circle cx="0" cy="0" r="90" fill="url(#moonlightGlow)"/>
+    <!-- Moon Body -->
+    <path d="M 18 -42 A 46 46 0 1 0 42 34 A 40 40 0 1 1 18 -42 Z" fill="#fef08a" stroke="#ffffff" stroke-width="1.5"/>
+    <circle cx="0" cy="-6" r="3.5" fill="#fde047" opacity="0.4"/>
+    <circle cx="-12" cy="12" r="5" fill="#fde047" opacity="0.35"/>
+    <circle cx="10" cy="16" r="2.5" fill="#fde047" opacity="0.3"/>
+  </g>
+
+  <!-- ==================== LAYER 3: DISTANT MOUNTAIN SILHOUETTES ==================== -->
+  <path d="M 0 420 
+           Q 180 370 380 410 
+           Q 600 350 820 400 
+           Q 1040 340 1260 395 
+           Q 1480 330 1700 390 
+           Q 1920 330 2140 380 
+           Q 2280 350 2400 390 
+           L 2400 680 L 0 680 Z" 
+        fill="url(#mountainsGrad)" opacity="0.85"/>
+
+  <!-- ==================== LAYER 4: MIDGROUND ROLLING HILLS ==================== -->
+  <path d="M 0 470 
+           Q 220 430 460 460 
+           Q 720 410 980 455 
+           Q 1220 405 1460 450 
+           Q 1720 395 1980 445 
+           Q 2200 415 2400 450 
+           L 2400 680 L 0 680 Z" 
+        fill="url(#hillsGrad)"/>
+
+  <!-- Charming Storybook Trees along Midground Ridges -->
+  <!-- Morning Trees (Golden / Dewy Green) -->
+  <g fill="#14532d" stroke="#166534" stroke-width="1.5">
+    <path d="M 120 460 Q 130 430 140 460 Z"/>
+    <circle cx="130" cy="435" r="14" fill="#15803d"/>
+    <path d="M 330 465 Q 342 435 354 465 Z"/>
+    <circle cx="342" cy="440" r="16" fill="#22c55e"/>
+  </g>
+  <!-- Midday Lush Trees -->
+  <g fill="#166534">
+    <circle cx="710" cy="425" r="18" fill="#16a34a"/>
+    <circle cx="730" cy="430" r="14" fill="#22c55e"/>
+    <rect x="718" y="435" width="4" height="15" fill="#78350f"/>
+  </g>
+  <!-- Dusk Silhouette Pine -->
+  <g fill="#4a044e">
+    <path d="M 1660 455 L 1670 415 L 1680 455 Z"/>
+    <path d="M 1663 440 L 1670 422 L 1677 440 Z"/>
+    <rect x="1668" y="452" width="4" height="10" fill="#2e1065"/>
+  </g>
+  <!-- Night Starlit Silhouette Pines -->
+  <g fill="#020617">
+    <path d="M 2060 445 L 2072 405 L 2084 445 Z"/>
+    <path d="M 2240 435 L 2252 390 L 2264 435 Z"/>
+    <circle cx="2095" cy="425" r="2" fill="#a7f3d0" filter="url(#glowSubtle)" opacity="0.8"/>
+  </g>
+
+  <!-- ==================== LAYER 5: FOREGROUND ROLLING TERRAIN ==================== -->
+  <path d="M 0 525 
+           Q 260 495 540 525 
+           Q 840 480 1140 520 
+           Q 1440 475 1740 515 
+           Q 2040 475 2400 515 
+           L 2400 680 L 0 680 Z" 
+        fill="url(#groundGrad)"/>
+
+  <!-- ==================== LAYER 6: WINDING TIME-TRACK / RUNNING PATH ==================== -->
+  <!-- Path Base Ribbon -->
+  <path d="M 0 550 
+           Q 260 520 540 548 
+           Q 840 505 1140 545 
+           Q 1440 500 1740 540 
+           Q 2040 500 2400 540 
+           L 2400 595 
+           Q 2040 555 1740 595 
+           Q 1440 555 1140 600 
+           Q 840 560 540 600 
+           Q 260 575 0 605 Z" 
+        fill="url(#pathGrad)"/>
+
+  <!-- Path Top & Bottom Edge Borders -->
+  <path d="M 0 550 
+           Q 260 520 540 548 
+           Q 840 505 1140 545 
+           Q 1440 500 1740 540 
+           Q 2040 500 2400 540" 
+        fill="none" stroke="url(#pathBorderGrad)" stroke-width="3"/>
+
+  <path d="M 0 605 
+           Q 260 575 540 600 
+           Q 840 560 1140 600 
+           Q 1440 555 1740 595 
+           Q 2040 555 2400 595" 
+        fill="none" stroke="url(#pathBorderGrad)" stroke-width="2" opacity="0.6"/>
+
+  <!-- Dashed Time-Line Cadence Markings (Ticks of time along the road) -->
+  <path d="M 0 575 
+           Q 260 546 540 573 
+           Q 840 531 1140 571 
+           Q 1440 526 1740 566 
+           Q 2040 526 2400 566" 
+        fill="none" stroke="#ffffff" stroke-width="3" stroke-dasharray="16 14" opacity="0.8"/>
+
+  <!-- Small Clock-Face Minute Tick Details on Track Verge -->
+  <g stroke="#ffffff" stroke-width="1.5" opacity="0.4" stroke-linecap="round">
+    <line x1="180" y1="563" x2="180" y2="573"/>
+    <line x1="380" y1="552" x2="380" y2="562"/>
+    <line x1="720" y1="535" x2="720" y2="545"/>
+    <line x1="940" y1="532" x2="940" y2="542"/>
+    <line x1="1520" y1="532" x2="1520" y2="542"/>
+    <line x1="1880" y1="544" x2="1880" y2="554"/>
+    <line x1="2220" y1="542" x2="2220" y2="552"/>
+  </g>
+
+  <!-- ==================== LAYER 7: RUNNER KINETIC SPEED EFFECTS ==================== -->
+  <!-- Cartoon Wind Swooshes (Trailing the Jogging Clock) -->
+  <g fill="none" stroke="#ffffff" stroke-linecap="round" opacity="0.75">
+    <path d="M 860 360 Q 960 355 1040 370" stroke-width="3.5" stroke-dasharray="80 20"/>
+    <path d="M 760 395 Q 890 390 1020 405" stroke-width="4.5" opacity="0.9"/>
+    <path d="M 830 435 Q 940 430 1030 442" stroke-width="3"/>
+    <path d="M 910 470 Q 990 465 1060 480" stroke-width="3.5"/>
+    <path d="M 980 325 Q 1030 320 1070 330" stroke-width="2.5" opacity="0.5"/>
+  </g>
+
+  <!-- Whimsical Dust Puffs Under Runner Feet -->
+  <g fill="#ffffff" opacity="0.8">
+    <!-- Back Foot Dust -->
+    <circle cx="1025" cy="470" r="14"/>
+    <circle cx="1005" cy="476" r="10"/>
+    <circle cx="1040" cy="475" r="9"/>
+    <circle cx="990" cy="482" r="6"/>
+    <!-- Front Foot Impact Dust -->
+    <circle cx="1235" cy="565" r="11"/>
+    <circle cx="1220" cy="570" r="8"/>
+    <circle cx="1248" cy="572" r="7"/>
+  </g>
+
+  <!-- ==================== LAYER 8: THE HERO JOGGING ALARM CLOCK ==================== -->
+  <!-- 
+    The personified old-fashioned twin-bell alarm clock, 
+    actively JOGGING from left to right in a confident, energetic mid-stride pose.
+    Slight forward lean (approx 7 degrees) for dynamic momentum.
+  -->
+  <g id="heroClockRunner" filter="url(#characterShadow)">
+
+    <!-- Ground Contact Shadow Directly Under Clock -->
+    <ellipse cx="1180" cy="570" rx="90" ry="16" fill="#0f172a" opacity="0.28"/>
+
+    <!-- ====== BACK ARM (PUMPING BACKWARD) ====== -->
+    <!-- Arm Sleeve / Limb -->
+    <path d="M 1120 410 Q 1075 425 1055 450" fill="none" stroke="#1e293b" stroke-width="15" stroke-linecap="round"/>
+    <!-- White Cartoon Glove (Back Hand) -->
+    <g transform="translate(1050, 455) rotate(-25)">
+      <ellipse cx="0" cy="0" rx="15" ry="12" fill="#ffffff" stroke="#1e293b" stroke-width="3.5"/>
+      <circle cx="-5" cy="8" r="6" fill="#ffffff" stroke="#1e293b" stroke-width="3"/>
+      <line x1="-3" y1="-5" x2="5" y2="-5" stroke="#cbd5e1" stroke-width="2"/>
+    </g>
+
+    <!-- ====== BACK LEG & SHOE (KICKED UPWARD IN FULL SPRINT) ====== -->
+    <!-- Back Leg Limb -->
+    <path d="M 1145 470 Q 1095 475 1045 440" fill="none" stroke="#1e293b" stroke-width="16" stroke-linecap="round"/>
+    <!-- Back Running Sneaker -->
+    <g transform="translate(1040, 435) rotate(-40)">
+      <!-- Red Shoe Body -->
+      <path d="M -8 -15 L 20 -8 C 30 -5 34 8 26 18 L -15 18 C -24 18 -28 5 -20 -8 Z" fill="url(#sneakerRed)" stroke="#1e293b" stroke-width="3.5"/>
+      <!-- White Sneaker Toe Cap -->
+      <path d="M 15 -9 C 24 -7 28 4 23 15 L 12 15 Z" fill="url(#sneakerWhite)" stroke="#1e293b" stroke-width="3"/>
+      <!-- White Racing Stripe -->
+      <path d="M -10 -2 Q 2 2 10 -4" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <!-- White Thick Rubber Sole with Tread -->
+      <path d="M -22 18 L 26 18 C 30 18 30 25 24 26 L -20 26 C -26 26 -26 18 -22 18 Z" fill="url(#sneakerWhite)" stroke="#1e293b" stroke-width="3"/>
+      <!-- Sole Waffle Treads -->
+      <line x1="-12" y1="26" x2="-10" y2="21" stroke="#94a3b8" stroke-width="2"/>
+      <line x1="-2" y1="26" x2="0" y2="21" stroke="#94a3b8" stroke-width="2"/>
+      <line x1="8" y1="26" x2="10" y2="21" stroke="#94a3b8" stroke-width="2"/>
+      <line x1="18" y1="26" x2="20" y2="21" stroke="#94a3b8" stroke-width="2"/>
+    </g>
+
+    <!-- ====== TWIN BELLS & TOP MOUNT ====== -->
+    <!-- Top Center Brass Hammer (Striker) -->
+    <g transform="translate(1185, 215)">
+      <rect x="-3.5" y="-30" width="7" height="32" fill="#78350f" stroke="#1e293b" stroke-width="2.5"/>
+      <circle cx="0" cy="-35" r="11" fill="url(#goldBellGrad)" stroke="#1e293b" stroke-width="3.5"/>
+      <circle cx="-3" cy="-38" r="3" fill="#ffffff" opacity="0.8"/>
+    </g>
+
+    <!-- Top Arched Metal Carrying Handle -->
+    <path d="M 1135 245 C 1135 175 1235 175 1235 245" fill="none" stroke="#d97706" stroke-width="11" stroke-linecap="round"/>
+    <path d="M 1135 245 C 1135 175 1235 175 1235 245" fill="none" stroke="url(#goldBellGrad)" stroke-width="7" stroke-linecap="round"/>
+    <path d="M 1135 245 C 1135 175 1235 175 1235 245" fill="none" stroke="#1e293b" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Left Bell Mount & Dome -->
+    <!-- Stalk Base -->
+    <line x1="1120" y1="260" x2="1100" y2="225" stroke="#92400e" stroke-width="12" stroke-linecap="round"/>
+    <line x1="1120" y1="260" x2="1100" y2="225" stroke="#1e293b" stroke-width="3.5"/>
+    <!-- Left Bell Dome (-38 deg tilt) -->
+    <g transform="translate(1095, 215) rotate(-38)">
+      <path d="M -38 0 C -38 -32 38 -32 38 0 C 38 7 -38 7 -38 0 Z" fill="url(#goldBellGrad)" stroke="#1e293b" stroke-width="4"/>
+      <!-- Bell Rim Lip -->
+      <ellipse cx="0" cy="0" rx="40" ry="7" fill="#f59e0b" stroke="#1e293b" stroke-width="3.5"/>
+      <!-- Specular Highlight Arc -->
+      <path d="M -26 -14 C -18 -26 12 -26 24 -14" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+      <!-- Screw Finial on Bell Top -->
+      <circle cx="0" cy="-28" r="5" fill="#fef08a" stroke="#1e293b" stroke-width="2.5"/>
+    </g>
+
+    <!-- Right Bell Mount & Dome (+38 deg tilt) -->
+    <!-- Stalk Base -->
+    <line x1="1250" y1="260" x2="1270" y2="225" stroke="#92400e" stroke-width="12" stroke-linecap="round"/>
+    <line x1="1250" y1="260" x2="1270" y2="225" stroke="#1e293b" stroke-width="3.5"/>
+    <!-- Right Bell Dome (+38 deg tilt) -->
+    <g transform="translate(1275, 215) rotate(38)">
+      <path d="M -38 0 C -38 -32 38 -32 38 0 C 38 7 -38 7 -38 0 Z" fill="url(#goldBellGrad)" stroke="#1e293b" stroke-width="4"/>
+      <!-- Bell Rim Lip -->
+      <ellipse cx="0" cy="0" rx="40" ry="7" fill="#f59e0b" stroke="#1e293b" stroke-width="3.5"/>
+      <!-- Specular Highlight Arc -->
+      <path d="M -26 -14 C -18 -26 12 -26 24 -14" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+      <!-- Screw Finial on Bell Top -->
+      <circle cx="0" cy="-28" r="5" fill="#fef08a" stroke="#1e293b" stroke-width="2.5"/>
+    </g>
+
+    <!-- ====== CLOCK BODY CASING ====== -->
+    <!-- Vintage Enamel Red Outer Shell (Centered at 1185, 365, slight forward tilt) -->
+    <g transform="translate(1185, 365) rotate(6)">
+      <!-- Outer Metal Body Shadow Ring -->
+      <circle cx="0" cy="0" r="140" fill="#9f1239" stroke="#1e293b" stroke-width="5"/>
+      <!-- Main Enamel Bezel -->
+      <circle cx="0" cy="0" r="134" fill="url(#clockBodyGrad)"/>
+      <!-- High-Gloss Bevel Specular Arc -->
+      <path d="M -100 -80 A 130 130 0 0 1 100 -80" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.45"/>
+
+      <!-- Polished Brass Dial Inset Rim -->
+      <circle cx="0" cy="0" r="118" fill="#f59e0b" stroke="#1e293b" stroke-width="3"/>
+      <circle cx="0" cy="0" r="114" fill="#fef08a"/>
+
+      <!-- Antique Cream Clock Face Dial -->
+      <circle cx="0" cy="0" r="110" fill="url(#dialFaceGrad)" stroke="#d97706" stroke-width="2"/>
+
+      <!-- Hour Marks Around Perimeter -->
+      <!-- 12, 3, 6, 9 Cardinal Pill Marks -->
+      <rect x="-3" y="-104" width="6" height="14" rx="3" fill="#1e293b"/>
+      <rect x="-3" y="90" width="6" height="14" rx="3" fill="#1e293b"/>
+      <rect x="90" y="-3" width="14" height="6" rx="3" fill="#1e293b"/>
+      <rect x="-104" y="-3" width="14" height="6" rx="3" fill="#1e293b"/>
+      <!-- Minor Hour Dots -->
+      <circle cx="48" cy="-84" r="3.5" fill="#475569"/>
+      <circle cx="84" cy="-48" r="3.5" fill="#475569"/>
+      <circle cx="84" cy="48" r="3.5" fill="#475569"/>
+      <circle cx="48" cy="84" r="3.5" fill="#475569"/>
+      <circle cx="-48" cy="84" r="3.5" fill="#475569"/>
+      <circle cx="-84" cy="48" r="3.5" fill="#475569"/>
+      <circle cx="-84" cy="-48" r="3.5" fill="#475569"/>
+      <circle cx="-48" cy="-84" r="3.5" fill="#475569"/>
+
+      <!-- ====== CLOCK HANDS (Tireless Timekeeper at Work) ====== -->
+      <!-- Hour Hand (Pointing gracefully up-left towards 10 o'clock) -->
+      <g transform="rotate(-65)">
+        <path d="M -4 10 L -3 -58 L 0 -68 L 3 -58 L 4 10 Z" fill="#1e293b"/>
+        <circle cx="0" cy="-40" r="3" fill="#fef08a"/>
+      </g>
+      <!-- Minute Hand (Pointing up-right towards 2 o'clock) -->
+      <g transform="rotate(55)">
+        <path d="M -3.5 12 L -2 -80 L 0 -92 L 2 -80 L 3.5 12 Z" fill="#1e293b"/>
+        <circle cx="0" cy="-55" r="3.5" fill="#fef08a"/>
+      </g>
+      <!-- Coral Second Hand (Sweeping forward with momentum) -->
+      <g transform="rotate(145)">
+        <line x1="0" y1="18" x2="0" y2="-96" stroke="#e11d48" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="0" cy="18" r="4" fill="#e11d48"/>
+      </g>
+      <!-- Brass Center Pivot Rivet -->
+      <circle cx="0" cy="0" r="8" fill="#d97706" stroke="#1e293b" stroke-width="2.5"/>
+      <circle cx="0" cy="0" r="5" fill="#fef08a"/>
+
+      <!-- ====== THE EXPRESSIVE PERSONIFIED FACE ====== -->
+      <!-- Cheerful Rosy Blush Cheeks -->
+      <ellipse cx="-44" cy="22" rx="16" ry="10" fill="#f43f5e" opacity="0.38"/>
+      <ellipse cx="44" cy="20" rx="16" ry="10" fill="#f43f5e" opacity="0.38"/>
+
+      <!-- Left Eye (Looking Forward / Rightwards) -->
+      <g transform="translate(-24, -14)">
+        <ellipse cx="0" cy="0" rx="16" ry="22" fill="#ffffff" stroke="#1e293b" stroke-width="3.5"/>
+        <!-- Pupil Looking Right -->
+        <ellipse cx="5" cy="0" rx="10" ry="15" fill="#0f172a"/>
+        <ellipse cx="6" cy="-1" rx="8" ry="12" fill="#1e293b"/>
+        <!-- Cute Specular Catchlights -->
+        <circle cx="7" cy="-6" r="4.5" fill="#ffffff"/>
+        <circle cx="2" cy="5" r="2.5" fill="#ffffff"/>
+      </g>
+
+      <!-- Right Eye (Looking Forward / Rightwards) -->
+      <g transform="translate(26, -16)">
+        <ellipse cx="0" cy="0" rx="16" ry="22" fill="#ffffff" stroke="#1e293b" stroke-width="3.5"/>
+        <!-- Pupil Looking Right -->
+        <ellipse cx="5" cy="0" rx="10" ry="15" fill="#0f172a"/>
+        <ellipse cx="6" cy="-1" rx="8" ry="12" fill="#1e293b"/>
+        <!-- Cute Specular Catchlights -->
+        <circle cx="7" cy="-6" r="4.5" fill="#ffffff"/>
+        <circle cx="2" cy="5" r="2.5" fill="#ffffff"/>
+      </g>
+
+      <!-- Determined, Cheerful Eyebrows -->
+      <path d="M -38 -42 Q -24 -52 -8 -44" fill="none" stroke="#1e293b" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M 12 -45 Q 28 -54 44 -44" fill="none" stroke="#1e293b" stroke-width="4.5" stroke-linecap="round"/>
+
+      <!-- Joyful Wide Running Smile (Open, Determined, Happy) -->
+      <g transform="translate(0, 32)">
+        <!-- Mouth Cavity -->
+        <path d="M -26 -4 Q 0 38 28 -2 Q 0 8 -26 -4 Z" fill="#991b1b" stroke="#1e293b" stroke-width="3.5"/>
+        <!-- Warm Pink Tongue -->
+        <path d="M -12 12 Q 2 6 18 12 Q 5 28 -8 24 Z" fill="#f43f5e"/>
+        <!-- White Upper Teeth Smile Line -->
+        <path d="M -22 -2 Q 0 8 24 -1 L 22 4 Q 0 11 -20 3 Z" fill="#ffffff"/>
+        <!-- Cheek Smile Creases -->
+        <path d="M -30 -6 Q -26 -1 -24 3" fill="none" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 32 -4 Q 28 1 26 5" fill="none" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+      </g>
+
+      <!-- Effort Perspiration Sparkle Bead (Tireless Runner Pep) -->
+      <g transform="translate(-72, -45)">
+        <path d="M 0 -12 C 6 -6 8 4 0 10 C -8 4 -6 -6 0 -12 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="1.5"/>
+        <circle cx="-1" cy="4" r="2" fill="#ffffff"/>
+      </g>
+    </g>
+
+    <!-- ====== FRONT LEG & SNEAKER (STRIDING FORWARD TO PLANT) ====== -->
+    <!-- Front Leg Limb -->
+    <path d="M 1210 480 Q 1255 520 1275 545" fill="none" stroke="#1e293b" stroke-width="16" stroke-linecap="round"/>
+    <!-- Front Running Sneaker -->
+    <g transform="translate(1275, 545) rotate(10)">
+      <!-- Red Shoe Body -->
+      <path d="M -12 -14 L 18 -10 C 30 -6 38 6 32 18 L -14 18 C -24 18 -26 4 -18 -8 Z" fill="url(#sneakerRed)" stroke="#1e293b" stroke-width="3.5"/>
+      <!-- White Sneaker Toe Cap -->
+      <path d="M 16 -10 C 26 -7 34 5 30 18 L 14 18 Z" fill="url(#sneakerWhite)" stroke="#1e293b" stroke-width="3"/>
+      <!-- White Racing Stripe -->
+      <path d="M -10 -2 Q 4 4 12 -4" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <!-- White Thick Rubber Sole with Tread -->
+      <path d="M -20 18 L 32 18 C 36 18 36 26 30 27 L -18 27 C -24 27 -24 18 -20 18 Z" fill="url(#sneakerWhite)" stroke="#1e293b" stroke-width="3"/>
+      <!-- Sole Waffle Treads -->
+      <line x1="-10" y1="27" x2="-8" y2="22" stroke="#94a3b8" stroke-width="2"/>
+      <line x1="0" y1="27" x2="2" y2="22" stroke="#94a3b8" stroke-width="2"/>
+      <line x1="10" y1="27" x2="12" y2="22" stroke="#94a3b8" stroke-width="2"/>
+      <line x1="20" y1="27" x2="22" y2="22" stroke="#94a3b8" stroke-width="2"/>
+      <!-- Sporty White Shoelaces -->
+      <line x1="-2" y1="-8" x2="6" y2="-4" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="2" y1="-4" x2="10" y2="0" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+    </g>
+
+    <!-- ====== FRONT ARM (PUMPING FORWARD WITH CLENCHED FIST) ====== -->
+    <!-- Arm Limb -->
+    <path d="M 1250 405 Q 1295 425 1275 390" fill="none" stroke="#1e293b" stroke-width="15" stroke-linecap="round"/>
+    <!-- White Cartoon Glove (Front Clenched Fist) -->
+    <g transform="translate(1275, 385) rotate(15)">
+      <ellipse cx="0" cy="0" rx="16" ry="13" fill="#ffffff" stroke="#1e293b" stroke-width="3.5"/>
+      <!-- Finger Creases -->
+      <path d="M -6 -4 Q 0 -6 6 -3" stroke="#cbd5e1" stroke-width="2" fill="none"/>
+      <path d="M -6 2 Q 0 0 6 3" stroke="#cbd5e1" stroke-width="2" fill="none"/>
+      <!-- Thumb Fold -->
+      <ellipse cx="-7" cy="-5" rx="7" ry="5" fill="#ffffff" stroke="#1e293b" stroke-width="2.5"/>
+    </g>
+  </g>
+
+  <!-- ==================== LAYER 9: BRANDING WORDMARK & TAGLINE ==================== -->
+  <!-- 
+    "ellmos Scheduler" as a wordmark, secondary to the illustration.
+    Placed in the open morning sky at upper left with supreme legibility, 
+    accompanied by the exact candidate tagline from the project brief.
+  -->
+  <g transform="translate(120, 88)">
+    <!-- Soft Contrast Glow Behind Text -->
+    <rect x="-18" y="-48" width="820" height="120" rx="24" fill="#ffffff" opacity="0.18" filter="url(#glowSubtle)"/>
+
+    <!-- Wordmark -->
+    <text x="0" y="0" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="54" font-weight="900" letter-spacing="-0.8">
+      <tspan fill="#0f172a">ellmos </tspan>
+      <tspan fill="#e11d48">Scheduler</tspan>
+    </text>
+
+    <!-- Project Tagline (Directly from brief) -->
+    <text x="3" y="38" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20.5" font-weight="600" fill="#1e293b" letter-spacing="0.2">
+      The local-first scheduler that keeps time, day and night.
+    </text>
+  </g>
+
+  <!-- ==================== LAYER 10: OUTER CANVAS BORDER FRAME ==================== -->
+  <!-- Ensures crisp boundary on both dark and light GitHub themes without un-styled gaps -->
+  <rect x="1" y="1" width="2398" height="678" rx="0" fill="none" stroke="#0f172a" stroke-width="2" opacity="0.25"/>
+</svg>
