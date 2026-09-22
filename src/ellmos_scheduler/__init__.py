@@ -40,4 +40,4 @@ __all__ = [
     "validate_authority_specs",
 ]
 
-__version__ = "0.3.5"
+__version__ = "0.3.6"

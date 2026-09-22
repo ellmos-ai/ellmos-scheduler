@@ -201,11 +201,38 @@ Long-Tail / Architecture Intent:
     - Test suite expanded to 128 passed tests (100% green).
 
 ================================================================================
-10. MANUAL / NON-AUTOMATED NEXT STEPS
+10. IMPLEMENTED PFAD A RELEASE GATE HARDENING & HYGIENE (2026-09-22)
+================================================================================
+
+[x] 10/10 Canonical Release Gates Passed:
+    - Successfully validated repository against _scripts/final_gate_check.py (10 PASS, 0 FAIL, 0 WARN).
+    - Status: READY FOR PUBLIC RELEASE.
+
+[x] Gate 1 .gitignore Hardening:
+    - Added required Gate 1 patterns (*.pyc, .env, .env.*, .idea/, .vscode/, data/) while preserving
+      multi-agent lock defenses, multi-host conflict patterns, and test caches.
+
+[x] Gate 10 Standard TODO.md with STATUS Table:
+    - Established standardized TODO.md tracking all 10 system invariant categories (INV-LOCAL-01 to INV-SLA-10)
+      and formalizing actionable follow-up tasks (TASK-SCHED-01 to TASK-SCHED-04).
+
+[x] PEP 639 License Files & Manifest Parity:
+    - Declared license-files = ["LICENSE", "THIRD_PARTY_LICENSES.md"] in pyproject.toml.
+    - Synchronized version 0.3.6 and status active in ellmos-module.v2.json with genuine German umlauts.
+
+[x] Plan-D Mirroring & Pointer Parity:
+    - Synchronized all tracked files to .MODULES/.CONTROL/ellmos-scheduler with PLAN_D_POINTER.md and REPO.pointer.json.
+
+[x] Contract Testsuite Expansion:
+    - Added 4 contract tests for TODO.md hygiene, PEP 639 license files, Gate 1 entries, and Changelog 0.3.6 entry.
+    - Test suite expanded to 132 passed tests (100% green).
+
+================================================================================
+11. MANUAL / NON-AUTOMATED NEXT STEPS
 ================================================================================
 1. PyPI Release Publication:
    - When ready for 0.4.0 or next release, trigger PyPI publish workflow.
 2. Glama / Smithery / Awesome-MCP Listing:
    - For agent tool discoverability, cross-link ellmos-scheduler inside agent orchestrator registries.
 3. GitHub Release Tagging:
-   - Tag commit with v0.3.5 release notes referencing the expanded 16-point navigation, 10-dimension comparative matrix, and 128 contract tests.
+   - Tag commit with v0.3.6 release notes referencing 10/10 release gates, PEP 639 license files, and 132 contract tests.

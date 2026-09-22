@@ -2,12 +2,12 @@
   "schema": "ellmos.module.v2",
   "id": "ellmos-scheduler",
   "display_name": "ellmos Scheduler",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "category": "control",
   "kind": "library",
-  "status": "experimental",
+  "status": "active",
   "visibility": "public",
-  "description": "Eigenstaendiger Zeitgeber, Lease-/Claim-Manager und Run-Recorder fuer ellmos-Stacks mit BACH-Consumer- und Executor-Adaptern.",
+  "description": "Eigenständiger Zeitgeber, Lease-/Claim-Manager und Run-Recorder für ellmos-Stacks mit BACH-Consumer- und Executor-Adaptern.",
   "package": "ellmos-scheduler",
   "entrypoints": {
     "cli": "python -m ellmos_scheduler",
@@ -33,8 +33,8 @@
     "service"
   ],
   "state": {
-    "ownership": "module",
-    "location": "user-home"
+    "ownership": "external",
+    "location": "external"
   },
   "boundaries": {
     "network": "optional",

@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.6] - 2026-09-22
+
+### Release Gate Härtung (10/10 PASS), Gate 1 .gitignore, Gate 10 TODO.md, PEP 639 Lizenzinventar & Plan-D-Parität (Pfad A)
+- **10/10 Release Gates Vollständigkeit**: Erfolgreiche Zertifizierung aller 10 Release-Readiness-Gates durch `_scripts/final_gate_check.py` (10 PASS, 0 FAIL, 0 WARN) mit Prädikat `READY FOR PUBLIC RELEASE`.
+- **Gate 1 Gitignore-Härtung**: `.gitignore` um verbindliche Gate-1-Ausschlussmuster (`*.pyc`, `.env`, `.env.*`, `.idea/`, `.vscode/`, `data/`) gehärtet bei gleichzeitiger Bewahrung von Cache-, Lock- und Multi-Host-Konfliktschutzregeln.
+- **Gate 10 Standard TODO.md mit STATUS-Tabelle**: Strukturierte `TODO.md` mit normierter `## STATUS`-Tabelle, 10 Kategorien, Invariantenbezügen (`INV-LOCAL-01` bis `INV-SLA-10`) und formalisierten Folgeaufgaben (`TASK-SCHED-01` bis `TASK-SCHED-04`) etabliert.
+- **PEP 639 Lizenzdateien-Deklaration**: `pyproject.toml` um vollständige Angabe `license-files = ["LICENSE", "THIRD_PARTY_LICENSES.md"]` ergänzt zur lückenlosen Transparenz von Haupt- und Drittanbieter-Lizenzen.
+- **Manifest- & Paritätsaktualisierung**: Manifest `ellmos-module.v2.json` auf Version `0.3.6`, Status `active`, echte deutsche Umlaute in der Beschreibung und kanonischen Plan-D-Zustand (`ownership: external`, `location: external`) synchronisiert.
+- **Plan-D-Spiegelung & Pointer**: Vollständige Synchronisation aller getrackten Repository-Dateien in die OneDrive-Projektion `.MODULES/.CONTROL/ellmos-scheduler` inklusive `PLAN_D_POINTER.md` und `REPO.pointer.json` unter striktem Ausschluss von `.git`, temporären Dateien und Test-Caches.
+- **Vertragstest-Erweiterung**: 4 neue automatisierte Vertragstests in `tests/test_metadata.py` für `TODO.md`-Hygiene, PEP 639 `license-files`, Gate-1-Muster und Changelog-Eintrag integriert (132/132 Tests bestanden, 100% grün).
+
 ## [0.3.5] - 2026-09-14
 
 ### Discoverability, 10-Dimension Comparative Matrix, 16-Point Navigation Parity & Metadata Contract (Pfad B)

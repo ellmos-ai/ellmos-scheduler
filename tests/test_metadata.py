@@ -48,7 +48,7 @@ def test_readme_badges_and_language_parity():
         "python-3.10%2B-blue.svg",
         "platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg",
         "License-MIT-yellow.svg",
-        "tests-128%20passed-brightgreen.svg",
+        "tests-132%20passed-brightgreen.svg",
         "code%20style-ruff-000000.svg",
         "security-Local--First-green.svg",
         "privacy-Zero--Egress-success.svg",
@@ -119,7 +119,8 @@ def test_llms_txt_structure_and_timestamp():
     assert "## Integration & Metadata" in content
     assert "SECURITY.md" in content
     assert "THIRD_PARTY_LICENSES.md" in content
-    assert "2026-09-14" in content
+    assert "TODO.md" in content
+    assert "2026-09-22" in content
     assert "Governance & Runtime Invariants" in content
 
 
@@ -598,3 +599,51 @@ def test_marketing_log_recent_pfad_b_035_audit():
     assert "2026-09-14" in content
     assert "0.3.5" in content
     assert "9. IMPLEMENTED PFAD B DISCOVERABILITY & 16-POINT PARITY (2026-09-14)" in content
+
+
+def test_todo_md_hygiene_and_status_table():
+    """Verify TODO.md exists and contains standard STATUS table and tasks (Release Gate 10)."""
+    todo_path = ROOT / "TODO.md"
+    assert todo_path.is_file(), "TODO.md must exist in repo root"
+
+    content = todo_path.read_text(encoding="utf-8")
+    assert "## STATUS" in content
+    assert "| Category | Status | Details |" in content
+    assert "INV-LOCAL-01" in content
+    assert "INV-SLA-10" in content
+    assert "TASK-SCHED-01" in content
+    assert "TASK-SCHED-04" in content
+
+
+def test_gitignore_release_gate_entries():
+    """Verify .gitignore contains all mandatory patterns required by final_gate_check.py (Gate 1)."""
+    gitignore_path = ROOT / ".gitignore"
+    assert gitignore_path.is_file(), ".gitignore must exist"
+
+    content = gitignore_path.read_text(encoding="utf-8")
+    required = ["__pycache__", "*.pyc", ".env", "*.db", ".venv/", ".idea/", ".vscode/", "data/"]
+    for pattern in required:
+        assert pattern in content, f".gitignore missing required gate pattern: {pattern}"
+    assert "TODO.md" not in content, "TODO.md must not be ignored in .gitignore"
+
+
+def test_pep639_license_files_contract():
+    """Verify PEP 639 license-files in pyproject.toml includes LICENSE and THIRD_PARTY_LICENSES.md."""
+    pyproject_path = ROOT / "pyproject.toml"
+    assert pyproject_path.is_file()
+
+    pyproject = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+    license_files = pyproject.get("project", {}).get("license-files", [])
+    assert "LICENSE" in license_files
+    assert "THIRD_PARTY_LICENSES.md" in license_files
+
+
+def test_changelog_recent_pfad_a_036_entry():
+    """Verify CHANGELOG.md contains the 2026-09-22 Pfad A release entry."""
+    changelog_path = ROOT / "CHANGELOG.md"
+    assert changelog_path.is_file(), "CHANGELOG.md must exist"
+
+    content = changelog_path.read_text(encoding="utf-8")
+    assert "## [0.3.6] - 2026-09-22" in content
+    assert "Release Gate Härtung (10/10 PASS)" in content
+
