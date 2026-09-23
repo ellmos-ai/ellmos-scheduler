@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Repository Hygiene, Open-Source NOTICE Attribution, Welcome/Stale Lifecycle CI Hardening & Multi-Host Defense (Pfad A)
+- **Kanonische Open-Source NOTICE Attribution**: Repository-Root `NOTICE`-Attributionsdatei mit Urheberrechtsvermerk für Lukas Geiger, ellmos-ai und open-bricks Umbrella-Organisation angelegt.
+- **CI Lifecycle Workflows & Least-Privilege Permissions**: Bereitstellung von `.github/workflows/welcome.yml` (`actions/first-interaction@v3`, `timeout-minutes: 5`, Concurrency `cancel-in-progress: true`, `issues: write`, `pull-requests: write`) und Concurrency-Härtung in `.github/workflows/stale.yml`.
+- **Multi-Host Cloud-Sync-, Lock- und Cache-Schutz**: `.gitignore` um plattform- und geräteübergreifende Konflikt- und Lock-Muster (`*-Mac Studio*`, `*-MacBook*`, `LOCK.user.*`, `LOCK.until.*`, `LOCK.condition.*`, `.automation-lock`, `.hypothesis/`, `.nyc_output/`) gehärtet.
+- **PEP 621 Standardisierung in pyproject.toml**: `license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.md"]`, Notice-URL in `[project.urls]` ergänzt, `[tool.pytest.ini_options]` um `minversion = "7.0"` und `norecursedirs` gehärtet; strikte Beibehaltung von Version `0.3.6` gemäß T-20260920-167562623.
+- **Drittanbieter-Lizenzaudit & SBOM Level 1**: `THIRD_PARTY_LICENSES.md` mit Stand 2026-09-23 Re-Audit, Non-Elevation (Unprivileged RunAsInvoker) & Zero-Copyleft Garantie sowie Querverweis auf `NOTICE` aktualisiert.
+- **Metadaten-, Badge- & Kontext-Synchronisation**: Shields.io Badges in `README.md` und `README_de.md` um Attribution-NOTICE-Badge und Testsuite-Stand synchronisiert; maschinenlesbarer KI-Kontext `llms.txt` auf Stand 2026-09-23 mit Querverweis auf `NOTICE` aktualisiert; `MARKETING-LOG.txt` um Pfad-A-Hygiene-Audit (Abschnitt 11) erweitert.
+- **Automatisierte Vertragstest-Erweiterung**: `tests/test_metadata.py` um 6 neue Contract-Tests für `NOTICE`-Attribution, Welcome/Stale Workflows, least-privilege permissions, PEP 621 license-files und norecursedirs sowie Multi-Host/Lock Guards ausgebaut.
+
 ## [0.3.6] - 2026-09-22
 
 ### Release Gate Härtung (10/10 PASS), Gate 1 .gitignore, Gate 10 TODO.md, PEP 639 Lizenzinventar & Plan-D-Parität (Pfad A)

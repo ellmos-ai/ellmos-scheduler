@@ -14,7 +14,8 @@
 
 ## Directory Structure & Key Files
 - `src/ellmos_scheduler/`: Core Python package (CLI, service, store, executors, authorities).
-- `tests/`: Comprehensive Pytest test suite (128 passed tests, 100% green).
+- `tests/`: Comprehensive Pytest test suite (138 passed tests, 100% green).
+- `NOTICE`: Canonical open-source attribution, copyright Lukas Geiger, ellmos-ai, and open-bricks umbrella.
 - `SECURITY.md`: Local-first, zero-egress, authority preflight, and lease security policies.
 - `THIRD_PARTY_LICENSES.md`: Dependency transparency, inventory, and 100% permissive license certification.
 - `ARCHITECTURE.md`: Technical design, execution sequence, and internal state machine documentation.
@@ -34,5 +35,5 @@
 - **Ecosystem**: `ellmos-ai`
 - **Umbrella**: `open-bricks`
 - **License**: MIT
-- **Test-Suite**: 132 passed tests (100% green)
-- **Last-checked**: 2026-09-22
+- **Test-Suite**: 138 passed tests (100% green)
+- **Last-checked**: 2026-09-23

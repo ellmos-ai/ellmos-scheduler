@@ -30,8 +30,12 @@ htmlcov/
 LOCK
 LOCK.*
 LOCK*.txt
+LOCK.user.*
+LOCK.until.*
+LOCK.condition.*
 *.lock
 LOCK.permissions.json
+.automation-lock
 uv.lock
 !package-lock.json
 
@@ -53,10 +57,14 @@ uv.lock
 *-ASUS*
 *-ASUS-GEI*
 *-LAPTOP*
+*-Mac Studio*
+*-MacBook*
 
 # Environment and packaging caches
 .tox/
 .turbo/
+.hypothesis/
+.nyc_output/
 
 # Temporary, patch, editor and log artifacts
 *.tmp

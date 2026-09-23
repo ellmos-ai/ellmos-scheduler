@@ -8,7 +8,7 @@ version = "0.3.6"
 description = "Standalone, modular scheduler for ellmos stacks and BACH adapters"
 readme = "README.md"
 license = "MIT"
-license-files = ["LICENSE", "THIRD_PARTY_LICENSES.md"]
+license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.md"]
 requires-python = ">=3.10"
 authors = [{ name = "Lukas Geiger" }]
 dependencies = [
@@ -37,6 +37,7 @@ Issues = "https://github.com/ellmos-ai/ellmos-scheduler/issues"
 Changelog = "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/CHANGELOG.md"
 Documentation = "https://github.com/ellmos-ai/ellmos-scheduler#readme"
 Security = "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/SECURITY.md"
+Notice = "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/NOTICE"
 "Third-Party Licenses" = "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/THIRD_PARTY_LICENSES.md"
 "Marketing Log" = "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/MARKETING-LOG.txt"
 "LLM Ready" = "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/llms.txt"
@@ -56,8 +57,10 @@ ellmos-scheduler = "ellmos_scheduler.cli:main"
 where = ["src"]
 
 [tool.pytest.ini_options]
+minversion = "7.0"
 testpaths = ["tests"]
 pythonpath = ["src"]
+norecursedirs = [".git", ".pytest_cache", "__pycache__", "build", "dist", ".venv"]
 addopts = "-ra -v"
 
 [tool.ruff]

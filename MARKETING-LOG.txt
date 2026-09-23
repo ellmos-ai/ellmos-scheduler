@@ -1,7 +1,7 @@
 # MARKETING-LOG: ellmos-scheduler
-Latest Run: 2026-09-14 (Version: 0.3.5)
+Latest Run: 2026-09-23 (Version: 0.3.6)
 Initial Baseline: 2026-09-11 (Version: 0.3.3)
-Operator: Antigravity / Gemini (via GITHUBBOT Pfad B)
+Operator: Antigravity / Gemini (via GITHUBBOT Pfad A / Pfad B)
 Target Repo: ellmos-ai/ellmos-scheduler
 Canonical Path: C:\_Local_DEV\repos\ellmos-scheduler
 
@@ -228,7 +228,34 @@ Long-Tail / Architecture Intent:
     - Test suite expanded to 132 passed tests (100% green).
 
 ================================================================================
-11. MANUAL / NON-AUTOMATED NEXT STEPS
+11. IMPLEMENTED PFAD A REPOSITORY HYGIENE & TECHNICAL AUDIT (2026-09-23)
+================================================================================
+
+[x] Canonical Open-Source NOTICE Attribution:
+    - Created repository root NOTICE file attributing Lukas Geiger, ellmos-ai, and open-bricks umbrella.
+    - Updated pyproject.toml PEP 621 license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.md"] and Notice project URL.
+    - Added Attribution: NOTICE badge and Development & Security section links across README.md and README_de.md.
+
+[x] CI Workflow Hardening & Welcome Automation:
+    - Added .github/workflows/welcome.yml with actions/first-interaction@v3, timeout-minutes: 5, concurrency cancel-in-progress, and least-privilege permissions.
+    - Enhanced .github/workflows/stale.yml with explicit concurrency cancel-in-progress group.
+
+[x] Multi-Host Sync, Platform & Extended Lock Defense:
+    - Hardened .gitignore against cross-host conflict copies (*-Mac Studio*, *-MacBook*), multi-agent locks (LOCK.user.*, LOCK.until.*, LOCK.condition.*, .automation-lock), and test caches (.hypothesis/, .nyc_output/).
+
+[x] Pytest Configuration Standard & Third-Party SBOM Level 1:
+    - Configured minversion = "7.0" and norecursedirs in [tool.pytest.ini_options] in pyproject.toml.
+    - Re-audited THIRD_PARTY_LICENSES.md (Stand 2026-09-23, Level 1 SBOM, unprivileged RunAsInvoker non-elevation & zero-copyleft certification).
+
+[x] Version-Freeze Discipline (T-20260920-167562623):
+    - Strictly maintained package version 0.3.6 without premature bump; documented audit under ## [Unreleased] in CHANGELOG.md.
+
+[x] Contract Testsuite Expansion:
+    - Extended tests/test_metadata.py with 6 automated contract tests covering NOTICE attribution, welcome/stale workflows, CI timeouts & concurrency, PEP 621 license-files, norecursedirs, and multi-host lock defenses.
+    - Test suite expanded to 138 passed tests (100% green).
+
+================================================================================
+12. MANUAL / NON-AUTOMATED NEXT STEPS
 ================================================================================
 1. PyPI Release Publication:
    - When ready for 0.4.0 or next release, trigger PyPI publish workflow.

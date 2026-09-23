@@ -7,7 +7,8 @@
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests: 132 Passed](https://img.shields.io/badge/tests-132%20passed-brightgreen.svg)](tests/)
+[![Attribution: NOTICE](https://img.shields.io/badge/Attribution-NOTICE-blue.svg)](NOTICE)
+[![Tests: 138 Passed](https://img.shields.io/badge/tests-138%20passed-brightgreen.svg)](tests/)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Security: Local--First](https://img.shields.io/badge/security-Local--First-green.svg)](SECURITY.md)
 [![Privacy: Zero--Egress](https://img.shields.io/badge/privacy-Zero--Egress-success.svg)](SECURITY.md)
@@ -391,6 +392,7 @@ For detailed competitive positioning benchmarks and architectural evaluations, s
 
 ## Development, Security & License
 
+- **Attribution & Transparency**: See [`NOTICE`](NOTICE) and [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md) for legal notices, authorship, and complete open-source dependency audits.
 - **Security & Vulnerability Disclosure**: See [`SECURITY.md`](SECURITY.md) for vulnerability reporting procedures (48h initial acknowledgment SLA, 5 business days triage SLA).
 - **Changelog**: Comprehensive release and architecture notes are maintained in [`CHANGELOG.md`](CHANGELOG.md).
 - **License**: MIT License. See [LICENSE](LICENSE) for details.

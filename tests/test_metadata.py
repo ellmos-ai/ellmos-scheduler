@@ -48,7 +48,8 @@ def test_readme_badges_and_language_parity():
         "python-3.10%2B-blue.svg",
         "platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg",
         "License-MIT-yellow.svg",
-        "tests-132%20passed-brightgreen.svg",
+        "Attribution-NOTICE-blue.svg",
+        "tests-138%20passed-brightgreen.svg",
         "code%20style-ruff-000000.svg",
         "security-Local--First-green.svg",
         "privacy-Zero--Egress-success.svg",
@@ -120,7 +121,7 @@ def test_llms_txt_structure_and_timestamp():
     assert "SECURITY.md" in content
     assert "THIRD_PARTY_LICENSES.md" in content
     assert "TODO.md" in content
-    assert "2026-09-22" in content
+    assert "2026-09-23" in content
     assert "Governance & Runtime Invariants" in content
 
 
@@ -373,7 +374,7 @@ def test_third_party_licenses_inventory():
     assert lic_path.is_file(), "THIRD_PARTY_LICENSES.md must exist in repo root"
 
     content = lic_path.read_text(encoding="utf-8")
-    assert "2026-09-14" in content
+    assert "2026-09-23" in content
     assert "tzdata" in content
     assert "Python Standard Library" in content
     assert "pytest" in content
@@ -647,3 +648,95 @@ def test_changelog_recent_pfad_a_036_entry():
     assert "## [0.3.6] - 2026-09-22" in content
     assert "Release Gate Härtung (10/10 PASS)" in content
 
+
+def test_notice_attribution_and_metadata():
+    """Verify NOTICE file exists, attributes Lukas Geiger & open-bricks, and is referenced in manifests."""
+    notice_path = ROOT / "NOTICE"
+    assert notice_path.is_file(), "NOTICE file must exist in repo root"
+
+    content = notice_path.read_text(encoding="utf-8")
+    assert "ellmos-scheduler" in content
+    assert "Lukas Geiger" in content
+    assert "open-bricks" in content
+    assert "MIT License" in content
+    assert "THIRD_PARTY_LICENSES.md" in content
+
+    pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    license_files = pyproject.get("project", {}).get("license-files", [])
+    assert "NOTICE" in license_files, "pyproject.toml project.license-files must include NOTICE"
+
+    urls = pyproject.get("project", {}).get("urls", {})
+    assert "Notice" in urls, "pyproject.toml project.urls must include Notice endpoint"
+    assert urls["Notice"].endswith("/NOTICE")
+
+    readme_en = (ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (ROOT / "README_de.md").read_text(encoding="utf-8")
+    assert "Attribution-NOTICE-blue.svg" in readme_en
+    assert "Attribution-NOTICE-blue.svg" in readme_de
+    assert "NOTICE" in readme_en
+    assert "NOTICE" in readme_de
+
+
+def test_welcome_workflow_present_and_configured():
+    """Verify welcome.yml workflow exists and enforces first-interaction action with timeouts and least-privilege permissions."""
+    workflow_path = ROOT / ".github" / "workflows" / "welcome.yml"
+    assert workflow_path.is_file(), "welcome.yml workflow must exist"
+
+    content = workflow_path.read_text(encoding="utf-8")
+    assert "actions/first-interaction@v3" in content
+    assert "timeout-minutes: 5" in content
+    assert "cancel-in-progress: true" in content
+    assert "issues: write" in content
+    assert "pull-requests: write" in content
+
+
+def test_stale_workflow_concurrency_configured():
+    """Verify stale.yml workflow enforces concurrency cancel-in-progress group."""
+    workflow_path = ROOT / ".github" / "workflows" / "stale.yml"
+    assert workflow_path.is_file(), "stale.yml workflow must exist"
+
+    content = workflow_path.read_text(encoding="utf-8")
+    assert "concurrency:" in content
+    assert "cancel-in-progress: true" in content
+
+
+def test_extended_multihost_and_lock_defense():
+    """Verify .gitignore includes extended multi-host tokens, lock patterns, and test caches."""
+    gitignore_path = ROOT / ".gitignore"
+    assert gitignore_path.is_file(), ".gitignore must exist"
+
+    content = gitignore_path.read_text(encoding="utf-8")
+    expected_patterns = [
+        "*-Mac Studio*",
+        "*-MacBook*",
+        "LOCK.user.*",
+        "LOCK.until.*",
+        "LOCK.condition.*",
+        ".automation-lock",
+        ".hypothesis/",
+        ".nyc_output/",
+    ]
+    for pattern in expected_patterns:
+        assert pattern in content, f".gitignore missing extended pattern: {pattern}"
+
+
+def test_pytest_ini_minversion_and_norecursedirs():
+    """Verify pyproject.toml defines minversion and norecursedirs in [tool.pytest.ini_options]."""
+    pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    pytest_cfg = pyproject.get("tool", {}).get("pytest", {}).get("ini_options", {})
+
+    assert pytest_cfg.get("minversion") == "7.0", "pytest minversion must be 7.0"
+    norecursedirs = pytest_cfg.get("norecursedirs", [])
+    for d in [".git", ".pytest_cache", "__pycache__", "build", "dist", ".venv"]:
+        assert d in norecursedirs, f"pytest norecursedirs missing directory: {d}"
+
+
+def test_changelog_unreleased_pfad_a_audit():
+    """Verify CHANGELOG.md contains the ## [Unreleased] Pfad A repository hygiene section."""
+    changelog_path = ROOT / "CHANGELOG.md"
+    assert changelog_path.is_file(), "CHANGELOG.md must exist"
+
+    content = changelog_path.read_text(encoding="utf-8")
+    assert "## [Unreleased]" in content
+    assert "Repository Hygiene, Open-Source NOTICE Attribution" in content
+    assert "Kanonische Open-Source NOTICE Attribution" in content
