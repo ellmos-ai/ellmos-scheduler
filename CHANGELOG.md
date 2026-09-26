@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Discoverability, 18-Point Bilingual Navigation Parity, Level 1 SBOM Invariant Matrix & 20-Topic Saturation (Pfad B - 2026-09-26)
+- **18-Punkte Zweisprachige Schnellnavigations-Parität mit Dualen HTML-Ankern**: Vollständige Synchronisation von 18 standardisierten Navigationspunkten über `README.md` und `README_de.md` mit reziproken dualen HTML-Ankern (`<a id="sec-01"></a>` bis `<a id="sec-18"></a>`) und Rückwärtskompatibilität für bestehende Markdown-Anker.
+- **GitHub Topics & PEP 621 Keywords 20/20 Vollsättigung**: Sättigung aller 20/20 verfügbaren GitHub-Repository-Topics via `gh repo edit` und Angleichung des `keywords`-Arrays in `pyproject.toml` (`cron`, `deterministic-lease`, `ellmos-ai`, `execution-engine`, `fail-closed`, `interval-scheduler`, `job-scheduler`, `lease-discipline`, `local-first`, `offline-first`, `open-bricks`, `python`, `run-receipts`, `scheduled-tasks`, `scheduler`, `sqlite`, `task-execution`, `task-runner`, `workflow-automation`, `zero-egress`); kanonische Homepage-URL auf `https://github.com/ellmos-ai/ellmos-scheduler#readme` gesetzt.
+- **Level 1 SBOM Invariant Cross-Reference Matrix**: Erweiterung von `THIRD_PARTY_LICENSES.md` (Stand 2026-09-26) um die tabellarische Level-1-SBOM-Invarianz-Matrix mit Zuordnung von `INV-LOCAL-01` bis `INV-SLA-10`, unprivilegierter `RunAsInvoker`-Zertifizierung (`INV-PRIV-02`) und Zero-Copyleft-Isolationsgarantie.
+- **Gesetzlicher Hinweis (§ 521 BGB Gefälligkeitsrecht) & Verbindliche 48h Security SLA**: Verankerung des gesetzlichen Haftungsausschlusses für unentgeltliche Softwarebereitstellung nach § 521 BGB (Haftung beschränkt auf Vorsatz und grobe Fahrlässigkeit) sowie der verbindlichen 48-Stunden-Reaktions-SLA in Abschnitt 18 von `README.md`, `README_de.md` und in `SECURITY.md`.
+- **Maschinenlesbarer KI-Kontext (llms.txt)**: Aktualisierung des Prüfzeitstempels auf Stand 2026-09-26 mit Referenzierung von § 521 BGB, Level 1 SBOM und Testsuite-Status.
+- **Strikte Versions-Freeze-Disziplin (T-20260920-167562623)**: Beibehaltung von Version `0.3.6` ohne verfrühten Versionssprung.
+- **Vertragstestsuite & Qualitäts-Gates**: Erweiterung von `tests/test_metadata.py` um umfassende Prüfungen der 18-Punkte-Navigation, dualen Anker, PEP 621 Keywords, Level 1 SBOM Matrix und § 521 BGB Klauseln.
+
 ### Repository Hygiene, Open-Source NOTICE Attribution, Welcome/Stale Lifecycle CI Hardening & Multi-Host Defense (Pfad A)
 - **Kanonische Open-Source NOTICE Attribution**: Repository-Root `NOTICE`-Attributionsdatei mit Urheberrechtsvermerk für Lukas Geiger, ellmos-ai und open-bricks Umbrella-Organisation angelegt.
 - **CI Lifecycle Workflows & Least-Privilege Permissions**: Bereitstellung von `.github/workflows/welcome.yml` (`actions/first-interaction@v3`, `timeout-minutes: 5`, Concurrency `cancel-in-progress: true`, `issues: write`, `pull-requests: write`) und Concurrency-Härtung in `.github/workflows/stale.yml`.

@@ -11,6 +11,28 @@ license = "MIT"
 license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.md"]
 requires-python = ">=3.10"
 authors = [{ name = "Lukas Geiger" }]
+keywords = [
+  "cron",
+  "deterministic-lease",
+  "ellmos-ai",
+  "execution-engine",
+  "fail-closed",
+  "interval-scheduler",
+  "job-scheduler",
+  "lease-discipline",
+  "local-first",
+  "offline-first",
+  "open-bricks",
+  "python",
+  "run-receipts",
+  "scheduled-tasks",
+  "scheduler",
+  "sqlite",
+  "task-execution",
+  "task-runner",
+  "workflow-automation",
+  "zero-egress",
+]
 dependencies = [
   "tzdata>=2024.1; platform_system == 'Windows'",
 ]

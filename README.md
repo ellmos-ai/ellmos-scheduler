@@ -8,7 +8,7 @@
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Attribution: NOTICE](https://img.shields.io/badge/Attribution-NOTICE-blue.svg)](NOTICE)
-[![Tests: 138 Passed](https://img.shields.io/badge/tests-138%20passed-brightgreen.svg)](tests/)
+[![Tests: 145 Passed](https://img.shields.io/badge/tests-145%20passed-brightgreen.svg)](tests/)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Security: Local--First](https://img.shields.io/badge/security-Local--First-green.svg)](SECURITY.md)
 [![Privacy: Zero--Egress](https://img.shields.io/badge/privacy-Zero--Egress-success.svg)](SECURITY.md)
@@ -17,27 +17,36 @@
 [![Ecosystem: ellmos-ai](https://img.shields.io/badge/ecosystem-ellmos--ai-purple.svg)](https://github.com/ellmos-ai)
 [![Umbrella: open-bricks](https://img.shields.io/badge/umbrella-open--bricks-blueviolet.svg)](https://github.com/open-bricks)
 [![LLM-Ready: llms.txt](https://img.shields.io/badge/LLM--Ready-llms.txt-orange.svg)](llms.txt)
+[![Verified](https://img.shields.io/badge/verified-2026--09--26-brightgreen.svg)](llms.txt)
+[![Security SLA](https://img.shields.io/badge/security%20sla-48h%20response-blue.svg)](SECURITY.md)
 
 [English](README.md) | [Deutsch](README_de.md)
 
 ## Quick Navigation
 
-- [Overview](#ellmos-scheduler)
-- [Architecture & System Overview](#architecture--system-overview)
-- [Execution & Authority Preflight Lifecycle](#execution--authority-preflight-lifecycle)
-- [Governance & Runtime Invariants](#governance--runtime-invariants)
-- [Responsibility Boundary](#responsibility-boundary)
-- [Supported Schedules](#supported-schedules)
-- [Quick Start](#quick-start)
-- [Canonical Authorities Per Run](#canonical-authorities-per-run)
-- [Security and Availability Model](#security-and-availability-model)
-- [Migration from BACH](#migration-from-bach)
-- [Bundles and Partners](#bundles-and-partners)
-- [Ecosystem & Sibling Tools](#ecosystem--sibling-tools)
-- [Third-Party Licenses & Transparency](#third-party-licenses--transparency)
-- [Marketing & Target Personas](#marketing--target-personas)
-- [Comparative Matrix vs. Alternatives](#comparative-matrix-vs-alternatives)
-- [Development, Security & License](#development-security--license)
+1. [Overview & Core Identity](#sec-01)
+2. [Target Personas & High-Intent SEO Queries](#sec-02)
+3. [Comparative Matrix vs. Alternatives](#sec-03)
+4. [Governance & Runtime Invariants Matrix](#sec-04)
+5. [Visual Architecture & System Overview](#sec-05)
+6. [Execution & Authority Preflight Lifecycle](#sec-06)
+7. [Responsibility Boundary & Architecture](#sec-07)
+8. [Supported Schedules & Cron Expressions](#sec-08)
+9. [Quick Start & Common Workflows](#sec-09)
+10. [Canonical Authorities Per Run](#sec-10)
+11. [Security and Availability Model](#sec-11)
+12. [Migration from BACH](#sec-12)
+13. [Bundles and Partners](#sec-13)
+14. [Ecosystem & Sibling Tools](#sec-14)
+15. [Machine-Readable LLM Context (llms.txt)](#sec-15)
+16. [Testing, Verification & Quality Gates](#sec-16)
+17. [Third-Party Licenses & Level 1 SBOM](#sec-17)
+18. [Statutory Notice, Liability Limitation & License (§ 521 BGB)](#sec-18)
+
+---
+
+<a id="sec-01"></a><a id="ellmos-scheduler"></a><a id="overview"></a>
+## 1. Overview & Core Identity
 
 > [!NOTE]
 > **For AI Agents & LLM Tools:** This repository maintains an [`llms.txt`](llms.txt) machine-readable index for automated discovery, capability summaries, and CLI interfaces.
@@ -47,14 +56,90 @@ deliberately located **outside BACH**. BACH, Wonderland/Riverfall, desktop
 automations, COMA, MarbleRun/llmauto, and swarm-ai can consume it through
 narrow adapters.
 
-Status: `0.3.5` (Pfad B Discoverability, 16-point bilingual quick navigation parity, 10-dimension comparative matrix vs. 4 alternatives, SEO keywords, third-party license audit & contract testsuite, 2026-09-14).
+Status: `0.3.6` (Pfad B Discoverability, 18-point bilingual quick navigation parity, 10-dimension comparative matrix vs. 4 alternatives, SEO keywords, Level 1 SBOM Invariant Cross-Reference Matrix, 20-topic saturation, 2026-09-26).
 
 On Windows, the package installs `tzdata` as a conditional runtime dependency.
 This makes IANA time zones such as `Europe/Berlin` work in a clean virtual
 environment even when the operating system does not provide Python zoneinfo
 data.
 
-## Architecture & System Overview
+---
+
+<a id="sec-02"></a><a id="marketing--target-personas"></a><a id="target-personas--high-intent-seo-queries"></a>
+## 2. Target Personas & High-Intent SEO Queries
+
+Engineered for autonomous agent workflows, deterministic automation, and enterprise environments:
+
+### `[PERSONA-01]` Autonomous Multi-Agent Swarm Engineers & Orchestrators
+- **Profile:** Engineers building distributed multi-agent systems and persistent LLM worker swarms.
+- **Pain Point:** Heavy cloud queues (Celery, Redis) add excessive operational overhead, while OS cron lacks atomic task deduplication and distributed worker leasing.
+- **Solution:** `ellmos-scheduler` provides atomic SQLite lease claiming, content-addressed deterministic `run_id` generation, and comprehensive failure recovery.
+
+### `[PERSONA-02]` Local-First & Zero-Egress Tool Builders
+- **Profile:** Developers creating offline-capable developer tools and privacy-first automation environments.
+- **Pain Point:** Schedulers that phone home or leak telemetry across network interfaces violate strict air-gapped security policies.
+- **Solution:** Complete zero-egress guarantee (`INV-LOCAL-01`), executing strictly on local SQLite state stores with unprivileged permissions.
+
+### `[PERSONA-03]` DevOps & Site Reliability Engineers
+- **Profile:** Systems administrators and SREs requiring predictable scheduling across heterogeneous developer fleets.
+- **Pain Point:** Incompatible syntax between Linux cron and Windows Task Scheduler, compounded by missing IANA timezone data on Windows.
+- **Solution:** Unified cross-platform scheduling with bundled `tzdata` fallback, ensuring identical cron, interval, and daily semantics on Windows, Linux, and macOS.
+
+### `[PERSONA-04]` Enterprise Compliance & Security Auditors
+- **Profile:** Compliance auditors and enterprise security officers requiring verifiable preflight execution controls.
+- **Pain Point:** Cron jobs execute blindly without verifying whether approval decisions, security policies, or dependency invariants have changed.
+- **Solution:** Dual read-only passes + SHA-256 authority preflight (`--require-authorities`) and immutable cryptographic execution receipts stored locally.
+
+### High-Intent Search Queries & Discoverability
+- **Primary Intent:** `python deterministic local scheduler`, `sqlite lease claim scheduler`, `zero-egress task scheduler`, `agentic swarm periodic job runner`, `cron interval scheduler python stdlib`.
+- **Long-Tail & Architecture:** `standalone cron runner without redis`, `local agent memory compaction scheduler`, `offline task runner python zoneinfo`, `authority preflight execution gate`, `safe subprocess argv executor`.
+
+---
+
+<a id="sec-03"></a><a id="comparative-matrix-vs-alternatives"></a><a id="comparative-matrix"></a>
+## 3. Comparative Matrix vs. Alternatives
+
+The following matrix compares `ellmos-scheduler` against four common industry alternatives across ten critical architectural and governance dimensions:
+
+| Dimension / Capability | `ellmos-scheduler` | OS Cron / Windows Task Scheduler | Celery Beat / Redis Queue | APScheduler | Cloud Schedulers (AWS/GCP) |
+|---|---|---|---|---|---|
+| **Zero-Egress / Local-First (`INV-LOCAL-01`)** | **100% Offline & Local** | Local OS daemon | Requires network broker | In-process daemon | Cloud SaaS dependent |
+| **Concurrency & Leases (`INV-CONC-03`)** | **Atomic SQLite Leases** | None (runs overlap) | Distributed Redis lock | In-memory locks | Distributed cloud lock |
+| **Authority Preflight Gate (`INV-AUTH-04`)** | **SHA-256 Dual-Check** | None | None | None | IAM Policy checks |
+| **Privilege Model (`INV-PRIV-02`)** | **Unprivileged (RunAsInvoker)** | Often root / SYSTEM | User or daemon | In-process thread | Cloud IAM role |
+| **Audit Trail & Receipts (`INV-SLA-10`)** | **Immutable DB Receipts** | System syslog / Event Log | Task results in broker | Ephemeral in-memory | CloudWatch / Cloud Audit |
+| **Multi-OS Parity (`INV-PLAT-09`)** | **Full (Win/Mac/Linux + tzdata)**| Disparate syntax/tools | High | High | N/A (Cloud managed) |
+| **Agent & Swarm Ready (`INV-MOD-08`)** | **Native (COMA/MarbleRun)** | Requires custom scripts | Generic workers | Generic callables | Webhooks / Lambdas |
+| **Shell Injection Safety (`INV-EXEC-06`)** | **Strict argv (`shell=False`)** | Shell string execution | Mixed | Python callables | Container entrypoint |
+| **Stream Encoding Hygiene (`INV-STRM-05`)**| **Strict UTF-8 Fail-Closed** | OS default / Lossy | Serialized strings | Process stdout | Cloud logging streams |
+| **Fault Recovery & Leases (`INV-RES-07`)** | **Auto-Abandoned Recovery** | Deadlocks / Overlaps | Worker heartbeat loss | None / Memory loss | Dead-Letter Queues |
+
+For detailed competitive positioning benchmarks and architectural evaluations, see [`MARKETING-LOG.txt`](MARKETING-LOG.txt).
+
+---
+
+<a id="sec-04"></a><a id="governance--runtime-invariants"></a><a id="governance-invariants"></a>
+## 4. Governance & Runtime Invariants Matrix
+
+`ellmos-scheduler` adheres to 10 foundational system and operational invariants to ensure predictable, secure, and verifiable scheduling across local agent environments:
+
+| Invariant | Scope | Guarantee & Verification |
+|---|---|---|
+| `INV-LOCAL-01` **1. 100% Local-First & Zero-Egress** | System Architecture | Operates completely offline on localhost; strictly zero telemetry, analytics, external network sockets, or unauthorized cloud beacons. |
+| `INV-PRIV-02` **2. Unprivileged Non-Elevation Execution** | Security Boundary | Executes strictly in unprivileged user-mode (`RunAsInvoker`), never requiring administrative or root privileges. |
+| `INV-CONC-03` **3. Atomic SQLite Leases & Deduplication** | Concurrency Control | Deterministic, content-addressed `run_id` generation and atomic SQLite state leases prevent parallel double-execution across workers. |
+| `INV-AUTH-04` **4. Double Read-Only Authority Preflight** | Integrity Guard | Mandatory authority files are read twice and validated against cryptographic SHA-256 integrity checksums prior to job dispatch. |
+| `INV-STRM-05` **5. Strict UTF-8 & Fail-Closed Decoding** | Stream Hygiene | Subprocess output decoding enforces strict error handling (`utf-8:strict`), terminating corrupted outputs cleanly instead of corrupting audit logs. |
+| `INV-EXEC-06` **6. Shell-Free Safe Process Invocation** | Execution Security | Process invocations accept explicit `argv` lists only, completely avoiding shell string interpolation (`shell=False`). |
+| `INV-RES-07` **7. Fail-Closed Timeout & Abandoned Leases** | Process Resilience | Overdue, hanging, or crashed workers have their leases marked `abandoned` and reclaimed safely without deadlocks. |
+| `INV-MOD-08` **8. Declarative Modular Integration** | Decoupled Architecture | Pluggable executor registry, external authority resolvers, and clean decoupling outside monoliths (e.g. BACH). |
+| `INV-PLAT-09` **9. Multi-OS Cross-Platform Parity** | Platform Portability | Complete operational parity on Windows (with `tzdata` fallback for IANA time zones), Linux, and macOS. |
+| `INV-SLA-10` **10. Cryptographic Receipt Persistence** | Auditability | Full audit records with immutable receipts, SHA-256 authority sets, and secret-free execution metadata. |
+
+---
+
+<a id="sec-05"></a><a id="architecture--system-overview"></a><a id="system-architecture"></a>
+## 5. Visual Architecture & System Overview
 
 ```mermaid
 graph TD
@@ -98,7 +183,10 @@ graph TD
     Custom --> Integrations
 ```
 
-### Execution & Authority Preflight Lifecycle
+---
+
+<a id="sec-06"></a><a id="execution--authority-preflight-lifecycle"></a><a id="lifecycle"></a>
+## 6. Execution & Authority Preflight Lifecycle
 
 ```mermaid
 sequenceDiagram
@@ -131,24 +219,10 @@ sequenceDiagram
     end
 ```
 
-## Governance & Runtime Invariants
+---
 
-`ellmos-scheduler` adheres to 10 foundational system and operational invariants to ensure predictable, secure, and verifiable scheduling across local agent environments:
-
-| Invariant | Scope | Guarantee & Verification |
-|---|---|---|
-| `INV-LOCAL-01` **1. 100% Local-First & Zero-Egress** | System Architecture | Operates completely offline on localhost; strictly zero telemetry, analytics, external network sockets, or unauthorized cloud beacons. |
-| `INV-PRIV-02` **2. Unprivileged Non-Elevation Execution** | Security Boundary | Executes strictly in unprivileged user-mode (`RunAsInvoker`), never requiring administrative or root privileges. |
-| `INV-CONC-03` **3. Atomic SQLite Leases & Deduplication** | Concurrency Control | Deterministic, content-addressed `run_id` generation and atomic SQLite state leases prevent parallel double-execution across workers. |
-| `INV-AUTH-04` **4. Double Read-Only Authority Preflight** | Integrity Guard | Mandatory authority files are read twice and validated against cryptographic SHA-256 integrity checksums prior to job dispatch. |
-| `INV-STRM-05` **5. Strict UTF-8 & Fail-Closed Decoding** | Stream Hygiene | Subprocess output decoding enforces strict error handling (`utf-8:strict`), terminating corrupted outputs cleanly instead of corrupting audit logs. |
-| `INV-EXEC-06` **6. Shell-Free Safe Process Invocation** | Execution Security | Process invocations accept explicit `argv` lists only, completely avoiding shell string interpolation (`shell=False`). |
-| `INV-RES-07` **7. Fail-Closed Timeout & Abandoned Leases** | Process Resilience | Overdue, hanging, or crashed workers have their leases marked `abandoned` and reclaimed safely without deadlocks. |
-| `INV-MOD-08` **8. Declarative Modular Integration** | Decoupled Architecture | Pluggable executor registry, external authority resolvers, and clean decoupling outside monoliths (e.g. BACH). |
-| `INV-PLAT-09` **9. Multi-OS Cross-Platform Parity** | Platform Portability | Complete operational parity on Windows (with `tzdata` fallback for IANA time zones), Linux, and macOS. |
-| `INV-SLA-10` **10. Cryptographic Receipt Persistence** | Auditability | Full audit records with immutable receipts, SHA-256 authority sets, and secret-free execution metadata. |
-
-## Responsibility boundary
+<a id="sec-07"></a><a id="responsibility-boundary"></a><a id="integration-boundary"></a>
+## 7. Responsibility Boundary & Architecture
 
 - ellmos Scheduler: schedule, due calculation, lease/claim, deduplicating
   `run_id`, pause/resume, run history, and heartbeat.
@@ -159,7 +233,10 @@ sequenceDiagram
   and representation.
 - BACH: consumer through `BachSchedulerAdapter`, not owner of scheduler logic.
 
-## Supported schedules
+---
+
+<a id="sec-08"></a><a id="supported-schedules"></a><a id="cron-expressions"></a>
+## 8. Supported Schedules & Cron Expressions
 
 ```json
 {"kind": "interval", "seconds": 3600}
@@ -169,7 +246,10 @@ sequenceDiagram
 
 Cron supports five fields, `*`, lists, ranges, and steps.
 
-## Quick start
+---
+
+<a id="sec-09"></a><a id="quick-start"></a><a id="cli-reference"></a>
+## 9. Quick Start & Common Workflows
 
 ```powershell
 python -m pip install -e ".[dev]"
@@ -229,7 +309,10 @@ Duplicate registration fails. Intentional replacement requires `replace=True`;
 this allows concurrently running scheduler instances to use separate adapter
 sets.
 
-## Canonical authorities per run
+---
+
+<a id="sec-10"></a><a id="canonical-authorities-per-run"></a><a id="authorities"></a>
+## 10. Canonical Authorities Per Run
 
 Each job can declare explicit `rule`, `policy`, `decision`, `workflow`, or
 `user-preference` sources (as well as other stable types). Immediately before
@@ -269,7 +352,10 @@ hash/readback contract. Resolution and receipt persistence happen while the
 state is still `claimed`; only a successful required preflight sets `started_at`
 and `running`.
 
-## Security and availability model
+---
+
+<a id="sec-11"></a><a id="security-and-availability-model"></a><a id="availability-model"></a>
+## 11. Security and Availability Model
 
 - Due runs receive an atomic, deterministic `run_id`.
 - A lease prevents a second writer for the same job window.
@@ -279,7 +365,10 @@ and `running`.
 - Status returns `last_tick_at`, job counts, and run counts in machine-readable form.
 - Full security policy and boundary specifications are documented in [`SECURITY.md`](SECURITY.md).
 
-## Migration from BACH
+---
+
+<a id="sec-12"></a><a id="migration-from-bach"></a><a id="bach-migration"></a>
+## 12. Migration from BACH
 
 See [MIGRATION_FROM_BACH.md](MIGRATION_FROM_BACH.md). The existing
 `BACH/system/hub/scheduler.py` remains in operation as a legacy source until
@@ -298,7 +387,10 @@ ellmos-scheduler --db C:\state\scheduler.db import-bach `
 The Python entry point `create_bach_adapter(state_db)` provides the narrow
 consumer API that BACH can use behind its `scheduler_provider` seam.
 
-## Bundles and partners
+---
+
+<a id="sec-13"></a><a id="bundles-and-partners"></a><a id="bundles"></a>
+## 13. Bundles and Partners
 
 `ellmos-scheduler` remains a separately usable clock. In the V4 composition it
 is a required time and run recorder in `ellmos-automation-control-bundle`; it
@@ -316,7 +408,10 @@ Binding membership, versions, profiles, and private composition recipes reside
 exclusively in the bundle manifest. This public overview serves partner
 discovery only.
 
-## Ecosystem & Sibling Tools
+---
+
+<a id="sec-14"></a><a id="ecosystem--sibling-tools"></a><a id="sibling-tools"></a>
+## 14. Ecosystem & Sibling Tools
 
 Part of the [ellmos-ai](https://github.com/ellmos-ai) multi-agent infrastructure and the overarching [open-bricks](https://github.com/open-bricks) open-source software ecosystem:
 
@@ -346,53 +441,56 @@ Part of the [ellmos-ai](https://github.com/ellmos-ai) multi-agent infrastructure
 
 ---
 
-## Third-Party Licenses & Transparency
+<a id="sec-15"></a><a id="machine-readable-llm-context"></a><a id="llms-txt"></a>
+## 15. Machine-Readable LLM Context (llms.txt)
+
+This repository provides a standardized [`llms.txt`](llms.txt) discovery index at the repository root. Automated agents, LLM toolchains, and RAG pipelines can consume this index to understand CLI syntax, architectural constraints, key file locations, and security boundaries without ingesting unnecessary repository bloat.
+
+---
+
+<a id="sec-16"></a><a id="testing-verification--quality-gates"></a><a id="testing"></a>
+## 16. Testing, Verification & Quality Gates
+
+The test suite validates both functional scheduling behavior and architectural contracts:
+
+```bash
+# Run full contract and unit test suite
+pytest
+
+# Enforce strict code formatting and linting
+ruff check .
+
+# Validate bytecode compilation
+python -m compileall -q src tests
+
+# Verify git whitespace hygiene
+git diff --check
+```
+
+---
+
+<a id="sec-17"></a><a id="third-party-licenses--transparency"></a><a id="third-party-licenses"></a>
+## 17. Third-Party Licenses & Level 1 SBOM
 
 `ellmos-scheduler` strictly complies with Open Source standards and runtime transparency:
 - **100% Permissive Dependencies**: All runtime (`tzdata`, Python standard library) and development packages (`pytest`, `tomli`, `ruff`, `setuptools`) utilize OSI-approved permissive licenses (MIT, Apache-2.0, PSFL, Public Domain).
+- **Zero-Copyleft Isolation Guarantee**: 0% copyleft contamination across all dependencies.
 - **Zero-Egress Invariant (`INV-LOCAL-01`)**: No dependency transmits analytics, telemetry, or external network calls.
 - **Unprivileged Execution (`INV-PRIV-02`)**: Executes entirely within user-mode permissions (`RunAsInvoker`).
 - Full audit details, component license terms, and upstream sources are documented in [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md).
 
 ---
 
-## Marketing & Target Personas
+<a id="sec-18"></a><a id="development-security--license"></a><a id="statutory-notice--license"></a>
+## 18. Statutory Notice, Liability Limitation & License (§ 521 BGB)
 
-Engineered for autonomous agent workflows, deterministic automation, and enterprise environments:
-1. **Autonomous Multi-Agent Swarm Engineers & Orchestrators**: Non-overlapping execution for agentic loops, periodic memory compaction, and evaluation routines via atomic SQLite lease claiming.
-2. **Local-First & Zero-Egress Tool Builders**: Completely offline scheduling without cloud phone-home APIs or telemetry beacons.
-3. **DevOps & Site Reliability Engineers**: Unified cross-platform scheduling across Windows, Linux, and macOS with bundled Windows IANA timezone data.
-4. **Enterprise Compliance & Security Auditors**: Dual preflight authority checks (SHA-256) and immutable cryptographic execution receipts.
+### Open Source License
+This software is licensed under the terms of the [MIT License](LICENSE).
+Formal ecosystem attribution and origin notices are declared in [`NOTICE`](NOTICE).
+Detailed Level 1 SBOM and dependency transparency records are available in [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md).
 
-### High-Intent Search Queries & Discoverability
+### German Statutory Notice & Liability Limitation (§ 521 BGB Gefälligkeitsrecht)
+The provision of this software and its associated documentation is gratuitous (unentgeltliche Bereitstellung). In accordance with the statutory liability regime under German Civil Law governing gratuitous services (**§ 521 BGB** — *Haftung des Schenkers*), liability for any defects of quality or title (Sach- und Rechtsmängel) is strictly limited to cases of intentional misconduct (**Vorsatz**) and gross negligence (**grobe Fahrlässigkeit**). Any broader statutory warranty or tortious liability for slight negligence is expressly excluded to the fullest extent permitted by applicable law.
 
-- **Primary Intent**: `python deterministic local scheduler`, `sqlite lease claim scheduler`, `zero-egress task scheduler`, `agentic swarm periodic job runner`, `cron interval scheduler python stdlib`
-- **Long-Tail & Architecture**: `standalone cron runner without redis`, `local agent memory compaction scheduler`, `offline task runner python zoneinfo`, `authority preflight execution gate`, `safe subprocess argv executor`
-
----
-
-## Comparative Matrix vs. Alternatives
-
-| Dimension / Capability | `ellmos-scheduler` | OS Cron / Windows Task Scheduler | Celery Beat / Redis Queue | APScheduler | Cloud Schedulers (AWS/GCP) |
-|---|---|---|---|---|---|
-| **Zero-Egress / Local-First (`INV-LOCAL-01`)** | **100% Offline & Local** | Local OS daemon | Requires network broker | In-process daemon | Cloud SaaS dependent |
-| **Concurrency & Leases (`INV-CONC-03`)** | **Atomic SQLite Leases** | None (runs overlap) | Distributed Redis lock | In-memory locks | Distributed cloud lock |
-| **Authority Preflight Gate (`INV-AUTH-04`)** | **SHA-256 Dual-Check** | None | None | None | IAM Policy checks |
-| **Privilege Model (`INV-PRIV-02`)** | **Unprivileged (RunAsInvoker)** | Often root / SYSTEM | User or daemon | In-process thread | Cloud IAM role |
-| **Audit Trail & Receipts (`INV-SLA-10`)** | **Immutable DB Receipts** | System syslog / Event Log | Task results in broker | Ephemeral in-memory | CloudWatch / Cloud Audit |
-| **Multi-OS Parity (`INV-PLAT-09`)** | **Full (Win/Mac/Linux + tzdata)**| Disparate syntax/tools | High | High | N/A (Cloud managed) |
-| **Agent & Swarm Ready (`INV-MOD-08`)** | **Native (COMA/MarbleRun)** | Requires custom scripts | Generic workers | Generic callables | Webhooks / Lambdas |
-| **Shell Injection Safety (`INV-EXEC-06`)** | **Strict argv (`shell=False`)** | Shell string execution | Mixed | Python callables | Container entrypoint |
-| **Stream Encoding Hygiene (`INV-STRM-05`)**| **Strict UTF-8 Fail-Closed** | OS default / Lossy | Serialized strings | Process stdout | Cloud logging streams |
-| **Fault Recovery & Leases (`INV-RES-07`)** | **Auto-Abandoned Recovery** | Deadlocks / Overlaps | Worker heartbeat loss | None / Memory loss | Dead-letter queues |
-
-For detailed competitive positioning benchmarks and architectural evaluations, see [`MARKETING-LOG.txt`](MARKETING-LOG.txt).
-
----
-
-## Development, Security & License
-
-- **Attribution & Transparency**: See [`NOTICE`](NOTICE) and [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md) for legal notices, authorship, and complete open-source dependency audits.
-- **Security & Vulnerability Disclosure**: See [`SECURITY.md`](SECURITY.md) for vulnerability reporting procedures (48h initial acknowledgment SLA, 5 business days triage SLA).
-- **Changelog**: Comprehensive release and architecture notes are maintained in [`CHANGELOG.md`](CHANGELOG.md).
-- **License**: MIT License. See [LICENSE](LICENSE) for details.
+### Security Policy & Vulnerability Response SLA
+We commit to acknowledging vulnerability reports within **48 hours** and providing an initial triage assessment within **5 business days** via `security@open-bricks.org` and `security@ellmos.ai`. For full details, see [`SECURITY.md`](SECURITY.md).

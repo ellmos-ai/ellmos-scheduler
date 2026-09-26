@@ -41,7 +41,10 @@ If you discover a security vulnerability or boundary violation in `ellmos-schedu
 1. **Do not open a public issue.**
 2. Report the vulnerability privately via [GitHub Security Advisories](https://github.com/ellmos-ai/ellmos-scheduler/security/advisories) or by contacting the maintainers directly at [security@ellmos.ai](mailto:security@ellmos.ai) (fallbacks: [security@open-bricks.org](mailto:security@open-bricks.org), [support@lukasgeiger.com](mailto:support@lukasgeiger.com), [lukas@open-bricks.org](mailto:lukas@open-bricks.org)).
 3. Please provide a clear description of the vulnerability, reproduction steps, affected platform/environment, and impact assessment.
-4. We aim to acknowledge receipt within 48 hours, complete triage within 5 business days, and provide a coordinated remediation release.
+4. **Binding Response SLA**: We commit to acknowledging receipt within **48 hours** and providing an initial triage assessment within **5 business days**, followed by coordinated remediation.
+
+### Statutory Notice & Liability Limitation (§ 521 BGB Gefälligkeitsrecht)
+The provision of this software and its associated documentation is gratuitous (unentgeltliche Bereitstellung). In accordance with the statutory liability regime under German Civil Law governing gratuitous services (**§ 521 BGB** — *Haftung des Schenkers*), liability for any defects of quality or title (Sach- und Rechtsmängel) is strictly limited to cases of intentional misconduct (**Vorsatz**) and gross negligence (**grobe Fahrlässigkeit**). Any broader statutory warranty or tortious liability for slight negligence is expressly excluded to the fullest extent permitted by applicable law.
 
 ---
 
@@ -82,4 +85,7 @@ Sollten Sie eine Sicherheitslücke oder eine Verletzung der Sicherheitsrichtlini
 1. **Bitte erstellen Sie kein öffentliches Issue.**
 2. Melden Sie die Schwachstelle vertraulich über [GitHub Security Advisories](https://github.com/ellmos-ai/ellmos-scheduler/security/advisories) oder per E-Mail an [security@ellmos.ai](mailto:security@ellmos.ai) (Fallback: [security@open-bricks.org](mailto:security@open-bricks.org), [support@lukasgeiger.com](mailto:support@lukasgeiger.com), [lukas@open-bricks.org](mailto:lukas@open-bricks.org)).
 3. Bitte fügen Sie eine Beschreibung, Reproduktionsschritte und eine Einschätzung der Auswirkungen bei.
-4. Wir bestätigen den Eingang in der Regel innerhalb von 48 Stunden, schließen das Triage-Verfahren innerhalb von 5 Werktagen ab und stellen ein koordiniertes Update bereit.
+4. **Verbindliche Reaktions-SLA**: Wir verpflichten uns, den Eingang von Sicherheitsmeldungen innerhalb von **48 Stunden** zu bestätigen und innerhalb von **5 Werktagen** eine fundierte erste Triage-Bewertung bereitzustellen.
+
+### Gesetzlicher Hinweis & Haftungsbeschränkung (§ 521 BGB Gefälligkeitsrecht)
+Die Bereitstellung dieser Software sowie der dazugehörigen Dokumentation erfolgt unentgeltlich (Gefälligkeitsverhältnis). Gemäß dem gesetzlichen Haftungsregime des deutschen Bürgerlichen Gesetzbuches (**§ 521 BGB** — *Haftung des Schenkers*) ist die Haftung für Sach- und Rechtsmängel ausdrücklich auf **Vorsatz** und **grobe Fahrlässigkeit** beschränkt. Eine Haftung für einfache oder leichte Fahrlässigkeit ist im gesetzlich zulässigen Rahmen vollständig ausgeschlossen.

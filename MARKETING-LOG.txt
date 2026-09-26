@@ -1,5 +1,5 @@
 # MARKETING-LOG: ellmos-scheduler
-Latest Run: 2026-09-23 (Version: 0.3.6)
+Latest Run: 2026-09-26 (Version: 0.3.6 Pfad B)
 Initial Baseline: 2026-09-11 (Version: 0.3.3)
 Operator: Antigravity / Gemini (via GITHUBBOT Pfad A / Pfad B)
 Target Repo: ellmos-ai/ellmos-scheduler
@@ -255,7 +255,47 @@ Long-Tail / Architecture Intent:
     - Test suite expanded to 138 passed tests (100% green).
 
 ================================================================================
-12. MANUAL / NON-AUTOMATED NEXT STEPS
+13. IMPLEMENTED PFAD B DISCOVERABILITY, 18-POINT PARITY & SBOM AUDIT (2026-09-26)
+================================================================================
+
+[x] 18-Point Bilingual Navigation Parity & Dual Reciprocal Anchors:
+    - Expanded table of contents navigation in README.md and README_de.md to full 18-point
+      navigation parity with reciprocal dual HTML anchors [<a id="sec-01"></a>..<a id="sec-18"></a> aliases].
+    - Maintained all previous markdown anchor aliases for complete backward compatibility.
+
+[x] 20/20 GitHub Topics Saturation & Canonical Homepage:
+    - Saturated all 20 available GitHub repository topics via `gh repo edit`:
+      cron, deterministic-lease, ellmos-ai, execution-engine, fail-closed, interval-scheduler,
+      job-scheduler, lease-discipline, local-first, offline-first, open-bricks, python,
+      run-receipts, scheduled-tasks, scheduler, sqlite, task-execution, task-runner,
+      workflow-automation, zero-egress.
+    - Set canonical repository homepage URL to https://github.com/ellmos-ai/ellmos-scheduler#readme.
+
+[x] PEP 621 Metadata Alignment (pyproject.toml):
+    - Added saturated 20-element keywords array in pyproject.toml matching GitHub topics.
+    - Maintained strict version freeze at 0.3.6 per T-20260920-167562623.
+
+[x] Level 1 SBOM Invariant Cross-Reference Matrix (THIRD_PARTY_LICENSES.md):
+    - Updated THIRD_PARTY_LICENSES.md to Stand: 2026-09-26.
+    - Added tabular Level 1 SBOM Invariant Cross-Reference Matrix mapping INV-LOCAL-01..INV-SLA-10,
+      unprivileged RunAsInvoker non-elevation certification (INV-PRIV-02), and Zero-Copyleft isolation guarantee.
+
+[x] German Statutory Notice & Binding 48h Security SLA (§ 521 BGB):
+    - Embedded statutory notice for gratuitous software provision under § 521 BGB Gefälligkeitsrecht
+      (liability strictly limited to intent and gross negligence) in Section 18 of README.md & README_de.md
+      and in SECURITY.md.
+    - Reaffirmed binding 48-hour acknowledgment and 5 business days triage security response SLA.
+
+[x] Machine-Readable LLM Context (llms.txt):
+    - Updated llms.txt Last-checked timestamp to 2026-09-26, indexing § 521 BGB notice and Level 1 SBOM.
+
+[x] Automated Contract Testsuite Expansion (tests/test_metadata.py):
+    - Added new contract tests for 18-point navigation parity with dual HTML reciprocal anchors,
+      20-keyword saturation in pyproject.toml, Level 1 SBOM matrix recency, § 521 BGB & 48h SLA,
+      and changelog Pfad B entry.
+
+================================================================================
+14. MANUAL / NON-AUTOMATED NEXT STEPS
 ================================================================================
 1. PyPI Release Publication:
    - When ready for 0.4.0 or next release, trigger PyPI publish workflow.

@@ -49,7 +49,7 @@ def test_readme_badges_and_language_parity():
         "platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg",
         "License-MIT-yellow.svg",
         "Attribution-NOTICE-blue.svg",
-        "tests-138%20passed-brightgreen.svg",
+        "tests-145%20passed-brightgreen.svg",
         "code%20style-ruff-000000.svg",
         "security-Local--First-green.svg",
         "privacy-Zero--Egress-success.svg",
@@ -219,53 +219,62 @@ def test_gitignore_hygiene():
 
 
 def test_readme_quick_navigation_anchors():
-    """Verify both README files provide complete 16-point quick navigation blocks with matching anchors."""
+    """Verify both README files provide complete 18-point quick navigation blocks with matching anchors."""
     readme_en = (ROOT / "README.md").read_text(encoding="utf-8")
     readme_de = (ROOT / "README_de.md").read_text(encoding="utf-8")
 
-    en_anchors = [
-        "(#ellmos-scheduler)",
-        "(#architecture--system-overview)",
-        "(#execution--authority-preflight-lifecycle)",
-        "(#governance--runtime-invariants)",
-        "(#responsibility-boundary)",
-        "(#supported-schedules)",
-        "(#quick-start)",
-        "(#canonical-authorities-per-run)",
-        "(#security-and-availability-model)",
-        "(#migration-from-bach)",
-        "(#bundles-and-partners)",
-        "(#ecosystem--sibling-tools)",
-        "(#third-party-licenses--transparency)",
-        "(#marketing--target-personas)",
-        "(#comparative-matrix-vs-alternatives)",
-        "(#development-security--license)",
+    for i in range(1, 19):
+        sec_link = f"(#sec-{i:02d})"
+        assert sec_link in readme_en, f"README.md missing navigation link: {sec_link}"
+        assert sec_link in readme_de, f"README_de.md missing navigation link: {sec_link}"
+
+        sec_anchor = f'<a id="sec-{i:02d}"></a>'
+        assert sec_anchor in readme_en, f"README.md missing HTML anchor: {sec_anchor}"
+        assert sec_anchor in readme_de, f"README_de.md missing HTML anchor: {sec_anchor}"
+
+    legacy_en_aliases = [
+        '<a id="ellmos-scheduler"></a>',
+        '<a id="architecture--system-overview"></a>',
+        '<a id="execution--authority-preflight-lifecycle"></a>',
+        '<a id="governance--runtime-invariants"></a>',
+        '<a id="responsibility-boundary"></a>',
+        '<a id="supported-schedules"></a>',
+        '<a id="quick-start"></a>',
+        '<a id="canonical-authorities-per-run"></a>',
+        '<a id="security-and-availability-model"></a>',
+        '<a id="migration-from-bach"></a>',
+        '<a id="bundles-and-partners"></a>',
+        '<a id="ecosystem--sibling-tools"></a>',
+        '<a id="third-party-licenses--transparency"></a>',
+        '<a id="marketing--target-personas"></a>',
+        '<a id="comparative-matrix-vs-alternatives"></a>',
+        '<a id="development-security--license"></a>',
     ]
 
-    de_anchors = [
-        "(#ellmos-scheduler)",
-        "(#architektur--systemübersicht)",
-        "(#ausführungs--authority-preflight-lebenszyklus)",
-        "(#governance--laufzeit-invarianten)",
-        "(#verantwortungsgrenze)",
-        "(#unterstützte-zeitpläne)",
-        "(#schnellstart)",
-        "(#kanonische-autoritäten-pro-lauf)",
-        "(#sicherheits--und-verfügbarkeitsmodell)",
-        "(#migration-von-bach)",
-        "(#bundles-und-partner)",
-        "(#ökosystem--geschwister-werkzeuge)",
-        "(#drittanbieter-lizenzen--transparenz)",
-        "(#marketing--zielgruppen)",
-        "(#vergleichsmatrix-gegenüber-alternativen)",
-        "(#entwicklung-sicherheit--lizenz)",
+    legacy_de_aliases = [
+        '<a id="ellmos-scheduler"></a>',
+        '<a id="architektur--systemübersicht"></a>',
+        '<a id="ausführungs--authority-preflight-lebenszyklus"></a>',
+        '<a id="governance--laufzeit-invarianten"></a>',
+        '<a id="verantwortungsgrenze"></a>',
+        '<a id="unterstützte-zeitpläne"></a>',
+        '<a id="schnellstart"></a>',
+        '<a id="kanonische-autoritäten-pro-lauf"></a>',
+        '<a id="sicherheits--und-verfügbarkeitsmodell"></a>',
+        '<a id="migration-von-bach"></a>',
+        '<a id="bundles-und-partner"></a>',
+        '<a id="ökosystem--geschwister-werkzeuge"></a>',
+        '<a id="drittanbieter-lizenzen--transparenz"></a>',
+        '<a id="marketing--zielgruppen"></a>',
+        '<a id="vergleichsmatrix-gegenüber-alternativen"></a>',
+        '<a id="entwicklung-sicherheit--lizenz"></a>',
     ]
 
-    for anchor in en_anchors:
-        assert anchor in readme_en, f"README.md missing navigation anchor: {anchor}"
+    for alias in legacy_en_aliases:
+        assert alias in readme_en, f"README.md missing alias anchor: {alias}"
 
-    for anchor in de_anchors:
-        assert anchor in readme_de, f"README_de.md missing navigation anchor: {anchor}"
+    for alias in legacy_de_aliases:
+        assert alias in readme_de, f"README_de.md missing alias anchor: {alias}"
 
 
 def test_governance_and_runtime_invariants_table():
@@ -535,8 +544,8 @@ def test_readme_comparative_matrix_vs_alternatives():
     readme_en = (ROOT / "README.md").read_text(encoding="utf-8")
     readme_de = (ROOT / "README_de.md").read_text(encoding="utf-8")
 
-    assert "## Comparative Matrix vs. Alternatives" in readme_en
-    assert "## Vergleichsmatrix gegenüber Alternativen" in readme_de
+    assert "Comparative Matrix vs. Alternatives" in readme_en
+    assert "Vergleichsmatrix gegenüber Alternativen" in readme_de
 
     # Ensure 4 key competitor alternatives are present
     competitors = [
@@ -740,3 +749,119 @@ def test_changelog_unreleased_pfad_a_audit():
     assert "## [Unreleased]" in content
     assert "Repository Hygiene, Open-Source NOTICE Attribution" in content
     assert "Kanonische Open-Source NOTICE Attribution" in content
+
+
+def test_pep621_twenty_keywords_saturation():
+    """Verify pyproject.toml defines saturated 20-element keywords array matching GitHub topics."""
+    pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    keywords = pyproject.get("project", {}).get("keywords", [])
+    assert len(keywords) == 20, f"Expected 20 keywords, got {len(keywords)}: {keywords}"
+
+    expected_keywords = [
+        "cron",
+        "deterministic-lease",
+        "ellmos-ai",
+        "execution-engine",
+        "fail-closed",
+        "interval-scheduler",
+        "job-scheduler",
+        "lease-discipline",
+        "local-first",
+        "offline-first",
+        "open-bricks",
+        "python",
+        "run-receipts",
+        "scheduled-tasks",
+        "scheduler",
+        "sqlite",
+        "task-execution",
+        "task-runner",
+        "workflow-automation",
+        "zero-egress",
+    ]
+    for kw in expected_keywords:
+        assert kw in keywords, f"pyproject.toml missing keyword: {kw}"
+
+
+def test_target_personas_and_seo_parity():
+    """Verify both README files provide all 4 target personas and high-intent SEO queries."""
+    readme_en = (ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (ROOT / "README_de.md").read_text(encoding="utf-8")
+
+    for persona in ["[PERSONA-01]", "[PERSONA-02]", "[PERSONA-03]", "[PERSONA-04]"]:
+        assert persona in readme_en, f"README.md missing persona identifier: {persona}"
+        assert persona in readme_de, f"README_de.md missing persona identifier: {persona}"
+
+    assert "python deterministic local scheduler" in readme_en
+    assert "sqlite lease claim scheduler" in readme_en
+    assert "Python deterministischer lokaler Zeitplaner" in readme_de
+    assert "SQLite Lease Job Scheduler" in readme_de
+
+
+def test_third_party_licenses_level1_sbom_matrix():
+    """Verify THIRD_PARTY_LICENSES.md contains Level 1 SBOM Invariant Cross-Reference Matrix and 2026-09-26 recency."""
+    lic_path = ROOT / "THIRD_PARTY_LICENSES.md"
+    content = lic_path.read_text(encoding="utf-8")
+
+    assert "Stand: 2026-09-26" in content
+    assert "Level 1 SBOM Invariant Cross-Reference Matrix" in content
+    assert "RunAsInvoker" in content
+    expected_invs = [
+        "INV-LOCAL-01",
+        "INV-PRIV-02",
+        "INV-CONC-03",
+        "INV-AUTH-04",
+        "INV-STRM-05",
+        "INV-EXEC-06",
+        "INV-RES-07",
+        "INV-MOD-08",
+        "INV-PLAT-09",
+        "INV-SLA-10",
+    ]
+    for inv in expected_invs:
+        assert inv in content, f"THIRD_PARTY_LICENSES.md missing invariant: {inv}"
+
+
+def test_statutory_notice_and_48h_security_sla():
+    """Verify § 521 BGB statutory notice and 48h Security Response SLA across READMEs and SECURITY.md."""
+    readme_en = (ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (ROOT / "README_de.md").read_text(encoding="utf-8")
+    security = (ROOT / "SECURITY.md").read_text(encoding="utf-8")
+
+    assert "521 BGB" in readme_en
+    assert "521 BGB" in readme_de
+    assert "521 BGB" in security
+
+    assert "48 hours" in readme_en or "48-Stunden" in readme_de
+    assert "48 hours" in security or "48 Stunden" in security
+    assert "security@open-bricks.org" in security
+    assert "security@ellmos.ai" in security
+
+
+def test_llms_txt_2026_09_26_recency():
+    """Verify llms.txt context index specifies 2026-09-26 recency, § 521 BGB, and Level 1 SBOM."""
+    llms_path = ROOT / "llms.txt"
+    content = llms_path.read_text(encoding="utf-8")
+
+    assert "2026-09-26" in content
+    assert "521 BGB" in content
+    assert "Level 1 SBOM" in content
+
+
+def test_changelog_recent_pfad_b_entry_036():
+    """Verify CHANGELOG.md contains the 2026-09-26 Pfad B entry under ## [Unreleased]."""
+    changelog_path = ROOT / "CHANGELOG.md"
+    content = changelog_path.read_text(encoding="utf-8")
+
+    assert "## [Unreleased]" in content
+    assert "Discoverability, 18-Point Bilingual Navigation Parity, Level 1 SBOM Invariant Matrix & 20-Topic Saturation (Pfad B - 2026-09-26)" in content
+    assert "18-Punkte Zweisprachige Schnellnavigations-Parität mit Dualen HTML-Ankern" in content
+
+
+def test_marketing_log_recent_pfad_b_entry_036():
+    """Verify MARKETING-LOG.txt contains Section 13 Pfad B 2026-09-26 execution audit entry."""
+    mkt_log = (ROOT / "MARKETING-LOG.txt").read_text(encoding="utf-8")
+
+    assert "Latest Run: 2026-09-26 (Version: 0.3.6 Pfad B)" in mkt_log
+    assert "13. IMPLEMENTED PFAD B DISCOVERABILITY, 18-POINT PARITY & SBOM AUDIT (2026-09-26)" in mkt_log
+    assert "20/20 GitHub Topics Saturation" in mkt_log
