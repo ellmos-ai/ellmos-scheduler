@@ -8,7 +8,7 @@ version = "0.3.6"
 description = "Standalone, modular scheduler for ellmos stacks and BACH adapters"
 readme = "README.md"
 license = "MIT"
-license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.md"]
+license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.md", "THIRD_PARTY_LICENSES.txt"]
 requires-python = ">=3.10"
 authors = [{ name = "Lukas Geiger" }]
 keywords = [
@@ -61,6 +61,8 @@ Documentation = "https://github.com/ellmos-ai/ellmos-scheduler#readme"
 Security = "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/SECURITY.md"
 Notice = "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/NOTICE"
 "Third-Party Licenses" = "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/THIRD_PARTY_LICENSES.md"
+"Third-Party Licenses (Text)" = "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/THIRD_PARTY_LICENSES.txt"
+"Level 1 SBOM" = "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/THIRD_PARTY_LICENSES.txt"
 "Marketing Log" = "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/MARKETING-LOG.txt"
 "LLM Ready" = "https://github.com/ellmos-ai/ellmos-scheduler/blob/main/llms.txt"
 "Parent Organization" = "https://github.com/ellmos-ai"
@@ -82,8 +84,8 @@ where = ["src"]
 minversion = "7.0"
 testpaths = ["tests"]
 pythonpath = ["src"]
-norecursedirs = [".git", ".pytest_cache", "__pycache__", "build", "dist", ".venv"]
-addopts = "-ra -v"
+norecursedirs = [".git", ".pytest_cache", "__pycache__", "build", "dist", ".venv", ".pytest_temp", ".hypothesis", ".turbo"]
+addopts = "-ra -v --basetemp=.pytest_temp"
 
 [tool.ruff]
 line-length = 120

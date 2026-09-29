@@ -1,15 +1,16 @@
 # Third-Party Licenses & Dependency Transparency
 
-Stand: 2026-09-26 (Audit-Historie: 2026-09-23, 2026-09-14, 2026-09-11)
+Stand: 2026-09-29 (Audit-Historie: 2026-09-26, 2026-09-23, 2026-09-14, 2026-09-11)
 Project: **ellmos-scheduler** (`ellmos-ai/ellmos-scheduler`)  
 Maintainer: Lukas Geiger / ellmos-ai Core Team  
 Ecosystem: [open-bricks](https://github.com/open-bricks)
+Plain-Text Companion: [`THIRD_PARTY_LICENSES.txt`](THIRD_PARTY_LICENSES.txt)
 
 ---
 
 ## 1. Overview & Policy Statement
 
-`ellmos-scheduler` is dedicated to strict **Local-First & Zero-Egress** principles (`INV-LOCAL-01`) and executes exclusively in unprivileged user space (`INV-PRIV-02`, RunAsInvoker). To guarantee deterministic operation, auditability, and zero supply-chain lock-in, all runtime, testing, and build dependencies are rigorously vetted against the following criteria (with canonical attribution defined in [`NOTICE`](NOTICE)):
+`ellmos-scheduler` is dedicated to strict **Local-First & Zero-Egress** principles (`INV-LOCAL-01`) and executes exclusively in unprivileged user space (`INV-PRIV-02`, RunAsInvoker). To guarantee deterministic operation, auditability, and zero supply-chain lock-in, all runtime, testing, and build dependencies are rigorously vetted against the following criteria (with canonical attribution defined in [`NOTICE`](NOTICE) and plain-text inventory in [`THIRD_PARTY_LICENSES.txt`](THIRD_PARTY_LICENSES.txt)):
 
 - **100% Permissive Open-Source & Level 1 SBOM**: Only OSI-approved permissive licenses (MIT, Apache-2.0, BSD-3-Clause, PSFL, Public Domain) are permitted. Strict copyleft (GPL, AGPL) is forbidden. Zero-Copyleft isolation guarantee across all dependencies.
 - **Zero-Egress & Offline Determinism**: No third-party dependency is allowed to establish unsolicited outbound telemetry, cloud beacons, or network phone-home sockets.

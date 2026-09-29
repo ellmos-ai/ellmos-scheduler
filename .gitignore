@@ -54,17 +54,24 @@ uv.lock
 # Multi-host tokens
 *-WORKSTATION*
 *-WORKSTATION-LG*
+*_WORKSTATION*
+*_WORKSTATION-LG*
+*-WORKSTATION.*
+*-WORKSTATION-LG.*
 *-ASUS*
 *-ASUS-GEI*
 *-LAPTOP*
 *-Mac Studio*
 *-MacBook*
+*-IDEAPAD*
 
 # Environment and packaging caches
 .tox/
 .turbo/
 .hypothesis/
 .nyc_output/
+.pytest_temp/
+.pytest_tmp*/
 
 # Temporary, patch, editor and log artifacts
 *.tmp
@@ -74,6 +81,8 @@ uv.lock
 *.swp
 *~
 *.log
+Desktop.ini
+desktop.ini
 
 # Internal Plan-D working pointer (local development bookkeeping, not published)
 PLAN_D_POINTER.md

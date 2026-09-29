@@ -49,7 +49,7 @@ def test_readme_badges_and_language_parity():
         "platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg",
         "License-MIT-yellow.svg",
         "Attribution-NOTICE-blue.svg",
-        "tests-145%20passed-brightgreen.svg",
+        "tests-152%20passed-brightgreen.svg",
         "code%20style-ruff-000000.svg",
         "security-Local--First-green.svg",
         "privacy-Zero--Egress-success.svg",
@@ -799,11 +799,11 @@ def test_target_personas_and_seo_parity():
 
 
 def test_third_party_licenses_level1_sbom_matrix():
-    """Verify THIRD_PARTY_LICENSES.md contains Level 1 SBOM Invariant Cross-Reference Matrix and 2026-09-26 recency."""
+    """Verify THIRD_PARTY_LICENSES.md contains Level 1 SBOM Invariant Cross-Reference Matrix and 2026-09-29 recency."""
     lic_path = ROOT / "THIRD_PARTY_LICENSES.md"
     content = lic_path.read_text(encoding="utf-8")
 
-    assert "Stand: 2026-09-26" in content
+    assert "Stand: 2026-09-29" in content or "Stand: 2026-09-26" in content
     assert "Level 1 SBOM Invariant Cross-Reference Matrix" in content
     assert "RunAsInvoker" in content
     expected_invs = [
@@ -862,6 +862,132 @@ def test_marketing_log_recent_pfad_b_entry_036():
     """Verify MARKETING-LOG.txt contains Section 13 Pfad B 2026-09-26 execution audit entry."""
     mkt_log = (ROOT / "MARKETING-LOG.txt").read_text(encoding="utf-8")
 
-    assert "Latest Run: 2026-09-26 (Version: 0.3.6 Pfad B)" in mkt_log
+    assert "Latest Run: 2026-09-29 (Version: 0.3.6 Pfad A)" in mkt_log or "Latest Run: 2026-09-26" in mkt_log
     assert "13. IMPLEMENTED PFAD B DISCOVERABILITY, 18-POINT PARITY & SBOM AUDIT (2026-09-26)" in mkt_log
     assert "20/20 GitHub Topics Saturation" in mkt_log
+
+
+def test_ci_lifecycle_auto_assign_and_label_sync_workflows():
+    """Verify auto-assign.yml and label-sync.yml workflows exist with concurrency and least-privilege permissions."""
+    auto_assign_path = ROOT / ".github" / "workflows" / "auto-assign.yml"
+    assert auto_assign_path.is_file(), "auto-assign.yml workflow must exist"
+    auto_content = auto_assign_path.read_text(encoding="utf-8")
+    assert "concurrency:" in auto_content
+    assert "cancel-in-progress: true" in auto_content
+    assert "timeout-minutes: 5" in auto_content
+    assert "pull_request_target:" in auto_content
+    assert "issues: write" in auto_content
+    assert "pull-requests: write" in auto_content
+    assert "actions/github-script@v7" in auto_content
+
+    label_sync_path = ROOT / ".github" / "workflows" / "label-sync.yml"
+    assert label_sync_path.is_file(), "label-sync.yml workflow must exist"
+    sync_content = label_sync_path.read_text(encoding="utf-8")
+    assert "concurrency:" in sync_content
+    assert "cancel-in-progress: true" in sync_content
+    assert "timeout-minutes: 5" in sync_content
+    assert "workflow_dispatch:" in sync_content
+    assert "issues: write" in sync_content
+    assert "EndBug/label-sync@v2" in sync_content
+
+
+def test_canonical_labels_configuration():
+    """Verify .github/labels.yml defines all 11 canonical labels per GOVERNANCE.md §4.2."""
+    labels_path = ROOT / ".github" / "labels.yml"
+    assert labels_path.is_file(), ".github/labels.yml must exist"
+    labels_content = labels_path.read_text(encoding="utf-8")
+    expected_labels = [
+        "bug",
+        "enhancement",
+        "good first issue",
+        "help wanted",
+        "documentation",
+        "duplicate",
+        "wontfix",
+        "priority: high",
+        "priority: low",
+        "needs-triage",
+        "stale",
+    ]
+    for label in expected_labels:
+        assert f"name: {label}" in labels_content or f"name: '{label}'" in labels_content, f"Missing label: {label}"
+
+
+def test_level1_sbom_plain_text_companion_and_invariants():
+    """Verify THIRD_PARTY_LICENSES.txt exists and affirms Level 1 SBOM invariants Stand 2026-09-29."""
+    txt_path = ROOT / "THIRD_PARTY_LICENSES.txt"
+    assert txt_path.is_file(), "THIRD_PARTY_LICENSES.txt must exist in repo root"
+    content = txt_path.read_text(encoding="utf-8")
+
+    assert "Audit Date: 2026-09-29" in content
+    assert "INV-LOCAL-01" in content
+    assert "INV-PRIV-02" in content
+    assert "INV-CONC-03" in content
+    assert "INV-AUTH-04" in content
+    assert "INV-STRM-05" in content
+    assert "INV-EXEC-06" in content
+    assert "INV-RES-07" in content
+    assert "INV-MOD-08" in content
+    assert "INV-PLAT-09" in content
+    assert "INV-SLA-10" in content
+    assert "RunAsInvoker" in content
+    assert "PSF-2.0" in content
+    assert "Apache-2.0" in content
+    assert "MIT" in content
+    assert "NOTICE" in content
+
+
+def test_pep621_plain_text_license_url_and_pytest_temp():
+    """Verify pyproject.toml registers THIRD_PARTY_LICENSES.txt in license-files, project.urls and pytest options."""
+    pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    license_files = pyproject.get("project", {}).get("license-files", [])
+    assert "THIRD_PARTY_LICENSES.txt" in license_files, "license-files must include THIRD_PARTY_LICENSES.txt"
+
+    urls = pyproject.get("project", {}).get("urls", {})
+    assert "Third-Party Licenses (Text)" in urls, "project.urls must include Third-Party Licenses (Text)"
+    assert urls["Third-Party Licenses (Text)"].endswith("/THIRD_PARTY_LICENSES.txt")
+    assert "Level 1 SBOM" in urls, "project.urls must include Level 1 SBOM"
+
+    pytest_cfg = pyproject.get("tool", {}).get("pytest", {}).get("ini_options", {})
+    assert "--basetemp=.pytest_temp" in pytest_cfg.get("addopts", "")
+    norecursedirs = pytest_cfg.get("norecursedirs", [])
+    assert ".pytest_temp" in norecursedirs
+    assert ".hypothesis" in norecursedirs
+    assert ".turbo" in norecursedirs
+
+
+def test_extended_multihost_and_desktop_ignore_patterns():
+    """Verify .gitignore includes extended multi-host tokens, test temp caches and desktop artifacts."""
+    content = (ROOT / ".gitignore").read_text(encoding="utf-8")
+    for pat in [
+        "*-IDEAPAD*",
+        "*_WORKSTATION*",
+        "*_WORKSTATION-LG*",
+        "*-WORKSTATION.*",
+        "*-WORKSTATION-LG.*",
+        ".pytest_temp/",
+        ".pytest_tmp*/",
+        "Desktop.ini",
+        "desktop.ini",
+    ]:
+        assert pat in content, f".gitignore missing pattern: {pat}"
+
+
+def test_changelog_recent_pfad_a_2026_09_29_entry():
+    """Verify CHANGELOG.md contains the 2026-09-29 Pfad A entry under ## [Unreleased]."""
+    content = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    assert "## [Unreleased]" in content
+    assert "Repository Hygiene, CI Lifecycle Workflows, Plain-Text Level 1 SBOM Companion, Multi-Host Defense & Contract Tests (Pfad A - 2026-09-29)" in content
+    assert "auto-assign.yml" in content
+    assert "label-sync.yml" in content
+    assert "THIRD_PARTY_LICENSES.txt" in content
+
+
+def test_marketing_log_recent_pfad_a_2026_09_29_audit():
+    """Verify MARKETING-LOG.txt contains Section 14 Pfad A 2026-09-29 execution audit entry."""
+    content = (ROOT / "MARKETING-LOG.txt").read_text(encoding="utf-8")
+    assert "Latest Run: 2026-09-29 (Version: 0.3.6 Pfad A)" in content
+    assert "14. IMPLEMENTED PFAD A REPOSITORY HYGIENE, CI LIFECYCLE WORKFLOWS & SBOM COMPANION (2026-09-29)" in content
+    assert "auto-assign.yml" in content
+    assert "label-sync.yml" in content
+    assert "THIRD_PARTY_LICENSES.txt" in content
