@@ -8,7 +8,7 @@
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Attribution: NOTICE](https://img.shields.io/badge/Attribution-NOTICE-blue.svg)](NOTICE)
-[![Tests: 152 Passed](https://img.shields.io/badge/tests-152%20passed-brightgreen.svg)](tests/)
+[![Tests: 157 Passed](https://img.shields.io/badge/tests-157%20passed-brightgreen.svg)](tests/)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Security: Local--First](https://img.shields.io/badge/security-Local--First-green.svg)](SECURITY.md)
 [![Privacy: Zero--Egress](https://img.shields.io/badge/privacy-Zero--Egress-success.svg)](SECURITY.md)
@@ -17,7 +17,9 @@
 [![Ecosystem: ellmos-ai](https://img.shields.io/badge/ecosystem-ellmos--ai-purple.svg)](https://github.com/ellmos-ai)
 [![Umbrella: open-bricks](https://img.shields.io/badge/umbrella-open--bricks-blueviolet.svg)](https://github.com/open-bricks)
 [![LLM-Ready: llms.txt](https://img.shields.io/badge/LLM--Ready-llms.txt-orange.svg)](llms.txt)
-[![Verified](https://img.shields.io/badge/verified-2026--09--29-brightgreen.svg)](llms.txt)
+[![Verified](https://img.shields.io/badge/verified-2026--10--02-brightgreen.svg)](llms.txt)
+[![Contributing: Guide](https://img.shields.io/badge/contributing-guide-blue.svg)](CONTRIBUTING.md)
+[![Level 1 SBOM: Audited](https://img.shields.io/badge/Level%201%20SBOM-Plain--Text%20Audited-success.svg)](THIRD_PARTY_LICENSES.txt)
 [![Security SLA](https://img.shields.io/badge/security%20sla-48h%20response-blue.svg)](SECURITY.md)
 
 [English](README.md) | [Deutsch](README_de.md)
@@ -140,6 +142,49 @@ Detaillierte Vergleichsmatrizen und architektonische Benchmark-Profile finden si
 
 <a id="sec-05"></a><a id="architektur--systemübersicht"></a><a id="system-architecture"></a>
 ## 5. Visuelle Architektur & Systemübersicht
+
+### 4-Sichten-Architektur-Topologieprojektion (Four-View Topology)
+
+```text
++-------------------------------------------------------------------------------+
+|  SICHT 1: AUFRUFER-LAUFZEITEN, CLI-EINTRITTSPUNKTE & INTAKE-ADAPTER           |
+|  - Entwickler- & Dienst-CLI: ellmos-scheduler (tick, serve, add, list, status) |
+|  - Ökosystem-Adapter: BACH-Adapter, MarbleRun-Ketten, COMA-Provider           |
+|  - KI-Agenten-Clients: Claude Code, OpenAI Codex, Antigravity, Kimi Code      |
+|  - Qualitätstore & automatisierte Testsuiten: pytest, ruff, compileall        |
++---------------------------------------+---------------------------------------+
+                                        | ruft CLI auf / stößt Aufgaben an
+                                        v
++-------------------------------------------------------------------------------+
+|  SICHT 2: ELLMOS-SCHEDULER SOVERÄNE KERN-ENGINE & DISPATCH-ORCHESTRIERUNG     |
+|  - Deterministische Tick-Engine: Fälligkeitsprüfung, Cron/Intervall/Täglich    |
+|  - Atomare Nebenläufigkeits-Leases: Transaktionale SQLite-Claims & Reclaiming |
+|  - Preflight-Autoritäts-Prüfung: Zweifache Read-Passes & SHA-256-Integrität   |
+|  - Subprozess-Ausführungs-Dispatcher: CommandExecutor (sicheres argv, kein sh)|
+|  - Stream-Hygiene: striktes UTF-8-Decoding, Fail-Closed Timeout-Handling      |
++---------------------------------------+---------------------------------------+
+                                        | protokolliert Läufe / speichert Status
+                                        v
++-------------------------------------------------------------------------------+
+|  SICHT 3: LAUFZEIT-PERSISTENZ, LEBENSZYKLUS-LEDGER & AUDIT-VERZEICHNISSE      |
+|  - Soveräner SQLite-Statusspeicher: ~/.ellmos/scheduler.db (jobs, leases, runs)|
+|  - Unveränderliche kryptographische Belege: deterministische run_id, Hashes   |
+|  - Plain-Text Level 1 SBOM Ledger: THIRD_PARTY_LICENSES.txt (Stand 2026-10-02)|
+|  - Kontext-Index & Governance: llms.txt, ellmos-module.v2.json, NOTICE        |
++---------------------------------------+---------------------------------------+
+                                        | begrenzt / verifiziert & schützt
+                                        v
++-------------------------------------------------------------------------------+
+|  SICHT 4: AIR-GAP SICHERHEITSPERIMETER, RUNASINVOKER & ZERO-EGRESS-GRENZE     |
+|  - 100% Lokaler Offline-Betrieb & Null Netzwerk-Telemetrie (INV-LOCAL-01)     |
+|  - Nicht-privilegierte Ausführung (INV-PRIV-02, RunAsInvoker Benutzermodus)   |
+|  - Strikter Shell-Injektions-Schutz: ausschliesslich argv-Listen (INV-EXEC-06)|
+|  - Zero-Copyleft Isolations-Garantie: 100% Permissive Open Source (MIT, PSFL) |
+|  - Gesetzlicher Hinweis § 521 BGB Gefälligkeitsrecht & verbindliche 48h SLA   |
++-------------------------------------------------------------------------------+
+```
+
+### System-Architekturfluss
 
 ```mermaid
 graph TD

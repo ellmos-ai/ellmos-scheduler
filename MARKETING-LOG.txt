@@ -1,5 +1,5 @@
 # MARKETING-LOG: ellmos-scheduler
-Latest Run: 2026-09-29 (Version: 0.3.6 Pfad A)
+Latest Run: 2026-10-02 (Version: 0.3.6 Pfad B)
 Initial Baseline: 2026-09-11 (Version: 0.3.3)
 Operator: Antigravity / Gemini (via GITHUBBOT Pfad A / Pfad B)
 Target Repo: ellmos-ai/ellmos-scheduler
@@ -333,7 +333,39 @@ Long-Tail / Architecture Intent:
       PEP 621 URLs and pytest options, and extended .gitignore patterns.
 
 ================================================================================
-15. MANUAL / NON-AUTOMATED NEXT STEPS
+================================================================================
+15. IMPLEMENTED PFAD B DISCOVERABILITY, VISUAL ARCHITECTURE, FOUR-VIEW TOPOLOGY & CONTRIBUTING GUIDE (2026-10-02)
+================================================================================
+
+[x] Visual Architecture & ASCII Four-View Topology Projection:
+    - Added Section 05 ASCII Four-View Architectural Topology projection to README.md and README_de.md.
+    - View 1: Caller Runtimes, CLI Entrypoints & Intake Adapters (CLI, BACH, MarbleRun, COMA, Agent Clients).
+    - View 2: ellmos-scheduler Sovereign Core & Dispatch Orchestrator (Tick engine, atomic SQLite claims, SHA-256 preflight).
+    - View 3: Runtime Persistence, Lifecycle Ledgers & Audit Directories (scheduler.db, cryptographic receipts, Level 1 SBOM).
+    - View 4: Air-Gap Defense Perimeter, RunAsInvoker & Zero-Egress Boundary (100% offline, unprivileged token, strict argv).
+
+[x] Bilingual Contributor Guide (CONTRIBUTING.md):
+    - Created comprehensive English and German contributor guidelines in repository root.
+    - Embedded 10 Governance and Runtime Invariants (INV-LOCAL-01..INV-SLA-10) and unprivileged RunAsInvoker mandate.
+    - Documented local test setup, pytest execution, ruff static analysis, compileall verification, and version freeze discipline.
+
+[x] PEP 621 Standardized Metadata (pyproject.toml):
+    - Registered Contributing and Plain-Text License endpoints under [project.urls].
+    - Maintained strict version freeze at 0.3.6 per T-20260920-167562623.
+
+[x] Level 1 SBOM Re-Audit & Recency Stand 2026-10-02:
+    - Re-audited THIRD_PARTY_LICENSES.md and plain-text companion THIRD_PARTY_LICENSES.txt to Stand 2026-10-02.
+    - Verified all 10 invariants INV-LOCAL-01..INV-SLA-10, Zero-Copyleft isolation guarantee, and RunAsInvoker certification.
+
+[x] Machine-Readable Context Index & Badges:
+    - Updated llms.txt Last-checked date to 2026-10-02, indexing CONTRIBUTING.md and 4-view topology.
+    - Synchronized verified-2026-10-02, Contributing, and Level 1 SBOM Shields.io badges across README.md and README_de.md.
+
+[x] Automated Contract Testsuite Expansion (tests/test_metadata.py):
+    - Added new contract tests for ASCII 4-view topology parity EN/DE, CONTRIBUTING guide integrity,
+      PEP 621 endpoints, changelog Pfad B entry, marketing log audit recency, and version freeze discipline.
+
+16. MANUAL / NON-AUTOMATED NEXT STEPS
 ================================================================================
 1. PyPI Release Publication:
    - When ready for 0.4.0 or next release, trigger PyPI publish workflow.

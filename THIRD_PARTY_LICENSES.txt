@@ -3,7 +3,7 @@
 # =============================================================================
 # ellmos-scheduler is licensed under the MIT License.
 # Canonical Notice: NOTICE
-# Audit Date: 2026-09-29 (Audit History: 2026-09-26, 2026-09-23, 2026-09-14, 2026-09-11)
+# Audit Date: 2026-10-02 (Audit History: 2026-09-29, 2026-09-26, 2026-09-23, 2026-09-14, 2026-09-11)
 # Ecosystem: ellmos-ai | Umbrella: open-bricks (https://github.com/open-bricks)
 # This document provides the plain-text Level 1 SBOM companion inventory for all
 # runtime, packaging, development, and testing dependencies with license terms.
@@ -60,7 +60,7 @@ Constraint: >=0.6
 Description: High-performance Python linter and code formatting toolchain.
 
 # =============================================================================
-# Level 1 SBOM Invariant Compliance Status (Stand 2026-09-29):
+# Level 1 SBOM Invariant Compliance Status (Stand 2026-10-02):
 # =============================================================================
 # - INV-LOCAL-01: PASS (100% Local-First & Zero-Egress, No Outbound Network Telemetry)
 # - INV-PRIV-02:  PASS (Unprivileged RunAsInvoker Non-Elevation, Zero Admin/Root Requirement)

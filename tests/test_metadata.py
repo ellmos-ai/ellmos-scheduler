@@ -49,7 +49,7 @@ def test_readme_badges_and_language_parity():
         "platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg",
         "License-MIT-yellow.svg",
         "Attribution-NOTICE-blue.svg",
-        "tests-152%20passed-brightgreen.svg",
+        "tests-157%20passed-brightgreen.svg",
         "code%20style-ruff-000000.svg",
         "security-Local--First-green.svg",
         "privacy-Zero--Egress-success.svg",
@@ -803,7 +803,7 @@ def test_third_party_licenses_level1_sbom_matrix():
     lic_path = ROOT / "THIRD_PARTY_LICENSES.md"
     content = lic_path.read_text(encoding="utf-8")
 
-    assert "Stand: 2026-09-29" in content or "Stand: 2026-09-26" in content
+    assert any(s in content for s in ["Stand: 2026-10-02", "Stand: 2026-09-29", "Stand: 2026-09-26"])
     assert "Level 1 SBOM Invariant Cross-Reference Matrix" in content
     assert "RunAsInvoker" in content
     expected_invs = [
@@ -862,7 +862,7 @@ def test_marketing_log_recent_pfad_b_entry_036():
     """Verify MARKETING-LOG.txt contains Section 13 Pfad B 2026-09-26 execution audit entry."""
     mkt_log = (ROOT / "MARKETING-LOG.txt").read_text(encoding="utf-8")
 
-    assert "Latest Run: 2026-09-29 (Version: 0.3.6 Pfad A)" in mkt_log or "Latest Run: 2026-09-26" in mkt_log
+    assert any(s in mkt_log for s in ["Latest Run: 2026-10-02", "Latest Run: 2026-09-29", "Latest Run: 2026-09-26"])
     assert "13. IMPLEMENTED PFAD B DISCOVERABILITY, 18-POINT PARITY & SBOM AUDIT (2026-09-26)" in mkt_log
     assert "20/20 GitHub Topics Saturation" in mkt_log
 
@@ -919,7 +919,7 @@ def test_level1_sbom_plain_text_companion_and_invariants():
     assert txt_path.is_file(), "THIRD_PARTY_LICENSES.txt must exist in repo root"
     content = txt_path.read_text(encoding="utf-8")
 
-    assert "Audit Date: 2026-09-29" in content
+    assert any(s in content for s in ["Audit Date: 2026-10-02", "Audit Date: 2026-09-29"])
     assert "INV-LOCAL-01" in content
     assert "INV-PRIV-02" in content
     assert "INV-CONC-03" in content
@@ -986,8 +986,83 @@ def test_changelog_recent_pfad_a_2026_09_29_entry():
 def test_marketing_log_recent_pfad_a_2026_09_29_audit():
     """Verify MARKETING-LOG.txt contains Section 14 Pfad A 2026-09-29 execution audit entry."""
     content = (ROOT / "MARKETING-LOG.txt").read_text(encoding="utf-8")
-    assert "Latest Run: 2026-09-29 (Version: 0.3.6 Pfad A)" in content
+    assert any(s in content for s in ["Latest Run: 2026-10-02", "Latest Run: 2026-09-29"])
     assert "14. IMPLEMENTED PFAD A REPOSITORY HYGIENE, CI LIFECYCLE WORKFLOWS & SBOM COMPANION (2026-09-29)" in content
     assert "auto-assign.yml" in content
     assert "label-sync.yml" in content
     assert "THIRD_PARTY_LICENSES.txt" in content
+
+
+def test_ascii_four_view_architectural_topology_parity():
+    """Verify both README.md and README_de.md feature the 4-View Architectural Topology projection."""
+    readme_en = (ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (ROOT / "README_de.md").read_text(encoding="utf-8")
+
+    assert "### Four-View Architectural Topology Projection" in readme_en
+    assert "### 4-Sichten-Architektur-Topologieprojektion (Four-View Topology)" in readme_de
+
+    # English Views
+    assert "VIEW 1: CALLER RUNTIMES, CLI ENTRYPOINTS & INTAKE ADAPTERS" in readme_en
+    assert "VIEW 2: ELLMOS-SCHEDULER SOVEREIGN CORE & DISPATCH ORCHESTRATOR" in readme_en
+    assert "VIEW 3: RUNTIME PERSISTENCE, LIFECYCLE LEDGERS & AUDIT DIRECTORIES" in readme_en
+    assert "VIEW 4: AIR-GAP DEFENSE PERIMETER, RUNASINVOKER & ZERO-EGRESS BOUNDARY" in readme_en
+
+    # German Sichten
+    assert "SICHT 1: AUFRUFER-LAUFZEITEN, CLI-EINTRITTSPUNKTE & INTAKE-ADAPTER" in readme_de
+    assert "SICHT 2: ELLMOS-SCHEDULER SOVERÄNE KERN-ENGINE & DISPATCH-ORCHESTRIERUNG" in readme_de
+    assert "SICHT 3: LAUFZEIT-PERSISTENZ, LEBENSZYKLUS-LEDGER & AUDIT-VERZEICHNISSE" in readme_de
+    assert "SICHT 4: AIR-GAP SICHERHEITSPERIMETER, RUNASINVOKER & ZERO-EGRESS-GRENZE" in readme_de
+
+    # Key invariants referenced in topology
+    for inv in ["INV-LOCAL-01", "INV-PRIV-02", "INV-EXEC-06", "RunAsInvoker", "521 BGB"]:
+        assert inv in readme_en, f"README.md missing topology invariant: {inv}"
+        assert inv in readme_de, f"README_de.md missing topology invariant: {inv}"
+
+
+def test_contributing_guide_presence_and_pep621_urls():
+    """Verify CONTRIBUTING.md exists with bilingual guidelines and pyproject.urls registration."""
+    contrib_path = ROOT / "CONTRIBUTING.md"
+    assert contrib_path.is_file(), "CONTRIBUTING.md must exist in root"
+    content = contrib_path.read_text(encoding="utf-8")
+
+    assert "Contributing to ellmos-scheduler" in content
+    assert "[English](#english) | [Deutsch](#deutsch)" in content
+    assert "INV-LOCAL-01" in content
+    assert "RunAsInvoker" in content
+    assert "pytest" in content
+    assert "ruff check" in content
+
+    pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    urls = pyproject.get("project", {}).get("urls", {})
+    assert "Contributing" in urls, "project.urls must include Contributing endpoint"
+    assert urls["Contributing"].endswith("/CONTRIBUTING.md")
+    assert "Plain-Text License" in urls, "project.urls must include Plain-Text License endpoint"
+    assert urls["Plain-Text License"].endswith("/LICENSE")
+
+
+def test_changelog_recent_pfad_b_2026_10_02_entry():
+    """Verify CHANGELOG.md contains the 2026-10-02 Pfad B entry under ## [Unreleased]."""
+    content = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    assert "## [Unreleased]" in content
+    assert "Discoverability, Visual Architecture, ASCII Four-View Topology, Contributing Guide & Contract Tests (Pfad B - 2026-10-02)" in content
+    assert "CONTRIBUTING.md" in content
+    assert "ASCII 4-Sichten-Topologie" in content
+
+
+def test_marketing_log_recent_pfad_b_2026_10_02_audit():
+    """Verify MARKETING-LOG.txt contains Section 15 Pfad B 2026-10-02 execution audit entry."""
+    content = (ROOT / "MARKETING-LOG.txt").read_text(encoding="utf-8")
+    assert "Latest Run: 2026-10-02 (Version: 0.3.6 Pfad B)" in content
+    assert "15. IMPLEMENTED PFAD B DISCOVERABILITY, VISUAL ARCHITECTURE, FOUR-VIEW TOPOLOGY & CONTRIBUTING GUIDE (2026-10-02)" in content
+    assert "Four-View Architectural Topology" in content
+    assert "CONTRIBUTING.md" in content
+
+
+def test_version_freeze_discipline():
+    """Verify version 0.3.6 remains frozen per T-20260920-167562623 without unintended bumps."""
+    pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    manifest = json.loads((ROOT / "ellmos-module.v2.json").read_text(encoding="utf-8"))
+
+    assert __version__ == "0.3.6"
+    assert pyproject["project"]["version"] == "0.3.6"
+    assert manifest["version"] == "0.3.6"

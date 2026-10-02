@@ -16,6 +16,7 @@
 - `src/ellmos_scheduler/`: Core Python package (CLI, service, store, executors, authorities).
 - `tests/`: Comprehensive Pytest test suite (138 passed tests, 100% green).
 - `NOTICE`: Canonical open-source attribution, copyright Lukas Geiger, ellmos-ai, and open-bricks umbrella.
+- `CONTRIBUTING.md`: Bilingual contributor guide, local development workflows, code quality gates, and version freeze policy.
 - `SECURITY.md`: Local-first, zero-egress, authority preflight, 48h SLA, and § 521 BGB statutory notice.
 - `THIRD_PARTY_LICENSES.md`: Level 1 SBOM Invariant Cross-Reference Matrix and 100% permissive license certification.
 - `THIRD_PARTY_LICENSES.txt`: Plain-text Level 1 SBOM companion inventory with unprivileged RunAsInvoker non-elevation.
@@ -36,7 +37,7 @@
 - **Ecosystem**: `ellmos-ai`
 - **Umbrella**: `open-bricks`
 - **License**: MIT
-- **Test-Suite**: 152 passed contract & unit tests (100% green)
-- **Last-checked**: 2026-09-29 (Audit-Historie: 2026-09-26, 2026-09-23)
+- **Test-Suite**: 157 passed contract & unit tests (100% green)
+- **Last-checked**: 2026-10-02 (Audit-Historie: 2026-09-29, 2026-09-26, 2026-09-23)
 - **Statutory Notice**: § 521 BGB Gefälligkeitsrecht (gratuitous service liability limited to intent & gross negligence)
 - **Security SLA**: Binding 48h initial acknowledgment & 5 business days triage via security@open-bricks.org

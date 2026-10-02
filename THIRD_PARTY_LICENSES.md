@@ -1,6 +1,6 @@
 # Third-Party Licenses & Dependency Transparency
 
-Stand: 2026-09-29 (Audit-Historie: 2026-09-26, 2026-09-23, 2026-09-14, 2026-09-11)
+Stand: 2026-10-02 (Audit-Historie: 2026-09-29, 2026-09-26, 2026-09-23, 2026-09-14, 2026-09-11)
 Project: **ellmos-scheduler** (`ellmos-ai/ellmos-scheduler`)  
 Maintainer: Lukas Geiger / ellmos-ai Core Team  
 Ecosystem: [open-bricks](https://github.com/open-bricks)
