@@ -7,7 +7,7 @@
 - **Flexible Scheduling**: Supports `interval`, `daily` (time zone aware), and 5-field `cron` expressions.
 - **Lease & Claim Concurrency**: Atomic lease mechanism prevents duplicate execution across parallel scheduler workers.
 - **Authority Receipts**: Pre-execution verification of rule/policy/decision files with SHA-256 integrity hashing (`--require-authorities`).
-- **Executors & Adapters**: Native support for `command`/`subprocess`, `coma` AI provider execution, `marblerun` chains, and custom Python executor registries.
+- **Executors & Adapters**: Native support for `command`/`subprocess`, [COMA](https://github.com/ellmos-ai/coma) AI provider execution, `marblerun` chains, and custom Python executor registries.
 - **Fail-Closed Encoding**: Strict UTF-8 and configurable stream-safe encodings (CP1252, Latin-1, ASCII) with strict error handling.
 - **Windows Timezone Support**: Ships with `tzdata` fallback for reliable IANA time zones (e.g., `Europe/Berlin`) on Windows.
 - **Governance & Runtime Invariants**: Guarantees 10 foundational invariants (`INV-LOCAL-01` to `INV-SLA-10`) including zero-egress, non-elevation, atomic leases, and safe execution.
