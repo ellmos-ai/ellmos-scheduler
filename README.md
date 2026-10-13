@@ -432,6 +432,11 @@ ellmos-scheduler --db C:\state\scheduler.db import-bach `
 The Python entry point `create_bach_adapter(state_db)` provides the narrow
 consumer API that BACH can use behind its `scheduler_provider` seam.
 
+The `jobs()` projection keeps the newest run record (`last_run` and
+`last_result`) separate from `last_success`, the UTC `finished_at` of the
+successful run that completed most recently. `last_success` is `None` until a
+successful run finishes; a later failure does not clear the prior success.
+
 ---
 
 <a id="sec-13"></a><a id="bundles-and-partners"></a><a id="bundles"></a>

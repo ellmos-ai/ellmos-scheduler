@@ -328,3 +328,113 @@ def test_expired_claim_is_recovered_with_new_attempt(tmp_path):
     assert recovered[0]["scheduled_for"] == first[0]["scheduled_for"]
     assert recovered[0]["run_id"] != first[0]["run_id"]
     assert store.recent_runs()[1]["status"] == "abandoned"
+
+
+def test_latest_successful_runs_by_job_ignores_later_failures_and_incomplete_runs(
+    tmp_path,
+):
+    store = SchedulerStore(tmp_path / "scheduler.db")
+    store.init()
+    now = datetime(2026, 10, 13, 10, 0, tzinfo=UTC)
+    for job_id in ("alpha", "beta"):
+        store.add_job(
+            job_id,
+            {"kind": "interval", "seconds": 60},
+            "noop",
+            {},
+            now=now,
+            next_due_at=now,
+        )
+
+    def add_run(
+        run_id: str,
+        job_id: str,
+        scheduled_for: str,
+        attempt: int,
+        status: str,
+        started_at: str | None,
+        finished_at: str | None,
+    ) -> None:
+        with store.connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO runs(
+                    run_id, job_id, scheduled_for, attempt, claimed_by,
+                    lease_expires_at, status, started_at, finished_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    run_id,
+                    job_id,
+                    scheduled_for,
+                    attempt,
+                    "test-worker",
+                    "2026-10-13T10:15:00Z",
+                    status,
+                    started_at,
+                    finished_at,
+                ),
+            )
+
+    add_run(
+        "alpha-success-attempt-1",
+        "alpha",
+        "2026-10-13T10:00:00Z",
+        1,
+        "succeeded",
+        "2026-10-13T10:00:01Z",
+        "2026-10-13T10:00:02Z",
+    )
+    add_run(
+        "alpha-success-attempt-2",
+        "alpha",
+        "2026-10-13T10:00:00Z",
+        2,
+        "succeeded",
+        "2026-10-13T10:00:03Z",
+        "2026-10-13T10:00:04Z",
+    )
+    add_run(
+        "alpha-later-scheduled-earlier-finish",
+        "alpha",
+        "2026-10-13T10:00:30Z",
+        1,
+        "succeeded",
+        "2026-10-13T10:00:02Z",
+        "2026-10-13T10:00:03Z",
+    )
+    add_run(
+        "alpha-later-failure",
+        "alpha",
+        "2026-10-13T10:01:00Z",
+        1,
+        "failed",
+        "2026-10-13T10:01:01Z",
+        "2026-10-13T10:01:02Z",
+    )
+    add_run(
+        "alpha-incomplete",
+        "alpha",
+        "2026-10-13T10:02:00Z",
+        1,
+        "running",
+        "2026-10-13T10:02:01Z",
+        None,
+    )
+    add_run(
+        "beta-only-failure",
+        "beta",
+        "2026-10-13T10:00:00Z",
+        1,
+        "failed",
+        "2026-10-13T10:00:01Z",
+        "2026-10-13T10:00:02Z",
+    )
+
+    successes = store.latest_successful_runs_by_job()
+
+    assert set(successes) == {"alpha"}
+    assert successes["alpha"]["run_id"] == "alpha-success-attempt-2"
+    assert successes["alpha"]["attempt"] == 2
+    assert successes["alpha"]["finished_at"] == "2026-10-13T10:00:04Z"
+    assert store.latest_runs_by_job()["alpha"]["run_id"] == "alpha-incomplete"

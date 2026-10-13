@@ -442,8 +442,15 @@ class BachSchedulerAdapter:
         return {"provider": "ellmos-scheduler", **result}
 
     def jobs(self, *, now: datetime | None = None) -> list[dict[str, Any]]:
+        """Return job state with latest-attempt and latest-success fields separated.
+
+        last_run and last_result describe the newest run record. last_success
+        is the UTC finish time of the successful run that completed most
+        recently, or None if no completed success exists.
+        """
         stamp = (now or datetime.now(UTC)).astimezone(UTC)
         latest_runs = self.store.latest_runs_by_job()
+        latest_successful_runs = self.store.latest_successful_runs_by_job()
         result: list[dict[str, Any]] = []
         for row in self.store.list_jobs():
             payload = json.loads(row["payload_json"])
@@ -453,6 +460,7 @@ class BachSchedulerAdapter:
             enabled = bool(row["enabled"])
             due = parse_iso(row["next_due_at"]) <= stamp
             latest = latest_runs.get(str(row["id"]))
+            last_success = latest_successful_runs.get(str(row["id"]))
             last_status = None if latest is None else latest["status"]
             if not enabled:
                 status = "disabled"
@@ -478,6 +486,9 @@ class BachSchedulerAdapter:
                     if latest is None
                     else latest["finished_at"] or latest["started_at"],
                     "last_result": last_status,
+                    "last_success": None
+                    if last_success is None
+                    else last_success["finished_at"],
                 }
             )
         return result
