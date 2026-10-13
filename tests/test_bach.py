@@ -5,7 +5,7 @@ import json
 import os
 import sqlite3
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from ellmos_scheduler.bach import (
     BachSchedulerAdapter,
@@ -454,3 +454,82 @@ def test_import_bach_cli_dry_run_does_not_create_target(tmp_path, capsys):
     assert not target.exists()
     report = json.loads(capsys.readouterr().out)
     assert report["ready"] == 2
+
+
+def test_bach_jobs_project_last_success_separately_from_latest_run(tmp_path):
+    adapter = BachSchedulerAdapter(tmp_path / "state.db", worker_id="bach-history")
+    local_tz = timezone(timedelta(hours=2))
+    base = datetime(2026, 7, 28, 12, 0, tzinfo=local_tz)
+    interval = {"kind": "interval", "seconds": 60}
+    for job_id in ("sequence", "recovers", "incomplete", "never", "completion_order"):
+        adapter.store.add_job(
+            job_id,
+            interval,
+            "noop",
+            {},
+            now=base,
+            next_due_at=base,
+        )
+
+    def record_run(
+        job_id: str,
+        scheduled_at: datetime,
+        status: str | None,
+        *,
+        finished_at: datetime | None = None,
+    ) -> None:
+        claims = adapter.store.claim_due(
+            "history-test-worker", now=scheduled_at, job_ids=[job_id]
+        )
+        assert len(claims) == 1
+        run_id = claims[0]["run_id"]
+        adapter.store.start_run(run_id, now=scheduled_at + timedelta(seconds=1))
+        if status is not None:
+            adapter.store.finish_run(
+                run_id,
+                status,
+                now=finished_at or scheduled_at + timedelta(seconds=2),
+            )
+
+    record_run("sequence", base, "succeeded")
+    record_run("sequence", base + timedelta(minutes=1), "failed")
+    record_run("recovers", base, "failed")
+    record_run("recovers", base + timedelta(minutes=1), "succeeded")
+    record_run("incomplete", base, "succeeded")
+    record_run("incomplete", base + timedelta(minutes=1), None)
+    record_run("never", base, "failed")
+    record_run(
+        "completion_order",
+        base,
+        "succeeded",
+        finished_at=base + timedelta(minutes=10, microseconds=1),
+    )
+    record_run(
+        "completion_order",
+        base + timedelta(minutes=1),
+        "succeeded",
+        finished_at=base + timedelta(minutes=10),
+    )
+
+    before = adapter.store.recent_runs()
+    jobs = {
+        row["scheduler_id"]: row
+        for row in adapter.jobs(now=base + timedelta(minutes=2))
+    }
+    after = adapter.store.recent_runs()
+
+    assert before == after
+    assert jobs["sequence"]["status"] == "error"
+    assert jobs["sequence"]["last_result"] == "failed"
+    assert jobs["sequence"]["last_run"] == "2026-07-28T10:01:02Z"
+    assert jobs["sequence"]["last_success"] == "2026-07-28T10:00:02Z"
+    assert jobs["recovers"]["last_result"] == "succeeded"
+    assert jobs["recovers"]["last_success"] == "2026-07-28T10:01:02Z"
+    assert jobs["incomplete"]["last_result"] == "running"
+    assert jobs["incomplete"]["last_run"] == "2026-07-28T10:01:01Z"
+    assert jobs["incomplete"]["last_success"] == "2026-07-28T10:00:02Z"
+    assert jobs["never"]["last_result"] == "failed"
+    assert jobs["never"]["last_success"] is None
+    assert jobs["completion_order"]["last_result"] == "succeeded"
+    assert jobs["completion_order"]["last_run"] == "2026-07-28T10:10:00Z"
+    assert jobs["completion_order"]["last_success"] == "2026-07-28T10:10:00.000001Z"

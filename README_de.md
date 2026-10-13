@@ -436,6 +436,13 @@ Der Python-Einstiegspunkt `create_bach_adapter(state_db)` stellt die schmale
 Konsumenten-API bereit, die BACH hinter seiner `scheduler_provider`-Schnittstelle
 nutzen kann.
 
+Die `jobs()`-Projektion trennt den neuesten Run-Eintrag (`last_run` und
+`last_result`) von `last_success`: Das Feld enthält den UTC-Zeitstempel
+`finished_at` des erfolgreich abgeschlossenen Laufs mit dem jüngsten
+Abschlusszeitpunkt. Solange kein erfolgreicher Lauf beendet wurde, ist
+`last_success` `None`; ein späterer Fehler löscht den früheren Erfolgszeitpunkt
+nicht.
+
 ---
 
 <a id="sec-13"></a><a id="bundles-und-partner"></a><a id="bundles"></a>

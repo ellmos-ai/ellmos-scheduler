@@ -501,6 +501,37 @@ class SchedulerStore:
             ).fetchall()
         return {str(row["job_id"]): dict(row) for row in rows}
 
+    def latest_successful_runs_by_job(self) -> dict[str, dict[str, Any]]:
+        """Return each job's latest success by completion time in one read pass.
+
+        Store-written timestamps are normalized to UTC ISO values. If completion
+        times tie, scheduled time, attempt, and run ID provide stable ordering.
+        """
+        ranked: dict[
+            str, tuple[tuple[datetime, datetime, int, str], dict[str, Any]]
+        ] = {}
+        with self.connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT r.*
+                FROM runs r
+                WHERE r.status = 'succeeded' AND r.finished_at IS NOT NULL
+                """
+            )
+            for row in rows:
+                run = dict(row)
+                job_id = str(run["job_id"])
+                rank = (
+                    parse_iso(str(run["finished_at"])),
+                    parse_iso(str(run["scheduled_for"])),
+                    int(run["attempt"]),
+                    str(run["run_id"]),
+                )
+                previous = ranked.get(job_id)
+                if previous is None or rank > previous[0]:
+                    ranked[job_id] = (rank, run)
+        return {job_id: run for job_id, (_, run) in ranked.items()}
+
     def status(self) -> dict[str, Any]:
         with self.connect() as conn:
             jobs = conn.execute(
