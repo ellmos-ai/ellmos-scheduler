@@ -486,6 +486,7 @@ Teil der [ellmos-ai](https://github.com/ellmos-ai) Multi-Agenten-Infrastruktur u
 | [automizer-for-claude-desktop](https://github.com/dev-bricks/automizer-for-claude-desktop) | dev-bricks | Aufgabenautomations-Manager für Claude Desktop |
 | [DevCenter](https://github.com/dev-bricks/DevCenter) | dev-bricks | Entwickler-Leitstand, Repository-Dashboard & Umgebungskontrolle |
 | [CodeBox](https://github.com/dev-bricks/CodeBox) | dev-bricks | Polyglotter Code-Snippet-Manager & Entwickler-Werkbank |
+| [FolderHome](https://github.com/ellmos-ai/FolderHome) | ellmos-ai | Führt dieses Repository mit einem gepinnten Quellstand für die deklarierten Fähigkeiten `scheduler.jobs.register` und `scheduler.jobs.consume` auf; der [Provider-Checkout-Leitfaden](https://github.com/ellmos-ai/FolderHome/blob/main/docs/provider-checkouts.md) beschreibt den Bezug. |
 | [open-bricks](https://github.com/open-bricks) | open-bricks | Dachkatalog für Open-Source-Bausteine, Werkzeuge und Bibliotheken |
 
 ---
