@@ -24,7 +24,7 @@
 
 - [ ] **TASK-SCHED-05: Private POSIX-Zustandsdateien** (`effort=medium`, `scope=store`, priority `high`).
   - **Befund:** `SchedulerStore.connect()` erzeugt bei umask 022 einen Zustandsordner mit 0755 und SQLite mit 0644. Andere lokale Benutzer können Payloads und Run-Ausgaben lesen, wenn alle Vorfahren durchsuchbar sind. Ein Home mit 0700 schützt den Standardpfad. Keine Windows-ACL- oder Remote-Exposition belegt.
-  - **Nächster Schritt:** Neue moduleigene Ordner mit 0700 und Datenbanken atomar mit 0600 anlegen; WAL/SHM und umask 022 testen. Bestehende gemeinsam genutzte Verzeichnisse nicht pauschal chmod ändern.
+  - **Korrekturzweig vom 16.10.2026:** Neue moduleigene Verzeichnisse einschließlich Zwischenverzeichnissen erhalten 0700; neue Datenbanken werden exklusiv mit 0600 angelegt. Regressionen prüfen umask 022, WAL/SHM, Wiederöffnen und unveränderte gemeinsame Verzeichnisse. Bestehende Datenbankrechte werden nicht migriert. Unabhängige Prüfung und Integration stehen aus; deshalb bleibt der Punkt offen.
 
 - [ ] **TASK-SCHED-06: Sicherheitsversprechen gegen konkrete Kontrollen abgleichen** (`effort=medium`, `scope=documentation`, priority `normal`).
   - **Befund:** CLI `status`/`authority-receipt` initialisieren den Store; externe Executoren unterliegen keiner Scheduler-Netzwerksperre; Receipts sind Hashbelege und keine Signaturen oder unveränderliche Ablage. Absolute Datei-URIs und vollständige Payloads bleiben lokal gespeichert. Kein belegter Autorisierungsbypass.

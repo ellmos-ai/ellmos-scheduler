@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Private POSIX state creation
+- Create every missing state directory with mode 0700 and exclusively create new SQLite databases with mode 0600 before opening them. Keep existing directory/database permissions and Windows ACL behavior unchanged; cover live WAL/SHM, repeated opens and in-memory connections.
+
 ### Documentation privacy (2026-10-16)
 - Replace the developer's private home path in both Quick Start examples and the local clone path in the marketing log with neutral placeholders. Runtime behavior and version 0.3.6 are unchanged.
 
