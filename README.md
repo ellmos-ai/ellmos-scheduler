@@ -340,11 +340,17 @@ children cannot hold capture pipes open. Success confirms dispatch, not chain
 completion; inspect MarbleRun for that result. Failed or timed-out dispatches
 retain owned-work cleanup. Successfully delegated work is outside this lifetime.
 
-If a claimed run has already changed state, `tick` reports `status: conflict`,
+If a claimed run has changed state or its lease has expired before start, `tick` reports `status: conflict`,
 `phase: run-state-conflict` and the observed stored status. It does not overwrite
 the original/retry record or claim the late execution as success, and continues
 with other claimed jobs. Other storage errors still propagate. This handles stale
 record transitions; it does not stop external work or provide lease-expiry fencing.
+
+Due times, lease boundaries and run history compare normalized UTC instants with
+microsecond precision, including legacy timestamps with or without fractional
+seconds. Stored timestamps and run IDs are not rewritten. A claim may start at
+its exact expiry instant (the existing equality rule), but not afterward. This
+admission check does not renew the lease or cancel work that has already started.
 
 Registered adapter examples:
 

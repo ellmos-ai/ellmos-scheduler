@@ -344,13 +344,20 @@ Startauftrag, nicht den Abschluss der Kette; diesen zeigt MarbleRun an. Fehlgesc
 oder abgelaufene Startaufträge behalten die Bereinigung eigener Arbeit bei.
 Erfolgreich übergebene Arbeit liegt außerhalb dieser Lebenszyklusbegrenzung.
 
-Hat ein beanspruchter Lauf inzwischen seinen Zustand gewechselt, meldet `tick`
+Hat ein beanspruchter Lauf inzwischen seinen Zustand gewechselt oder ist seine Lease vor dem Start abgelaufen, meldet `tick`
 `status: conflict`, `phase: run-state-conflict` und den beobachteten gespeicherten
 Status. Ursprünglicher Lauf und Wiederholung werden nicht überschrieben; ein
 verspätetes Ergebnis gilt nicht als Erfolg dieses Ticks. Andere beanspruchte Jobs
 werden weiterbearbeitet. Andere Speicherfehler werden weiterhin ausgelöst.
 Dies behandelt veraltete Datensatzübergänge, stoppt aber keine externe Arbeit und
 ersetzt kein Fencing beim Lease-Ablauf.
+
+Fälligkeiten, Lease-Grenzen und Laufhistorien vergleichen normalisierte UTC-Zeitpunkte
+mit Mikrosekundenpräzision, auch bei älteren Zeitstempeln mit oder ohne Nachkommastellen.
+Gespeicherte Zeitstempel und Run-IDs werden nicht umgeschrieben. Am exakten
+Ablaufzeitpunkt bleibt ein Start nach der bestehenden Gleichheitsregel zulässig,
+danach nicht mehr. Diese Startprüfung verlängert keine Lease und beendet keine
+bereits gestartete Arbeit.
 
 Beispiele registrierter Adapter:
 
