@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Existing-state inspection
+- Open inspection queries read-only, retain committed WAL data and a consistent transaction snapshot, and remove implicit CLI initialization/migration. Missing, incompatible or corrupt state and missing run receipts produce an explicit CLI error instead of fabricated empty state.
+
 ### Private POSIX state creation
 - Create every missing state directory with mode 0700 and exclusively create new SQLite databases with mode 0600 before opening them. Keep existing directory/database permissions and Windows ACL behavior unchanged; cover live WAL/SHM, repeated opens and in-memory connections.
 

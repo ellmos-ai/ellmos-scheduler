@@ -6,14 +6,24 @@ import os
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import Any, Iterator, Sequence
+from urllib.parse import quote
 
 from .authorities import DEFAULT_AUTHORITY_REGISTRY, AuthorityResolverRegistry
 from .schedules import next_after
 
 
 UTC = timezone.utc
+
+
+def _readonly_uri(path: PurePath) -> str:
+    uri = path.as_uri()
+    if path.drive.startswith("\\\\"):
+        # Keep UNC slashes in the decoded filename, not in URI authority.
+        # SQLite rejects non-localhost authorities in its default build.
+        uri = "file:%2F%2F" + quote(path.as_posix()[2:], safe="/:")
+    return uri + "?mode=ro"
 
 
 def _private_directory(path: Path) -> None:
@@ -115,6 +125,20 @@ class SchedulerStore:
         finally:
             conn.close()
 
+    @contextmanager
+    def read_connection(self) -> Iterator[sqlite3.Connection]:
+        """Inspect existing state without creating or migrating the database."""
+        if str(self.path) == ":memory:":
+            raise sqlite3.OperationalError("in-memory state has no persistent inspection connection")
+        conn = sqlite3.connect(_readonly_uri(self.path.resolve()), uri=True)
+        try:
+            conn.row_factory = sqlite3.Row
+            conn.execute("PRAGMA query_only = ON")
+            conn.execute("BEGIN")
+            yield conn
+        finally:
+            conn.close()
+
     def init(self) -> None:
         with self.connect() as conn:
             conn.executescript(SCHEMA)
@@ -195,7 +219,7 @@ class SchedulerStore:
             )
 
     def list_jobs(self) -> list[dict[str, Any]]:
-        with self.connect() as conn:
+        with self.read_connection() as conn:
             rows = conn.execute("SELECT * FROM jobs ORDER BY id").fetchall()
         return [dict(row) for row in rows]
 
@@ -482,7 +506,7 @@ class SchedulerStore:
                 raise RuntimeError(f"run cannot finish: {run_id}")
 
     def recent_runs(self, limit: int = 20) -> list[dict[str, Any]]:
-        with self.connect() as conn:
+        with self.read_connection() as conn:
             rows = conn.execute(
                 "SELECT * FROM runs ORDER BY scheduled_for DESC, attempt DESC LIMIT ?",
                 (limit,),
@@ -490,7 +514,7 @@ class SchedulerStore:
         return [dict(row) for row in rows]
 
     def authority_receipt(self, run_id: str) -> dict[str, Any]:
-        with self.connect() as conn:
+        with self.read_connection() as conn:
             row = conn.execute(
                 """
                 SELECT run_id, job_id, scheduled_for, status,
@@ -507,7 +531,7 @@ class SchedulerStore:
         return result
 
     def latest_runs_by_job(self) -> dict[str, dict[str, Any]]:
-        with self.connect() as conn:
+        with self.read_connection() as conn:
             rows = conn.execute(
                 """
                 SELECT r.*
@@ -532,7 +556,7 @@ class SchedulerStore:
         ranked: dict[
             str, tuple[tuple[datetime, datetime, int, str], dict[str, Any]]
         ] = {}
-        with self.connect() as conn:
+        with self.read_connection() as conn:
             rows = conn.execute(
                 """
                 SELECT r.*
@@ -555,7 +579,7 @@ class SchedulerStore:
         return {job_id: run for job_id, (_, run) in ranked.items()}
 
     def status(self) -> dict[str, Any]:
-        with self.connect() as conn:
+        with self.read_connection() as conn:
             jobs = conn.execute(
                 "SELECT COUNT(*) total, SUM(enabled) enabled FROM jobs"
             ).fetchone()

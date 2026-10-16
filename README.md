@@ -309,6 +309,12 @@ ellmos-scheduler --db "$env:LOCALAPPDATA\ellmos\scheduler.db" status --json
 ellmos-scheduler --db "$env:LOCALAPPDATA\ellmos\scheduler.db" serve --require-authorities
 ```
 
+`status`, `jobs`, `runs`, and `authority-receipt` inspect existing state through
+read-only SQLite connections. They preserve job/run records and schema, including
+committed live WAL data. A missing, incompatible or corrupt database produces an
+error (exit code 2); create or migrate it explicitly with `init`. SQLite may maintain
+WAL coordination files during reads. Database inspection does not start jobs.
+
 For prepared cutover or shadow jobs, `add --disabled` materializes the record
 atomically in its disabled state. This prevents a parallel scheduler from
 claiming the new job in the interval between `add` and `disable`. Enable it

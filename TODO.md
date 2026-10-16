@@ -28,7 +28,8 @@
 
 - [ ] **TASK-SCHED-06: Sicherheitsversprechen gegen konkrete Kontrollen abgleichen** (`effort=medium`, `scope=documentation`, priority `normal`).
   - **Befund:** CLI `status`/`authority-receipt` initialisieren den Store; externe Executoren unterliegen keiner Scheduler-Netzwerksperre; Receipts sind Hashbelege und keine Signaturen oder unveränderliche Ablage. Absolute Datei-URIs und vollständige Payloads bleiben lokal gespeichert. Kein belegter Autorisierungsbypass.
-  - **Nächster Schritt:** EN/DE/SECURITY/SBOM-Claims präzisieren und echte Read-only-Inspektion separat implementieren. Ressourcen-/Prozessbaum- und Lease-Grenzen gezielt testen; `.sqlite`/`.sqlite3`, Authdateien und Beispiele beim Gitignore prüfen.
+  - **Korrekturzweig vom 16.10.2026:** Die vier Inspektionsbefehle lesen mit `mode=ro` ohne Initialisierung/Migration und melden fehlende oder unpassende Zustände ausdrücklich. Regressionen prüfen aktuelle WAL-Daten und konsistente Snapshots; EN/DE/SECURITY beschreiben den Umfang. Unabhängige Prüfung und Integration stehen aus.
+  - **Weiter offen:** Übrige EN/DE/SECURITY/SBOM-Claims zu Netzwerkgrenzen, gespeicherten Inhalten und Belegintegrität präzisieren. Ressourcen-/Prozessbaum- und Lease-Grenzen gezielt testen; `.sqlite`/`.sqlite3`, Authdateien und Beispiele beim Gitignore prüfen.
 
 - [ ] **TASK-SCHED-07: CI-Dependency-Hinweise verifizieren** (`effort=medium`, `scope=ci`, priority `normal`).
   - **Befund vom 16.10.2026:** OSV meldet `wheel==0.45.1` (GHSA-8rrh-rw8j-w5fx) und `setuptools==80.9.0` (GHSA-h35f-9h28-mq5c). Betroffene `wheel unpack`- bzw. macOS-MANIFEST/sdist-Aufrufe sind im aktuellen Wheel-CI nicht belegt; kein Advisory-Gesamt-PASS. Lokales tzdata 2026.2 liegt hinter PyPI 2026.5.
