@@ -133,7 +133,7 @@ The following ten identifiers describe implemented mechanisms and their boundari
 | `INV-AUTH-04` **4. Double Read-Only Authority Preflight** | Integrity Guard | Mandatory authority files are read twice and validated against cryptographic SHA-256 integrity checksums prior to job dispatch. |
 | `INV-STRM-05` **5. Strict UTF-8 & Fail-Closed Decoding** | Stream Hygiene | Subprocess output decoding enforces strict error handling (`utf-8:strict`), terminating corrupted outputs cleanly instead of corrupting audit logs. |
 | `INV-EXEC-06` **6. Shell-Free Safe Process Invocation** | Execution Security | Process invocations accept explicit `argv` lists only, completely avoiding shell string interpolation (`shell=False`). |
-| `INV-RES-07` **7. Timeout reports & abandoned leases** | Process Resilience | The command executor has a direct-process timeout; expired claims may become abandoned. Descendant/resource bounds need separate validation. |
+| `INV-RES-07` **7. Timeout reports & abandoned leases** | Process Resilience | Command execution owns a Windows Job or POSIX session group and bounds captured output. Escaped work, custom executors and lease fencing require separate controls. |
 | `INV-MOD-08` **8. Declarative Modular Integration** | Decoupled Architecture | Pluggable executor registry, external authority resolvers, and clean decoupling outside monoliths (e.g. BACH). |
 | `INV-PLAT-09` **9. Native platform test matrix** | Platform Portability | CI exercises Python 3.10/3.13 on Windows, Linux and macOS. Platform-specific skips and actual device/provider acceptance remain separate. |
 | `INV-SLA-10` **10. Audit records & hashes** | Auditability | Local run records and SHA-256 hashes bind observed bytes; no digital signature or append-only storage is implemented. DB writers can modify history. |
@@ -321,7 +321,26 @@ claiming the new job in the interval between `add` and `disable`. Enable it
 later explicitly with `enable <job-id>`.
 
 `command` and its equivalent name `subprocess` accept only an `argv` list and
-start without a shell. `noop`, `coma`, and `marblerun` are registered as well:
+start without a shell. `noop`, `coma`, and `marblerun` are registered as well.
+
+Commands are noninteractive: stdin is closed. Captured stdout and stderr share
+a 16 MiB raw-byte limit; exceeding it fails the run. The execution deadline also
+covers inherited output pipes, followed by a cleanup budget of at most 20 seconds
+under a responsive OS. Remaining owned work is stopped at completion, timeout or
+controller death: Windows uses an anonymous non-breakaway Job assigned before
+producer release; a POSIX gate signals its own session group when the control pipe
+closes. Unconfirmed cleanup is a failure. POSIX programs that deliberately leave
+the group, brokered services and custom executors require separate controls;
+this adds no general CPU/memory or privilege sandbox. Database output/error
+retention remains 20,000 characters per field.
+
+An explicit MarbleRun `background: true` dispatch delegates remaining work only
+after its CLI exits successfully. Its stdout/stderr are discarded so background
+children cannot hold capture pipes open. Success confirms dispatch, not chain
+completion; inspect MarbleRun for that result. Failed or timed-out dispatches
+retain owned-work cleanup. Successfully delegated work is outside this lifetime.
+
+Registered adapter examples:
 
 ```json
 {"executor":"coma","payload":{"provider":"codex","prompt":"Check the build","cwd":"C:\\repo"}}

@@ -422,9 +422,10 @@ def test_coma_result_booleans_are_not_coerced(monkeypatch):
 def test_marble_run_adapter_builds_safe_cli_argv(monkeypatch):
     captured = {}
 
-    def fake_subprocess(payload, timeout):
+    def fake_subprocess(payload, timeout, *, _detach_on_success=False):
         captured.update(payload)
         captured["timeout"] = timeout
+        captured["detach_on_success"] = _detach_on_success
         return ExecutionResult("succeeded", 0)
 
     monkeypatch.setattr(adapters, "command_executor", fake_subprocess)
@@ -451,6 +452,7 @@ def test_marble_run_adapter_builds_safe_cli_argv(monkeypatch):
     assert captured["cwd"] == "C:\\marblerun"
     assert captured["env"] == {"MODE": "test"}
     assert captured["timeout"] == 45
+    assert captured["detach_on_success"] is True
 
 
 def test_marble_run_background_requires_json_boolean():

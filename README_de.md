@@ -133,7 +133,7 @@ Die folgenden zehn Kennungen beschreiben implementierte Mechanismen und ihre Gre
 | `INV-AUTH-04` **4. Zweifache Read-Only Authority-Prüfung** | Integritätsschutz | Vorgeschriebene Authority-Dateien werden zweifach eingelesen und vor der Ausführung via SHA-256 kryptographisch validiert. |
 | `INV-STRM-05` **5. Strikte UTF-8- & Fail-Closed Kodierung** | Datenstrom-Hygiene | Subprozess-Ausgaben erzwingen strikte Fehlerbehandlung (`utf-8:strict`), fehlerhafte Kodierungen brechen den Lauf sauber ab. |
 | `INV-EXEC-06` **6. Shell-freie sichere Prozessausführung** | Prozesssicherheit | Befehlsausführungen akzeptieren ausschließlich explizite `argv`-Listen und vermeiden Shell-Interpolationen (`shell=False`). |
-| `INV-RES-07` **7. Timeout-Meldungen & abgelaufene Leases** | Prozessverhalten | Der Command-Executor hat einen Timeout für den direkten Prozess; abgelaufene Claims können abandoned werden. Grenzen für Nachkommen und Ressourcen benötigen separate Validierung. |
+| `INV-RES-07` **7. Timeout-Meldungen & abgelaufene Leases** | Prozessverhalten | Die Befehlsausführung besitzt einen Windows-Job oder eine POSIX-Sitzungsgruppe und begrenzt erfasste Ausgaben. Abgetrennte Arbeit, eigene Executoren und Lease-Fencing benötigen separate Kontrollen. |
 | `INV-MOD-08` **8. Deklarative modulare Entkopplung** | Modulare Architektur | Steckbare Executor-Registry, externe Authority-Resolver und saubere Trennung außerhalb monolithischer Blöcke (z. B. BACH). |
 | `INV-PLAT-09` **9. Native Plattform-Testmatrix** | Portabilität | CI prüft Python 3.10/3.13 auf Windows, Linux und macOS. Plattformspezifische Auslassungen und tatsächliche Geräte-/Provider-Abnahme bleiben getrennt. |
 | `INV-SLA-10` **10. Audit-Datensätze & Hashes** | Nachvollziehbarkeit | Lokale Laufdatensätze und SHA-256-Hashes binden beobachtete Bytes; digitale Signaturen und append-only Speicherung sind nicht implementiert. DB-Schreibberechtigte können die Historie verändern. |
@@ -322,7 +322,29 @@ Scheduler den Job im Intervall zwischen `add` und `disable` anstößt. Später
 explizit aktivieren mit `enable <job-id>`.
 
 `command` und `subprocess` akzeptieren ausschließlich eine `argv`-Liste und starten
-ohne Shell. `noop`, `coma` und `marblerun` sind standardmäßig registriert:
+ohne Shell. `noop`, `coma` und `marblerun` sind standardmäßig registriert.
+
+Befehle laufen ohne interaktive Eingabe; stdin ist geschlossen. Für erfasstes
+stdout und stderr gilt zusammen eine Grenze von 16 MiB Rohbytes. Ein Überschreiten
+lässt den Lauf fehlschlagen. Die Ausführungsfrist umfasst auch geerbte Ausgabepipes;
+danach folgt bei reagierendem Betriebssystem ein Bereinigungsbudget von höchstens
+20 Sekunden. Verbliebene eigene Arbeit wird bei Abschluss, Timeout oder Tod des
+Controllers gestoppt: Windows verwendet einen anonymen Job ohne Breakaway, der vor
+Freigabe des Programms zugeordnet wird. Ein POSIX-Gate signalisiert beim Schließen
+der Kontrollpipe seine eigene Sitzungsgruppe. Unbestätigte Bereinigung gilt als
+Fehler. Absichtlich abgetrennte POSIX-Prozesse, vermittelte Dienste und eigene
+Executoren benötigen separate Kontrollen; eine allgemeine CPU-/Speicher- oder
+Rechtesandbox entsteht nicht. Die Datenbank behält weiterhin höchstens 20.000 Zeichen
+je Ausgabe-/Fehlerfeld.
+
+Ein ausdrücklicher MarbleRun-Aufruf mit `background: true` übergibt verbliebene
+Arbeit erst nach erfolgreichem Ende seiner CLI. stdout/stderr werden verworfen,
+damit Hintergrundprozesse keine Ausgabepipes offen halten. Erfolg bestätigt den
+Startauftrag, nicht den Abschluss der Kette; diesen zeigt MarbleRun an. Fehlgeschlagene
+oder abgelaufene Startaufträge behalten die Bereinigung eigener Arbeit bei.
+Erfolgreich übergebene Arbeit liegt außerhalb dieser Lebenszyklusbegrenzung.
+
+Beispiele registrierter Adapter:
 
 ```json
 {"executor":"coma","payload":{"provider":"codex","prompt":"Check the build","cwd":"C:\\repo"}}

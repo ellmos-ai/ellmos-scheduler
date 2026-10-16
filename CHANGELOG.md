@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Owned command lifetime and bounded capture
+- Preserve explicit MarbleRun background dispatch through ownership handoff after CLI success; discard dispatch streams and distinguish dispatch from chain completion. Failed dispatches remain contained.
+- Bind a trusted Windows gate before producer release, stop owned work with Job/group control on completion, timeout and controller death, and cap combined captured stdout/stderr at 16 MiB. Commands now receive closed stdin. Cleanup failures remain failures; POSIX group escape, custom executors and lease fencing require separate controls.
+
 ### Security claim boundaries
 - Align EN/DE, security policy and declared dependency inventories with actual caller/network permissions, stored sensitive data, mutable hash records and tested platform scope. Keep unresolved resource/lease and dependency audit work open.
 
