@@ -11,15 +11,15 @@
 [![Tests: 157 Passed](https://img.shields.io/badge/tests-157%20passed-brightgreen.svg)](tests/)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Security: Local--First](https://img.shields.io/badge/security-Local--First-green.svg)](SECURITY.md)
-[![Privacy: Zero--Egress](https://img.shields.io/badge/privacy-Zero--Egress-success.svg)](SECURITY.md)
-[![Third-Party: Audited](https://img.shields.io/badge/third--party-audited-success.svg)](THIRD_PARTY_LICENSES.md)
+[![Privacy: Local--State](https://img.shields.io/badge/privacy-Local--State-blue.svg)](SECURITY.md)
+[![Third-Party: Inventory](https://img.shields.io/badge/third--party-inventory-blue.svg)](THIRD_PARTY_LICENSES.md)
 [![Marketing: Logged](https://img.shields.io/badge/marketing-logged-blue.svg)](MARKETING-LOG.txt)
 [![Ecosystem: ellmos-ai](https://img.shields.io/badge/ecosystem-ellmos--ai-purple.svg)](https://github.com/ellmos-ai)
 [![Umbrella: open-bricks](https://img.shields.io/badge/umbrella-open--bricks-blueviolet.svg)](https://github.com/open-bricks)
 [![LLM-Ready: llms.txt](https://img.shields.io/badge/LLM--Ready-llms.txt-orange.svg)](llms.txt)
 [![Verified](https://img.shields.io/badge/verified-2026--10--02-brightgreen.svg)](llms.txt)
 [![Contributing: Guide](https://img.shields.io/badge/contributing-guide-blue.svg)](CONTRIBUTING.md)
-[![Level 1 SBOM: Audited](https://img.shields.io/badge/Level%201%20SBOM-Plain--Text%20Audited-success.svg)](THIRD_PARTY_LICENSES.txt)
+[![Level 1 SBOM: Inventory](https://img.shields.io/badge/Level%201%20SBOM-Declared%20Inventory-blue.svg)](THIRD_PARTY_LICENSES.txt)
 [![Security SLA](https://img.shields.io/badge/security%20sla-48h%20response-blue.svg)](SECURITY.md)
 
 [English](README.md) | [Deutsch](README_de.md)
@@ -75,12 +75,12 @@ Konzipiert für autonome Agentensysteme, deterministische Workflows und unterneh
 ### `[PERSONA-01]` Autonome Multi-Agenten- & Swarm-Entwickler
 - **Profil:** Ingenieure, die verteilte Multi-Agenten-Systeme und persistente LLM-Worker-Swarms orchestrieren.
 - **Problem:** Schwere Cloud-Queues (Celery, Redis) erzeugen massiven Betriebsaufwand; Standard-Cron bietet keine atomare Entduplizierung oder Worker-Lease-Garantien.
-- **Lösung:** `ellmos-scheduler` bietet atomares SQLite-Lease-Claiming, inhaltsadressierte deterministische `run_id`-Erzeugung und zuverlässige Fehlerbehandlung.
+- **Lösung:** `ellmos-scheduler` bietet atomares SQLite-Lease-Claiming, inhaltsadressierte deterministische `run_id`-Erzeugung und explizite Wiederholungs-/Laufdatensätze.
 
-### `[PERSONA-02]` Local-First- & Zero-Egress-Entwickler
+### `[PERSONA-02]` Entwickler lokaler Zustandsverwaltung
 - **Profil:** Entwickler, die offline-fähige Entwicklerwerkzeuge und datenschutzorientierte Automationsumgebungen schaffen.
 - **Problem:** Zeitplaner, die Telemetrie übertragen oder Cloud-APIs kontaktieren, verletzen strikte Air-Gapped-Sicherheitsanforderungen.
-- **Lösung:** Vollständige Zero-Egress-Garantie (`INV-LOCAL-01`), die ausschließlich auf lokalen SQLite-Datenbanken im unprivilegierten Benutzerkontext läuft.
+- **Lösung:** Lokale SQLite-Zeitplanung ohne verpflichtenden Cloud-Dienst (`INV-LOCAL-01`); Netzwerkzugriffe von Executoren und Dateisystempfaden richten sich nach der Host-Richtlinie.
 
 ### `[PERSONA-03]` DevOps- & System-Administratoren
 - **Profil:** Systemadministratoren und SREs, die konsistente Zeitsteuerung über heterogene Entwicklerflotten hinweg verlangen.
@@ -90,11 +90,11 @@ Konzipiert für autonome Agentensysteme, deterministische Workflows und unterneh
 ### `[PERSONA-04]` Compliance-Beauftragte & Audit-Verantwortliche
 - **Profil:** Auditoren und Sicherheitsbeauftragte, die nachweisbare Vorab-Prüfungen vor der Ausführung verlangen.
 - **Problem:** Cron-Jobs laufen blind an, ohne zu prüfen, ob Genehmigungsentscheidungen, Sicherheitsrichtlinien oder Abhängigkeitsinvarianten gültig sind.
-- **Lösung:** Zweifacher Read-Only-Durchlauf + SHA-256 Authority-Preflight (`--require-authorities`) und unveränderliche kryptographische Ausführungsbelege.
+- **Lösung:** Zweifacher Read-Only-Durchlauf + SHA-256 Authority-Preflight (`--require-authorities`) und lokal gespeicherte Hash-/Rücklesebelege mit ausdrücklich beschriebenen Integritätsgrenzen.
 
 ### High-Intent Suchbegriffe & Auffindbarkeit
 - **Primäre Suchintention:** `Python deterministischer lokaler Zeitplaner`, `SQLite Lease Job Scheduler`, `Zero-Egress Aufgabenplaner`, `Multi-Agenten Task Scheduler`, `lokaler Cron Dienst ohne Redis`.
-- **Architektur & Long-Tail:** `Offline Aufgabenplanung ohne Cloud`, `Python Zeitsteuerung ohne externe Dienste`, `Aufgabenplaner mit Revisionsnachweisen`, `sichere Subprozess Ausfuehrung ohne Shell`, `Agenten Speicher Kompaktierung Scheduler`.
+- **Architektur & Long-Tail:** `Offline Aufgabenplanung ohne Cloud`, `Python Zeitsteuerung ohne externe Dienste`, `Aufgabenplaner mit Revisionsnachweisen`, `sichere Subprozess Ausführung ohne Shell`, `Agenten Speicher Kompaktierung Scheduler`.
 
 ---
 
@@ -105,11 +105,11 @@ Die folgende Matrix vergleicht `ellmos-scheduler` mit vier gängigen Industrieal
 
 | Dimension / Fähigkeit | `ellmos-scheduler` | OS Cron / Windows Task Scheduler | Celery Beat / Redis Queue | APScheduler | Cloud Schedulers (AWS/GCP) |
 |---|---|---|---|---|---|
-| **Zero-Egress / Local-First (`INV-LOCAL-01`)** | **100% Offline & Lokal** | Lokaler OS-Dienst | Benötigt Netzwerk-Broker | In-Process Dienst | Cloud SaaS-Abhängigkeit |
+| **Lokaler Zustand / Netzwerkgrenze (`INV-LOCAL-01`)** | **Lokaler Zustand; Netzwerkrechte des Executors bleiben erhalten** | Lokaler OS-Dienst | Benötigt Netzwerk-Broker | In-Process Dienst | Cloud SaaS-Abhängigkeit |
 | **Parallelität & Leases (`INV-CONC-03`)** | **Atomare SQLite-Leases** | Keine (Überlappung) | Verteilter Redis-Lock | In-Memory Locks | Verteilter Cloud-Lock |
 | **Authority-Preflight-Gate (`INV-AUTH-04`)** | **SHA-256 Dual-Check** | Keine | Keine | Keine | IAM-Richtlinienprüfung |
-| **Rechte- & Prozessmodell (`INV-PRIV-02`)** | **Unprivilegiert (RunAsInvoker)** | Oft root / SYSTEM | Benutzer oder Daemon | In-Process Thread | Cloud-IAM-Rolle |
-| **Audit-Trail & Nachweise (`INV-SLA-10`)** | **Unveränderliche DB-Belege** | Syslog / Event-Log | Task-Status in Broker | Flüchtig im Speicher | CloudWatch / Cloud Audit |
+| **Rechte- & Prozessmodell (`INV-PRIV-02`)** | **Aufruferrechte (RunAsInvoker)** | Oft root / SYSTEM | Benutzer oder Daemon | In-Process Thread | Cloud-IAM-Rolle |
+| **Audit-Trail & Nachweise (`INV-SLA-10`)** | **Lokale DB-Datensätze mit SHA-256-Hashes** | Syslog / Event-Log | Task-Status in Broker | Flüchtig im Speicher | CloudWatch / Cloud Audit |
 | **Plattformübergreifend (`INV-PLAT-09`)** | **Voll (Win/Mac/Linux + tzdata)**| Unterschiedliche Syntax | Hoch | Hoch | N/A (Cloud-Dienst) |
 | **Agenten- & Swarm-Ready (`INV-MOD-08`)** | **Nativ (COMA/MarbleRun)** | Benötigt Skripte | Generische Worker | Generische Callables | Webhooks / Lambdas |
 | **Shell-Injektionsschutz (`INV-EXEC-06`)** | **Strikte argv (`shell=False`)** | Shell-String-Ausführung| Gemischt | Python Callables | Container Entrypoint |
@@ -123,20 +123,20 @@ Detaillierte Vergleichsmatrizen und architektonische Benchmark-Profile finden si
 <a id="sec-04"></a><a id="governance--laufzeit-invarianten"></a><a id="governance-invariants"></a>
 ## 4. Governance & Laufzeit-Invarianten Matrix
 
-`ellmos-scheduler` erfüllt 10 verbindliche System- und Betriebsinvarianten, um eine deterministische, sichere und auditierbare Aufgabenplanung im lokalen Multi-Agenten-Ökosystem zu garantieren:
+Die folgenden zehn Kennungen beschreiben implementierte Mechanismen und ihre Grenzen. Betriebsrichtlinien und Executor-Verhalten bleiben Teil der Verantwortung des Betreibers:
 
-| Invariante | Bereich | Garantie & Verifikation |
+| Invariante | Bereich | Mechanismus & Grenzen |
 |---|---|---|
-| `INV-LOCAL-01` **1. 100% Local-First & Zero-Egress** | Systemarchitektur | Arbeitet vollständig offline auf dem lokalen System; garantiert keine externen Telemetrie- oder Netzwerkanfragen. |
-| `INV-PRIV-02` **2. Unprivilegierter User-Mode Betrieb** | Sicherheitsgrenze | Läuft strikt im unprivilegierten Benutzerkontext (`RunAsInvoker`), benötigt niemals Administrator- oder Root-Rechte. |
-| `INV-CONC-03` **3. Atomare SQLite-Leases & Deduplizierung** | Nebenläufigkeit | Deterministische `run_id`-Erzeugung und atomare Datenbank-Leases verhindern Doppelstarts bei parallelen Workern. |
+| `INV-LOCAL-01` **1. Lokaler Zustand & Netzwerkgrenze** | Systemarchitektur | SQLite-Zeitplanung ohne verpflichtenden Cloud-Dienst. Netzwerkzugriffe von Executoren/Providern und entfernten Dateisystempfaden richten sich nach der Host-Richtlinie; kein Netzwerkfilter wird eingerichtet. |
+| `INV-PRIV-02` **2. Aufruferrechte & keine Rechteanforderung** | Ausführungskontext | Übernimmt Aufruferrechte (RunAsInvoker), ohne zusätzliche Rechte anzufordern oder geerbte Rechte abzulegen. Vertrauenswürdige Executoren unter einem geeigneten OS-Konto ausführen. |
+| `INV-CONC-03` **3. Atomare SQLite-Leases & Deduplizierung** | Nebenläufigkeit | Transaktionen serialisieren Claims während gültiger Leases. Abgelaufene Arbeit darf erneut geplant werden; Lease-Ablauf beweist kein Ende des vorherigen Prozesses. |
 | `INV-AUTH-04` **4. Zweifache Read-Only Authority-Prüfung** | Integritätsschutz | Vorgeschriebene Authority-Dateien werden zweifach eingelesen und vor der Ausführung via SHA-256 kryptographisch validiert. |
 | `INV-STRM-05` **5. Strikte UTF-8- & Fail-Closed Kodierung** | Datenstrom-Hygiene | Subprozess-Ausgaben erzwingen strikte Fehlerbehandlung (`utf-8:strict`), fehlerhafte Kodierungen brechen den Lauf sauber ab. |
 | `INV-EXEC-06` **6. Shell-freie sichere Prozessausführung** | Prozesssicherheit | Befehlsausführungen akzeptieren ausschließlich explizite `argv`-Listen und vermeiden Shell-Interpolationen (`shell=False`). |
-| `INV-RES-07` **7. Fail-Closed Timeout & Lease-Wiederherstellung** | Ausfallsicherheit | Abgelaufene oder verwaiste Worker-Leases werden als `abandoned` markiert und ohne Deadlocks sauber wieder freigegeben. |
+| `INV-RES-07` **7. Timeout-Meldungen & abgelaufene Leases** | Prozessverhalten | Der Command-Executor hat einen Timeout für den direkten Prozess; abgelaufene Claims können abandoned werden. Grenzen für Nachkommen und Ressourcen benötigen separate Validierung. |
 | `INV-MOD-08` **8. Deklarative modulare Entkopplung** | Modulare Architektur | Steckbare Executor-Registry, externe Authority-Resolver und saubere Trennung außerhalb monolithischer Blöcke (z. B. BACH). |
-| `INV-PLAT-09` **9. Plattformübergreifende Parität** | Portabilität | Vollständige Verhaltensparität auf Windows (mit `tzdata`-Fallback für IANA-Zonen), Linux und macOS. |
-| `INV-SLA-10` **10. Kryptographische Receipt-Persistenz** | Revisionssicherheit | Lückenlose Audit-Logs mit unveränderlichen Belegen, SHA-256-Hashes und geheimnisfreien Metadaten. |
+| `INV-PLAT-09` **9. Native Plattform-Testmatrix** | Portabilität | CI prüft Python 3.10/3.13 auf Windows, Linux und macOS. Plattformspezifische Auslassungen und tatsächliche Geräte-/Provider-Abnahme bleiben getrennt. |
+| `INV-SLA-10` **10. Audit-Datensätze & Hashes** | Nachvollziehbarkeit | Lokale Laufdatensätze und SHA-256-Hashes binden beobachtete Bytes; digitale Signaturen und append-only Speicherung sind nicht implementiert. DB-Schreibberechtigte können die Historie verändern. |
 
 ---
 
@@ -147,40 +147,40 @@ Detaillierte Vergleichsmatrizen und architektonische Benchmark-Profile finden si
 
 ```text
 +-------------------------------------------------------------------------------+
-|  SICHT 1: AUFRUFER-LAUFZEITEN, CLI-EINTRITTSPUNKTE & INTAKE-ADAPTER           |
-|  - Entwickler- & Dienst-CLI: ellmos-scheduler (tick, serve, add, list, status) |
-|  - Ökosystem-Adapter: BACH-Adapter, MarbleRun-Ketten, COMA-Provider           |
-|  - KI-Agenten-Clients: Claude Code, OpenAI Codex, Antigravity, Kimi Code      |
-|  - Qualitätstore & automatisierte Testsuiten: pytest, ruff, compileall        |
+|  SICHT 1: AUFRUFER-LAUFZEITEN, CLI-EINTRITTSPUNKTE & INTAKE-ADAPTER          |
+|  - Entwickler- & Dienst-CLI: ellmos-scheduler (tick, serve, add, list, status)|
+|  - Ökosystem-Adapter: BACH-Adapter, MarbleRun-Ketten, COMA-Provider          |
+|  - KI-Agenten-Clients: Claude Code, OpenAI Codex, Antigravity, Kimi Code     |
+|  - Qualitätstore & automatisierte Testsuiten: pytest, ruff, compileall       |
 +---------------------------------------+---------------------------------------+
                                         | ruft CLI auf / stößt Aufgaben an
                                         v
 +-------------------------------------------------------------------------------+
-|  SICHT 2: ELLMOS-SCHEDULER SOVERÄNE KERN-ENGINE & DISPATCH-ORCHESTRIERUNG     |
-|  - Deterministische Tick-Engine: Fälligkeitsprüfung, Cron/Intervall/Täglich    |
-|  - Atomare Nebenläufigkeits-Leases: Transaktionale SQLite-Claims & Reclaiming |
-|  - Preflight-Autoritäts-Prüfung: Zweifache Read-Passes & SHA-256-Integrität   |
+|  SICHT 2: ELLMOS-SCHEDULER SOVERÄNE KERN-ENGINE & DISPATCH-ORCHESTRIERUNG    |
+|  - Deterministische Tick-Engine: Fälligkeitsprüfung, Cron/Intervall/Täglich  |
+|  - Atomare Nebenläufigkeits-Leases: Transaktionale SQLite-Claims & Reclaiming|
+|  - Preflight-Autoritäts-Prüfung: Zweifache Read-Passes & SHA-256-Integrität  |
 |  - Subprozess-Ausführungs-Dispatcher: CommandExecutor (sicheres argv, kein sh)|
-|  - Stream-Hygiene: striktes UTF-8-Decoding, Fail-Closed Timeout-Handling      |
+|  - Stream-Hygiene: strikte Dekodierung; erfasste Daten können privat sein    |
 +---------------------------------------+---------------------------------------+
                                         | protokolliert Läufe / speichert Status
                                         v
 +-------------------------------------------------------------------------------+
-|  SICHT 3: LAUFZEIT-PERSISTENZ, LEBENSZYKLUS-LEDGER & AUDIT-VERZEICHNISSE      |
+|  SICHT 3: LAUFZEIT-PERSISTENZ, LEBENSZYKLUS-LEDGER & AUDIT-VERZEICHNISSE     |
 |  - Soveräner SQLite-Statusspeicher: ~/.ellmos/scheduler.db (jobs, leases, runs)|
-|  - Unveränderliche kryptographische Belege: deterministische run_id, Hashes   |
+|  - Lokale Audit-Datensätze: deterministische run_id, SHA-256-Hashes          |
 |  - Plain-Text Level 1 SBOM Ledger: THIRD_PARTY_LICENSES.txt (Stand 2026-10-02)|
-|  - Kontext-Index & Governance: llms.txt, ellmos-module.v2.json, NOTICE        |
+|  - Kontext-Index & Governance: llms.txt, ellmos-module.v2.json, NOTICE       |
 +---------------------------------------+---------------------------------------+
                                         | begrenzt / verifiziert & schützt
                                         v
 +-------------------------------------------------------------------------------+
-|  SICHT 4: AIR-GAP SICHERHEITSPERIMETER, RUNASINVOKER & ZERO-EGRESS-GRENZE     |
-|  - 100% Lokaler Offline-Betrieb & Null Netzwerk-Telemetrie (INV-LOCAL-01)     |
-|  - Nicht-privilegierte Ausführung (INV-PRIV-02, RunAsInvoker Benutzermodus)   |
-|  - Strikter Shell-Injektions-Schutz: ausschliesslich argv-Listen (INV-EXEC-06)|
-|  - Zero-Copyleft Isolations-Garantie: 100% Permissive Open Source (MIT, PSFL) |
-|  - Gesetzlicher Hinweis § 521 BGB Gefälligkeitsrecht & verbindliche 48h SLA   |
+|  SICHT 4: AUSFÜHRUNGSGRENZEN & RECHTE DES AUFRUFERS                          |
+|  - Lokaler Planungszustand; Executor-Netzwerkrechte gemäß Host-Richtlinie    |
+|  - Aufruferrechte (RunAsInvoker); kein automatischer Rechteentzug            |
+|  - Strikter Shell-Injektions-Schutz: ausschließlich argv-Listen (INV-EXEC-06)|
+|  - Inventar deklarierter Lizenzen; aufgelöste Abhängigkeiten separat prüfen  |
+|  - Gesetzlicher Hinweis § 521 BGB Gefälligkeitsrecht & verbindliche 48h SLA  |
 +-------------------------------------------------------------------------------+
 ```
 
@@ -371,9 +371,12 @@ Jeder Job kann explizite `rule`-, `policy`-, `decision`-, `workflow`- oder
 `user-preference`-Quellen (sowie weitere stabile Typen) deklarieren. Unmittelbar
 vor der Ausführung liest der Scheduler diese zweimal schreibgeschützt ein, verlangt
 für Pflichtquellen einen identischen SHA-256-Rücklesewert und speichert nur
-Authority-ID/-Typ, Pflichtstatus, Resolver, sicheren Ursprung, Hashes, Byte-Zahl
-und Status. Rohe Inhalte oder geheime Metadaten werden strikt abgewiesen und nie
-gespeichert.
+Authority-ID/-Typ, Pflichtstatus, Resolver, Ursprung, Hashes, Byte-Zahl und
+Status. Inhalte referenzierter Dateien werden nicht in Authority-Belege kopiert.
+Die Metadatenprüfung weist erkannte geheimnistragende Felder ab; Ursprünge enthalten
+jedoch absolute Datei-URIs, und IDs können privaten Kontext enthalten. Job-Payloads
+und erfasste Ausgaben/Fehler werden separat gespeichert und können sensible Daten
+enthalten.
 
 ```powershell
 ellmos-scheduler --db C:\state\scheduler.db set-authorities sync.daily `
@@ -403,7 +406,7 @@ alte Jobs laufen im kompatiblen Standardmodus mit leerem Set weiter.
 `--require-authorities` ist das explizite Cutover-Gate nach vollendeter Job-Migration.
 Eigene Resolver können über `AuthorityResolverRegistry` injiziert werden, müssen aber
 zusammen mit Quellenprüfung/-Allowlisting registriert werden und denselben
-geheimnisfreien Hash-/Readback-Vertrag erfüllen. Auflösung und Belegspeicherung
+validierten Hash-/Readback-Vertrag erfüllen. Auflösung und Belegspeicherung
 erfolgen, während der Zustand noch `claimed` ist; erst ein erfolgreicher
 Pflicht-Preflight setzt `started_at` und `running`.
 
@@ -536,11 +539,11 @@ git diff --check
 <a id="sec-17"></a><a id="drittanbieter-lizenzen--transparenz"></a><a id="third-party-licenses"></a>
 ## 17. Drittanbieter-Lizenzen & Level 1 SBOM
 
-`ellmos-scheduler` verpflichtet sich zu strikten Open-Source-Standards und maximaler Transparenz:
-- **100% Freie & Permissive Lizenzen**: Sämtliche Laufzeit- (`tzdata`, Python Standardbibliothek) und Entwicklungswerkzeuge (`pytest`, `tomli`, `ruff`, `setuptools`) unterliegen OSI-anerkannten permissiven Lizenzen (MIT, Apache-2.0, PSFL, Public Domain).
-- **Zero-Copyleft-Isolationsgarantie**: 0% Copyleft-Kontamination über alle Abhängigkeiten hinweg.
-- **Zero-Egress-Garantie (`INV-LOCAL-01`)**: Keine Abhängigkeit überträgt Telemetrie- oder Analysedaten.
-- **Unprivilegierter Modus (`INV-PRIV-02`)**: Läuft vollständig im Standard-Benutzerkontext (`RunAsInvoker`).
+Das Inventar führt deklarierte Komponenten und Quellen ihrer Lizenzangaben auf:
+- **Deklarierte Abhängigkeiten**: `tzdata`, Python-Standardbibliothek und die aufgeführten Entwicklungs-/Build-Werkzeuge besitzen Lizenzangaben im Begleitinventar.
+- **Umfang der Auflösung**: Das Inventar ist keine vollständige aufgelöste/transitive SBOM und keine aktuelle Schwachstellenfreigabe; TASK-SCHED-07 bleibt offen.
+- **Netzwerkgrenze (`INV-LOCAL-01`)**: Die Zeitplanung braucht keinen verpflichtenden Cloud-Dienst; Netzwerkzugriffe von Executoren und Dateisystempfaden benötigen eine Host-Richtlinie.
+- **Aufruferrechte (`INV-PRIV-02`)**: Übernimmt die Rechte des Aufrufers, ohne zusätzliche Rechte anzufordern (RunAsInvoker).
 - Detaillierte Lizenztexte, Quellnachweise und Revisionsprüfungen sind in [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md) hinterlegt.
 - Ein Plain-Text Level 1 SBOM Begleit-Inventar steht unter [`THIRD_PARTY_LICENSES.txt`](THIRD_PARTY_LICENSES.txt) bereit.
 

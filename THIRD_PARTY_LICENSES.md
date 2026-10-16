@@ -10,29 +10,35 @@ Plain-Text Companion: [`THIRD_PARTY_LICENSES.txt`](THIRD_PARTY_LICENSES.txt)
 
 ## 1. Overview & Policy Statement
 
-`ellmos-scheduler` is dedicated to strict **Local-First & Zero-Egress** principles (`INV-LOCAL-01`) and executes exclusively in unprivileged user space (`INV-PRIV-02`, RunAsInvoker). To guarantee deterministic operation, auditability, and zero supply-chain lock-in, all runtime, testing, and build dependencies are rigorously vetted against the following criteria (with canonical attribution defined in [`NOTICE`](NOTICE) and plain-text inventory in [`THIRD_PARTY_LICENSES.txt`](THIRD_PARTY_LICENSES.txt)):
+This is a selected declared-component license inventory with upstream references, not a
+complete resolved/transitive SBOM or a current vulnerability clearance. The dated
+inventory below remains historical; boundary review: 2026-10-16. TASK-SCHED-07
+tracks dependency/advisory verification separately. Runtime declarations contain
+the Python standard library and conditional Windows tzdata; executors can invoke
+additional programs with their own dependencies and network behavior. RunAsInvoker
+describes inherited caller permissions, not privilege reduction.
 
-- **100% Permissive Open-Source & Level 1 SBOM**: Only OSI-approved permissive licenses (MIT, Apache-2.0, BSD-3-Clause, PSFL, Public Domain) are permitted. Strict copyleft (GPL, AGPL) is forbidden. Zero-Copyleft isolation guarantee across all dependencies.
-- **Zero-Egress & Offline Determinism**: No third-party dependency is allowed to establish unsolicited outbound telemetry, cloud beacons, or network phone-home sockets.
-- **Minimal Surface**: Runtime dependencies are intentionally minimized. The core scheduling engine relies exclusively on Python standard library modules (`sqlite3`, `zoneinfo`, `subprocess`, `hashlib`, `json`), with a single platform-conditional runtime package on Windows (`tzdata`).
-- **Unprivileged Non-Elevation Execution**: Fully certified for unprivileged execution under standard user tokens (`RunAsInvoker`).
+CI also installs `build` and `wheel`; their pinned workflow configuration is not
+a complete license/advisory audit. Dependency audit work remains in TASK-SCHED-07.
+See NOTICE for attribution and THIRD_PARTY_LICENSES.txt for the plain-text inventory.
 
 ---
 
 ## Level 1 SBOM Invariant Cross-Reference Matrix
 
-| Invariant Code | Core Requirement | Implementation Mechanism | License / Dependency Impact | Compliance Status |
-|:---|:---|:---|:---|:---:|
-| `INV-LOCAL-01` | 100% Local-First & Zero-Egress | Python Standard Library (`sqlite3`, `pathlib`, `hashlib`) | Zero external runtime network dependencies | **PASS (100% Offline)** |
-| `INV-PRIV-02` | Unprivileged User Execution (`RunAsInvoker`) | Standard user token execution, zero privilege elevation | Zero administrator / root requirements | **PASS (User-Mode)** |
-| `INV-CONC-03` | Atomic SQLite Leases & Deduplication | Atomic SQLite transactions & deterministic run_id | Standard library `sqlite3`, zero external brokers | **PASS (Atomic)** |
-| `INV-AUTH-04` | Double Read-Only Authority Preflight | Dual read passes with SHA-256 integrity checksums | Standard library `hashlib`, secret-free receipts | **PASS (Cryptographic)** |
-| `INV-STRM-05` | Strict UTF-8 & Fail-Closed Decoding | Strict UTF-8 decoding on child process streams | Zero data corruption, fail-closed handling | **PASS (Fail-Closed)** |
-| `INV-EXEC-06` | Shell-Free Safe Process Invocation | `subprocess.Popen` with explicit argv (`shell=False`) | Standard library `subprocess`, zero shell injection | **PASS (Safe Argv)** |
-| `INV-RES-07` | Fail-Closed Timeout & Abandoned Leases | Deadlock-free lease recovery & timeout handling | Deterministic state transitions, zero hang | **PASS (Resilient)** |
-| `INV-MOD-08` | Declarative Modular Integration | Pluggable executor registry & narrow consumer adapters | Decoupled architecture, zero monolith coupling | **PASS (Modular)** |
-| `INV-PLAT-09` | Multi-OS Cross-Platform Parity | Windows, Linux, macOS parity with `tzdata` fallback | Apache-2.0 / Public Domain `tzdata`, zero lock-in | **PASS (Cross-Platform)** |
-| `INV-SLA-10` | Cryptographic Receipts & 48h Security SLA | SQLite immutable receipts & binding 48h SLA in SECURITY.md | Coordinated disclosure via security@open-bricks.org | **PASS (Contractual)** |
+| Invariant Code | Implemented mechanism | Evidence scope / remaining boundary |
+|---|---|---|
+| `INV-LOCAL-01` | SQLite scheduling state | No mandatory cloud scheduler; host policy controls executor/filesystem network use. |
+| `INV-PRIV-02` | Caller permissions (RunAsInvoker) | No elevation request or automatic privilege drop. |
+| `INV-CONC-03` | Transactional claims and deterministic run IDs | Valid leases serialize claims; expiry does not prove old processes stopped. |
+| `INV-AUTH-04` | Two file reads and SHA-256 comparison | Configured sources must be trusted; file origins and IDs may be private. |
+| `INV-STRM-05` | Strict configured output decoding | Captured output/error can still contain sensitive data. |
+| `INV-EXEC-06` | Explicit argv and shell=False | Invoked programs retain their own behavior and caller permissions. |
+| `INV-RES-07` | Direct-process timeout and abandoned claims | Descendant/resource and lease-limit validation remains open. |
+| `INV-MOD-08` | Executor registry and consumer adapters | External programs/dependencies require their own controls. |
+| `INV-PLAT-09` | Native CI test matrix | Python 3.10/3.13 on three OS families; platform skips and device acceptance remain separate. |
+| `INV-SLA-10` | Local hash/readback records | No signatures or append-only storage; disclosure process is documented separately in SECURITY.md. |
+
 
 ---
 
@@ -56,19 +62,14 @@ Plain-Text Companion: [`THIRD_PARTY_LICENSES.txt`](THIRD_PARTY_LICENSES.txt)
 
 ---
 
-## 4. Invariant Compliance Assurances
+## 4. Scope and verification limits
 
-All declared dependencies and runtime behaviors strictly comply with the 10 Governance & Runtime Invariants:
-- **INV-LOCAL-01 (100% Local-First & Zero-Egress)**: None of the declared runtime or dev dependencies transmit network payloads, metrics, or telemetry across localhost boundaries.
-- **INV-PRIV-02 (Unprivileged Non-Elevation Execution)**: Neither runtime nor build components require elevated administrator, root, or kernel permissions (`RunAsInvoker`).
-- **INV-CONC-03 (Atomic SQLite Leases & Deduplication)**: Standard library `sqlite3` manages atomic concurrency without external network brokers.
-- **INV-AUTH-04 (Double Read-Only Authority Preflight)**: Authority files verified via standard library `hashlib` SHA-256 before any job execution.
-- **INV-STRM-05 (Strict UTF-8 & Fail-Closed Decoding)**: All textual IO, process stream decoding, and receipt handling rely on strict encoding standards without silent data loss.
-- **INV-EXEC-06 (Shell-Free Safe Process Invocation)**: Execution uses `subprocess` with explicit argv lists and `shell=False`.
-- **INV-RES-07 (Fail-Closed Timeout & Abandoned Leases)**: Expired or hanging executions are reclaimed safely without deadlock.
-- **INV-MOD-08 (Declarative Modular Integration)**: Completely decoupled outside monoliths with narrow adapters for BACH and COMA.
-- **INV-PLAT-09 (Multi-OS Cross-Platform Parity)**: Uniform cross-platform execution on Windows, Linux, and macOS (with `tzdata` fallback).
-- **INV-SLA-10 (Cryptographic Receipt Persistence & Security SLAs)**: Cryptographic execution receipts persisted locally in SQLite; 48h initial response SLA for vulnerabilities.
+The mechanisms above are source-level descriptions, not blanket compliance PASS
+certificates. Full payloads, truncated stored output/error and absolute file origins can
+remain in the local state. Database writers can modify records. Deployment policy
+must cover access control, backups, external programs and network restrictions.
+Dependency resolution, transitive licenses and advisory status require a separate
+reproducible audit; the inventory date alone proves none of these.
 
 ---
 

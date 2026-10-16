@@ -52,8 +52,8 @@ def test_readme_badges_and_language_parity():
         "tests-157%20passed-brightgreen.svg",
         "code%20style-ruff-000000.svg",
         "security-Local--First-green.svg",
-        "privacy-Zero--Egress-success.svg",
-        "third--party-audited-success.svg",
+        "privacy-Local--State-blue.svg",
+        "third--party-inventory-blue.svg",
         "marketing-logged-blue.svg",
         "ecosystem-ellmos--ai-purple.svg",
         "umbrella-open--bricks-blueviolet.svg",
@@ -133,8 +133,8 @@ def test_security_policy_structure():
     content = sec_path.read_text(encoding="utf-8")
     assert '<a name="english"></a>' in content
     assert '<a name="deutsch"></a>' in content
-    assert "Local-First & Zero-Egress Invariant" in content
-    assert "Local-First & Zero-Egress-Invariante" in content
+    assert "Local state & execution boundaries" in content
+    assert "Lokaler Zustand & Ausführungsgrenzen" in content
     assert "security@ellmos.ai" in content
     assert "security@open-bricks.org" in content
     assert "support@lukasgeiger.com" in content
@@ -283,29 +283,29 @@ def test_governance_and_runtime_invariants_table():
     readme_de = (ROOT / "README_de.md").read_text(encoding="utf-8")
 
     en_invariants = [
-        "1. 100% Local-First & Zero-Egress",
-        "2. Unprivileged Non-Elevation Execution",
+        "1. Local state & network boundary",
+        "2. Caller permissions & non-elevation",
         "3. Atomic SQLite Leases & Deduplication",
         "4. Double Read-Only Authority Preflight",
         "5. Strict UTF-8 & Fail-Closed Decoding",
         "6. Shell-Free Safe Process Invocation",
-        "7. Fail-Closed Timeout & Abandoned Leases",
+        "7. Timeout reports & abandoned leases",
         "8. Declarative Modular Integration",
-        "9. Multi-OS Cross-Platform Parity",
-        "10. Cryptographic Receipt Persistence",
+        "9. Native platform test matrix",
+        "10. Audit records & hashes",
     ]
 
     de_invariants = [
-        "1. 100% Local-First & Zero-Egress",
-        "2. Unprivilegierter User-Mode Betrieb",
+        "1. Lokaler Zustand & Netzwerkgrenze",
+        "2. Aufruferrechte & keine Rechteanforderung",
         "3. Atomare SQLite-Leases & Deduplizierung",
         "4. Zweifache Read-Only Authority-Prüfung",
         "5. Strikte UTF-8- & Fail-Closed Kodierung",
         "6. Shell-freie sichere Prozessausführung",
-        "7. Fail-Closed Timeout & Lease-Wiederherstellung",
+        "7. Timeout-Meldungen & abgelaufene Leases",
         "8. Deklarative modulare Entkopplung",
-        "9. Plattformübergreifende Parität",
-        "10. Kryptographische Receipt-Persistenz",
+        "9. Native Plattform-Testmatrix",
+        "10. Audit-Datensätze & Hashes",
     ]
 
     for inv in en_invariants:
@@ -393,7 +393,8 @@ def test_third_party_licenses_inventory():
     assert "INV-LOCAL-01" in content
     assert "INV-PRIV-02" in content
     assert "INV-STRM-05" in content
-    assert "100% Permissive" in content
+    assert "declared-component license inventory" in content
+    assert "TASK-SCHED-07" in content
 
 
 def test_pep621_extended_project_urls():
@@ -1005,13 +1006,13 @@ def test_ascii_four_view_architectural_topology_parity():
     assert "VIEW 1: CALLER RUNTIMES, CLI ENTRYPOINTS & INTAKE ADAPTERS" in readme_en
     assert "VIEW 2: ELLMOS-SCHEDULER SOVEREIGN CORE & DISPATCH ORCHESTRATOR" in readme_en
     assert "VIEW 3: RUNTIME PERSISTENCE, LIFECYCLE LEDGERS & AUDIT DIRECTORIES" in readme_en
-    assert "VIEW 4: AIR-GAP DEFENSE PERIMETER, RUNASINVOKER & ZERO-EGRESS BOUNDARY" in readme_en
+    assert "VIEW 4: EXECUTION TRUST BOUNDARIES & CALLER PERMISSIONS" in readme_en
 
     # German Sichten
     assert "SICHT 1: AUFRUFER-LAUFZEITEN, CLI-EINTRITTSPUNKTE & INTAKE-ADAPTER" in readme_de
     assert "SICHT 2: ELLMOS-SCHEDULER SOVERÄNE KERN-ENGINE & DISPATCH-ORCHESTRIERUNG" in readme_de
     assert "SICHT 3: LAUFZEIT-PERSISTENZ, LEBENSZYKLUS-LEDGER & AUDIT-VERZEICHNISSE" in readme_de
-    assert "SICHT 4: AIR-GAP SICHERHEITSPERIMETER, RUNASINVOKER & ZERO-EGRESS-GRENZE" in readme_de
+    assert "SICHT 4: AUSFÜHRUNGSGRENZEN & RECHTE DES AUFRUFERS" in readme_de
 
     # Key invariants referenced in topology
     for inv in ["INV-LOCAL-01", "INV-PRIV-02", "INV-EXEC-06", "RunAsInvoker", "521 BGB"]:
