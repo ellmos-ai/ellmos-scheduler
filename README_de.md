@@ -344,6 +344,14 @@ Startauftrag, nicht den Abschluss der Kette; diesen zeigt MarbleRun an. Fehlgesc
 oder abgelaufene Startaufträge behalten die Bereinigung eigener Arbeit bei.
 Erfolgreich übergebene Arbeit liegt außerhalb dieser Lebenszyklusbegrenzung.
 
+Hat ein beanspruchter Lauf inzwischen seinen Zustand gewechselt, meldet `tick`
+`status: conflict`, `phase: run-state-conflict` und den beobachteten gespeicherten
+Status. Ursprünglicher Lauf und Wiederholung werden nicht überschrieben; ein
+verspätetes Ergebnis gilt nicht als Erfolg dieses Ticks. Andere beanspruchte Jobs
+werden weiterbearbeitet. Andere Speicherfehler werden weiterhin ausgelöst.
+Dies behandelt veraltete Datensatzübergänge, stoppt aber keine externe Arbeit und
+ersetzt kein Fencing beim Lease-Ablauf.
+
 Beispiele registrierter Adapter:
 
 ```json

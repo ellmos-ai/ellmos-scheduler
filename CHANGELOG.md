@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Stale run transitions
+- Report per-run state conflicts when a late receipt/start/failure/completion loses its expected state, preserving the original and retry records while continuing other claimed jobs. Other storage errors still propagate. This adds no external lease fencing or heartbeat.
+
 ### CI packaging toolchain
 - Pin corrected setuptools/wheel versions for the two verified packaging advisories, replace the withdrawn build frontend, establish a checked pip baseline, and report the resolved CI environment after `pip check`. Runtime requirements and the package version are unchanged; advisory evidence is version- and time-bound.
 
