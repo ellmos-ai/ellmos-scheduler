@@ -340,6 +340,12 @@ children cannot hold capture pipes open. Success confirms dispatch, not chain
 completion; inspect MarbleRun for that result. Failed or timed-out dispatches
 retain owned-work cleanup. Successfully delegated work is outside this lifetime.
 
+If a claimed run has already changed state, `tick` reports `status: conflict`,
+`phase: run-state-conflict` and the observed stored status. It does not overwrite
+the original/retry record or claim the late execution as success, and continues
+with other claimed jobs. Other storage errors still propagate. This handles stale
+record transitions; it does not stop external work or provide lease-expiry fencing.
+
 Registered adapter examples:
 
 ```json

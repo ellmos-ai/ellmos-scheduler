@@ -13,7 +13,7 @@ from .authorities import (
     AuthorityResolverRegistry,
 )
 from .executors import DEFAULT_REGISTRY, ExecutorRegistry
-from .store import SchedulerStore
+from .store import RunStateConflict, SchedulerStore
 
 
 class SchedulerService:
@@ -52,40 +52,26 @@ class SchedulerService:
         )
         results: list[dict] = []
         for job in claimed:
-            run_id = job["run_id"]
-            authority_error = ""
             try:
-                authority_specs = json.loads(job.get("authorities_json") or "[]")
-                if self.require_authorities and not authority_specs:
-                    authority_error = "authority_configuration_required"
-                    empty_hash = hashlib.sha256(b"[]").hexdigest()
-                    self.store.record_authority_receipt(
-                        run_id,
-                        [],
-                        empty_hash,
-                        error=authority_error,
-                    )
-                    self.store.fail_claimed_run(
-                        run_id,
-                        error=authority_error,
-                        now=now,
-                    )
-                    results.append(
-                        {
-                            "run_id": run_id,
-                            "job_id": job["id"],
-                            "status": "failed",
-                            "exit_code": None,
-                            "phase": "authority-resolution",
-                        }
-                    )
-                    continue
-                authority_set = self.authority_registry.resolve(
-                    authority_specs,
-                    run_id=run_id,
-                )
-            except (json.JSONDecodeError, AuthorityConfigurationError):
-                authority_error = "invalid_authority_configuration"
+                self._run_claim(job, results, now=now)
+            except RunStateConflict as conflict:
+                results.append({
+                    "run_id": job["run_id"],
+                    "job_id": job["id"],
+                    "status": "conflict",
+                    "exit_code": None,
+                    "phase": "run-state-conflict",
+                    "observed_status": conflict.observed_status,
+                })
+        return results
+
+    def _run_claim(self, job: dict, results: list[dict], *, now: datetime | None) -> None:
+        run_id = job["run_id"]
+        authority_error = ""
+        try:
+            authority_specs = json.loads(job.get("authorities_json") or "[]")
+            if self.require_authorities and not authority_specs:
+                authority_error = "authority_configuration_required"
                 empty_hash = hashlib.sha256(b"[]").hexdigest()
                 self.store.record_authority_receipt(
                     run_id,
@@ -107,58 +93,85 @@ class SchedulerService:
                         "phase": "authority-resolution",
                     }
                 )
-                continue
-            receipt_error = (
-                ""
-                if authority_set.required_ok
-                else f"required_authority_unresolved:{authority_set.error}"
+                return
+            authority_set = self.authority_registry.resolve(
+                authority_specs,
+                run_id=run_id,
             )
+        except (json.JSONDecodeError, AuthorityConfigurationError):
+            authority_error = "invalid_authority_configuration"
+            empty_hash = hashlib.sha256(b"[]").hexdigest()
             self.store.record_authority_receipt(
                 run_id,
-                authority_set.receipts,
-                authority_set.set_sha256,
-                error=receipt_error,
+                [],
+                empty_hash,
+                error=authority_error,
             )
-            if not authority_set.required_ok:
-                authority_error = receipt_error
-                self.store.fail_claimed_run(
-                    run_id,
-                    error=authority_error,
-                    now=now,
-                )
-                results.append(
-                    {
-                        "run_id": run_id,
-                        "job_id": job["id"],
-                        "status": "failed",
-                        "exit_code": None,
-                        "phase": "authority-resolution",
-                    }
-                )
-                continue
-            self.store.start_run(run_id, now=now)
-            result = self.registry.execute(
-                job["executor"],
-                json.loads(job["payload_json"]),
-                int(job["timeout_seconds"]),
-            )
-            self.store.finish_run(
+            self.store.fail_claimed_run(
                 run_id,
-                result.status,
-                exit_code=result.exit_code,
-                output=result.output,
-                error=result.error,
+                error=authority_error,
                 now=now,
             )
             results.append(
                 {
                     "run_id": run_id,
                     "job_id": job["id"],
-                    "status": result.status,
-                    "exit_code": result.exit_code,
+                    "status": "failed",
+                    "exit_code": None,
+                    "phase": "authority-resolution",
                 }
             )
-        return results
+            return
+        receipt_error = (
+            ""
+            if authority_set.required_ok
+            else f"required_authority_unresolved:{authority_set.error}"
+        )
+        self.store.record_authority_receipt(
+            run_id,
+            authority_set.receipts,
+            authority_set.set_sha256,
+            error=receipt_error,
+        )
+        if not authority_set.required_ok:
+            authority_error = receipt_error
+            self.store.fail_claimed_run(
+                run_id,
+                error=authority_error,
+                now=now,
+            )
+            results.append(
+                {
+                    "run_id": run_id,
+                    "job_id": job["id"],
+                    "status": "failed",
+                    "exit_code": None,
+                    "phase": "authority-resolution",
+                }
+            )
+            return
+        self.store.start_run(run_id, now=now)
+        result = self.registry.execute(
+            job["executor"],
+            json.loads(job["payload_json"]),
+            int(job["timeout_seconds"]),
+        )
+        self.store.finish_run(
+            run_id,
+            result.status,
+            exit_code=result.exit_code,
+            output=result.output,
+            error=result.error,
+            now=now,
+        )
+        results.append(
+            {
+                "run_id": run_id,
+                "job_id": job["id"],
+                "status": result.status,
+                "exit_code": result.exit_code,
+            }
+        )
 
     def serve(self, poll_seconds: float = 5.0) -> None:
         if poll_seconds <= 0:
