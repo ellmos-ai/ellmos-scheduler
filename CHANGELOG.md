@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### CI packaging toolchain
+- Pin corrected setuptools/wheel versions for the two verified packaging advisories, replace the withdrawn build frontend, establish a checked pip baseline, and report the resolved CI environment after `pip check`. Runtime requirements and the package version are unchanged; advisory evidence is version- and time-bound.
+
 ### Local state exclusion
 - Ignore SQLite state and sidecars for `.db`, `.sqlite` and `.sqlite3`, plus conventional local authentication artifacts. Keep sanitized environment templates trackable and verify root/nested paths with Git's actual ignore rules. Existing tracked history and arbitrary secret detection are outside this change.
 
