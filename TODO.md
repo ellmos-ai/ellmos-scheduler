@@ -22,6 +22,21 @@
 
 ## Formalized next tasks
 
+- [ ] **TASK-SCHED-05: Private POSIX-Zustandsdateien** (`effort=medium`, `scope=store`, priority `high`).
+  - **Befund:** `SchedulerStore.connect()` erzeugt bei umask 022 einen Zustandsordner mit 0755 und SQLite mit 0644. Andere lokale Benutzer können Payloads und Run-Ausgaben lesen, wenn alle Vorfahren durchsuchbar sind. Ein Home mit 0700 schützt den Standardpfad. Keine Windows-ACL- oder Remote-Exposition belegt.
+  - **Nächster Schritt:** Neue moduleigene Ordner mit 0700 und Datenbanken atomar mit 0600 anlegen; WAL/SHM und umask 022 testen. Bestehende gemeinsam genutzte Verzeichnisse nicht pauschal chmod ändern.
+
+- [ ] **TASK-SCHED-06: Sicherheitsversprechen gegen konkrete Kontrollen abgleichen** (`effort=medium`, `scope=documentation`, priority `normal`).
+  - **Befund:** CLI `status`/`authority-receipt` initialisieren den Store; externe Executoren unterliegen keiner Scheduler-Netzwerksperre; Receipts sind Hashbelege und keine Signaturen oder unveränderliche Ablage. Absolute Datei-URIs und vollständige Payloads bleiben lokal gespeichert. Kein belegter Autorisierungsbypass.
+  - **Nächster Schritt:** EN/DE/SECURITY/SBOM-Claims präzisieren und echte Read-only-Inspektion separat implementieren. Ressourcen-/Prozessbaum- und Lease-Grenzen gezielt testen; `.sqlite`/`.sqlite3`, Authdateien und Beispiele beim Gitignore prüfen.
+
+- [ ] **TASK-SCHED-07: CI-Dependency-Hinweise verifizieren** (`effort=medium`, `scope=ci`, priority `normal`).
+  - **Befund vom 16.10.2026:** OSV meldet `wheel==0.45.1` (GHSA-8rrh-rw8j-w5fx) und `setuptools==80.9.0` (GHSA-h35f-9h28-mq5c). Betroffene `wheel unpack`- bzw. macOS-MANIFEST/sdist-Aufrufe sind im aktuellen Wheel-CI nicht belegt; kein Advisory-Gesamt-PASS. Lokales tzdata 2026.2 liegt hinter PyPI 2026.5.
+  - **Nächster Schritt:** Toolchain und transitive Auflösung isoliert auf allen unterstützten Plattformen prüfen; nur verifizierte Pins ändern. Keine riskanten Upgrades im Audit.
+
+- [x] **TASK-SCHED-08: Private Dokumentationspfade neutralisieren** (`effort=low`, `scope=documentation`, priority `normal`).
+  - **Ergebnis vom 16.10.2026:** Beide Quick-Start-Payloads nutzen denselben neutralen Beispielordner; der Marketing-Log enthält keinen lokalen Klonpfad mehr. Keine Historienbereinigung oder Löschung; Source-Audit auf f2740ba7 bleibt revisionsgebunden.
+
 - [ ] **TASK-SCHED-01: Dynamische Wiederholungsintervalle bei adaptiver Systemlast (Backoff-Strategie)** (`effort=medium`, `scope=engine`, priority `normal`).
   - **Ziel:** Intelligente Verlängerung von Job-Intervallen bei hoher Systemauslastung oder wiederholten Adapter-Fehlern.
   - **Definition of Done:** Konfigurierbarer Exponential-Backoff im SchedulerStore und automatisierte Regressionstests.

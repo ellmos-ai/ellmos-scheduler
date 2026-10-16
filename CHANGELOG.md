@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation privacy (2026-10-16)
+- Replace the developer's private home path in both Quick Start examples and the local clone path in the marketing log with neutral placeholders. Runtime behavior and version 0.3.6 are unchanged.
+
 ### Discoverability, Visual Architecture, ASCII Four-View Topology, Contributing Guide & Contract Tests (Pfad B - 2026-10-02)
 - **Visuelle Architektur & ASCII 4-Sichten-Topologie**: Integration der standardisierten ASCII Four-View Architectural Topology Projektion in Abschnitt 05 von `README.md` und `README_de.md` (Sicht 1: Aufrufer-Laufzeiten, CLI-Eintrittspunkte & Intake-Adapter; Sicht 2: Soveräne Kern-Engine & Dispatch-Orchestrierung; Sicht 3: Laufzeit-Persistenz, Lebenszyklus-Ledger & Audit-Verzeichnisse; Sicht 4: Air-Gap Sicherheitsperimeter, RunAsInvoker & Zero-Egress-Grenze).
 - **Zweisprachiger Leitfaden für Beitragende (CONTRIBUTING.md)**: Bereitstellung von `CONTRIBUTING.md` mit Code of Conduct, Richtlinien für deterministische lokale Entwicklung, Test-Gates (`pytest`), statischer Code-Analyse (`ruff`), Bytecode-Kompilierung und verbindlicher Version-Freeze-Disziplin (T-20260920-167562623).
