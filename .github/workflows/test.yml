@@ -47,7 +47,8 @@ jobs:
           "tomli==2.2.1; python_version < '3.11'"
           && python -m pip install --no-build-isolation -e .
       - name: Check and report resolved toolchain
-        run: python -c "import importlib.metadata as m, importlib.util as u, json, pathlib, subprocess, sys; subprocess.check_call([sys.executable, '-m', 'pip', 'check']); subprocess.check_call([sys.executable, '-m', 'pip', 'list', '--format=json']); p = pathlib.Path(next(iter(u.find_spec('setuptools').submodule_search_locations))) / '_vendor'; print('SETUPTOOLS_VENDOR=' + json.dumps([{'name': d.metadata['Name'], 'version': d.version} for d in m.distributions(path=[str(p)])]))"
+        run: >-
+          python -c "import importlib.metadata as m, importlib.util as u, json, pathlib, subprocess, sys; subprocess.check_call([sys.executable, '-m', 'pip', 'check']); subprocess.check_call([sys.executable, '-m', 'pip', 'list', '--format=json']); p = pathlib.Path(next(iter(u.find_spec('setuptools').submodule_search_locations))) / '_vendor'; print('SETUPTOOLS_VENDOR=' + json.dumps([{'name': d.metadata['Name'], 'version': d.version} for d in m.distributions(path=[str(p)])]))"
       - name: Bytecode compilation preflight
         run: python -m compileall -q src tests
       - name: Test
