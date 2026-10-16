@@ -5,21 +5,21 @@
 
 ## Core Capabilities
 - **Flexible Scheduling**: Supports `interval`, `daily` (time zone aware), and 5-field `cron` expressions.
-- **Lease & Claim Concurrency**: Atomic lease mechanism prevents duplicate execution across parallel scheduler workers.
+- **Lease & Claim Concurrency**: Transactions serialize claims during valid leases; expiry permits retry and does not prove the old process stopped.
 - **Authority Receipts**: Pre-execution verification of rule/policy/decision files with SHA-256 integrity hashing (`--require-authorities`).
 - **Executors & Adapters**: Native support for `command`/`subprocess`, [COMA](https://github.com/ellmos-ai/coma) AI provider execution, `marblerun` chains, and custom Python executor registries.
 - **Fail-Closed Encoding**: Strict UTF-8 and configurable stream-safe encodings (CP1252, Latin-1, ASCII) with strict error handling.
 - **Windows Timezone Support**: Ships with `tzdata` fallback for reliable IANA time zones (e.g., `Europe/Berlin`) on Windows.
-- **Governance & Runtime Invariants**: Guarantees 10 foundational invariants (`INV-LOCAL-01` to `INV-SLA-10`) including zero-egress, non-elevation, atomic leases, and safe execution.
+- **Governance & Runtime Invariants**: Documents 10 source-level mechanisms (`INV-LOCAL-01` to `INV-SLA-10`) and their limits: caller permissions, valid-lease claims, local hash records and host-controlled executor/network behavior.
 
 ## Directory Structure & Key Files
 - `src/ellmos_scheduler/`: Core Python package (CLI, service, store, executors, authorities).
-- `tests/`: Comprehensive Pytest test suite (138 passed tests, 100% green).
+- `tests/`: Unit, integration and metadata contracts; consult exact-revision CI for results and skips.
 - `NOTICE`: Canonical open-source attribution, copyright Lukas Geiger, ellmos-ai, and open-bricks umbrella.
 - `CONTRIBUTING.md`: Bilingual contributor guide, local development workflows, code quality gates, and version freeze policy.
-- `SECURITY.md`: Local-first, zero-egress, authority preflight, 48h SLA, and § 521 BGB statutory notice.
-- `THIRD_PARTY_LICENSES.md`: Level 1 SBOM Invariant Cross-Reference Matrix and 100% permissive license certification.
-- `THIRD_PARTY_LICENSES.txt`: Plain-text Level 1 SBOM companion inventory with unprivileged RunAsInvoker non-elevation.
+- `SECURITY.md`: Local state, execution/network boundaries, stored sensitive data, hash integrity limits, 48h SLA, and § 521 BGB statutory notice.
+- `THIRD_PARTY_LICENSES.md`: Declared-component Level 1 SBOM inventory, upstream references and verification limits.
+- `THIRD_PARTY_LICENSES.txt`: Plain-text selected-component inventory and caller-permission boundaries (RunAsInvoker).
 - `ARCHITECTURE.md`: Technical design, execution sequence, and internal state machine documentation.
 - `MIGRATION_FROM_BACH.md`: Migration guide and adapter interface for legacy BACH scheduler replacement.
 - `MARKETING-LOG.txt`: Local discoverability, architecture audit, 10-dimension competitive matrix, and marketing status log.
@@ -38,7 +38,7 @@
 - **Umbrella**: `open-bricks`
 - **License**: MIT
 - **Declared consumer**: [FolderHome](https://github.com/ellmos-ai/FolderHome) lists this repository at its pinned source revision for `scheduler.jobs.register` and `scheduler.jobs.consume`; see the [provider checkout guide](https://github.com/ellmos-ai/FolderHome/blob/main/docs/provider-checkouts.md).
-- **Test-Suite**: 157 passed contract & unit tests (100% green)
+- **Test-Suite**: Consult exact-revision CI for passed/skipped counts; this index is not a test receipt.
 - **Last-checked**: 2026-10-02 (Audit-Historie: 2026-09-29, 2026-09-26, 2026-09-23)
 - **Statutory Notice**: § 521 BGB Gefälligkeitsrecht (gratuitous service liability limited to intent & gross negligence)
 - **Security SLA**: Binding 48h initial acknowledgment & 5 business days triage via security@open-bricks.org

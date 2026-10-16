@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security claim boundaries
+- Align EN/DE, security policy and declared dependency inventories with actual caller/network permissions, stored sensitive data, mutable hash records and tested platform scope. Keep unresolved resource/lease and dependency audit work open.
+
 ### Existing-state inspection
 - Open inspection queries read-only, retain committed WAL data and a consistent transaction snapshot, and remove implicit CLI initialization/migration. Missing, incompatible or corrupt state and missing run receipts produce an explicit CLI error instead of fabricated empty state.
 
