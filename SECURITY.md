@@ -30,6 +30,17 @@
 
 ### Stored records and integrity
 
+The built-in command/subprocess executor owns a Windows Job or an isolated POSIX
+session group, has closed stdin, and caps combined captured stdout/stderr at 16 MiB.
+Its deadline covers inherited output pipes; cleanup has a separate 20-second budget
+under a responsive OS. Windows Job close and POSIX control-pipe EOF stop owned work
+on controller death. POSIX group escape, external service brokers, custom executors,
+CPU/RAM limits and lease-expiry fencing remain outside this mechanism.
+
+Explicit MarbleRun background dispatches hand off remaining work after CLI exit 0,
+with stdout/stderr discarded. They report dispatch success only. Failed dispatches
+remain contained; successfully delegated chains require MarbleRun lifecycle controls.
+
 Jobs retain full payload JSON; run output and error retain up to 20,000 characters each.
 Treat the database, its WAL/SHM sidecars and backups as potentially sensitive. Hashes
 and receipt IDs support readback comparison; no signing key or append-only store is
@@ -93,6 +104,19 @@ The provision of this software and its associated documentation is gratuitous (u
    - `status`, `jobs`, `runs` und `authority-receipt` öffnen vorhandene Datenbanken mit SQLite `mode=ro`; jede Leseverbindung verwendet einen Transaktions-Snapshot. Initialisierung, Schemamigration und Datensatzänderungen bleiben aus. Fehlende/inkompatible/beschädigte Zustände führen zu Fehlern; bestätigte Daten aus einer aktiven WAL-Datei werden berücksichtigt. SQLite kann WAL-Koordinationsdateien pflegen. Trockenläufe (`import-bach --dry-run`) zeigen Änderungen vorab, ohne Job-Datensätze zu importieren.
 
 ### Gespeicherte Datensätze und Integrität
+
+Der eingebaute Command-/Subprocess-Executor besitzt einen Windows-Job oder eine
+isolierte POSIX-Sitzungsgruppe, schließt stdin und begrenzt erfasstes stdout/stderr
+zusammen auf 16 MiB. Die Frist umfasst geerbte Ausgabepipes; für die Bereinigung gilt
+bei reagierendem Betriebssystem ein eigenes 20-Sekunden-Budget. Job-Schließen unter
+Windows und Kontrollpipe-EOF unter POSIX stoppen eigene Arbeit beim Tod des
+Controllers. POSIX-Gruppenaustritt, externe Dienstvermittler, eigene Executoren,
+CPU-/RAM-Grenzen und Fencing bei Lease-Ablauf liegen außerhalb dieses Mechanismus.
+
+Ausdrückliche MarbleRun-Hintergrundstarts übergeben verbliebene Arbeit nach CLI-Exit 0;
+stdout/stderr werden verworfen. Ihr Erfolg bestätigt nur den Startauftrag.
+Fehlgeschlagene Starts bleiben begrenzt; erfolgreich übergebene Ketten benötigen
+die Lebenszykluskontrollen von MarbleRun.
 
 Jobs enthalten die vollständige Payload als JSON; Ausgaben und Fehler enthalten jeweils
 bis zu 20.000 Zeichen. Datenbank, WAL/SHM-Dateien und Sicherungen sind als möglicherweise
