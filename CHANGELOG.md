@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Precise time boundaries and claim admission
+- Compare due times, leases and run history by microsecond UTC instants instead of mixed-precision ISO text. Reject expired claims before start while preserving the existing equality boundary, raw stored timestamps and run IDs. Invalid timestamps remain storage errors and roll back partial recovery. This does not renew leases or cancel running external work.
+
 ### Stale run transitions
 - Report per-run state conflicts when a late receipt/start/failure/completion loses its expected state, preserving the original and retry records while continuing other claimed jobs. Other storage errors still propagate. This adds no external lease fencing or heartbeat.
 

@@ -18,7 +18,7 @@ UTC = timezone.utc
 
 
 class RunStateConflict(RuntimeError):
-    """A conditional run transition no longer owns its expected state."""
+    """A conditional run transition cannot proceed in its current state or lease."""
 
     def __init__(self, message: str, *, observed_status: str | None):
         super().__init__(message)
@@ -58,6 +58,11 @@ def iso(value: datetime) -> str:
 
 def parse_iso(value: str) -> datetime:
     return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(UTC)
+
+
+def _utc_order_key(value: str) -> str:
+    """Compare precise UTC instants without rewriting legacy stored timestamps."""
+    return parse_iso(value).isoformat(timespec="microseconds")
 
 
 SCHEMA = """
@@ -130,6 +135,7 @@ class SchedulerStore:
         else:
             self.path.parent.mkdir(parents=True, exist_ok=True)
         conn = sqlite3.connect(self.path)
+        conn.create_function("scheduler_utc", 1, _utc_order_key, deterministic=True)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys = ON")
         conn.execute("PRAGMA journal_mode = WAL")
@@ -146,6 +152,7 @@ class SchedulerStore:
             raise sqlite3.OperationalError("in-memory state has no persistent inspection connection")
         conn = sqlite3.connect(_readonly_uri(self.path.resolve()), uri=True)
         try:
+            conn.create_function("scheduler_utc", 1, _utc_order_key, deterministic=True)
             conn.row_factory = sqlite3.Row
             conn.execute("PRAGMA query_only = ON")
             conn.execute("BEGIN")
@@ -341,7 +348,7 @@ class SchedulerStore:
                 f"""
                 SELECT job_id, scheduled_for
                 FROM runs
-                WHERE status IN ('claimed', 'running') AND lease_expires_at < ?
+                WHERE status IN ('claimed', 'running') AND scheduler_utc(lease_expires_at) < scheduler_utc(?)
                 {run_target_clause}
                 """,
                 (iso(now), *targets),
@@ -350,7 +357,7 @@ class SchedulerStore:
                 f"""
                 UPDATE runs
                 SET status = 'abandoned', finished_at = ?
-                WHERE status IN ('claimed', 'running') AND lease_expires_at < ?
+                WHERE status IN ('claimed', 'running') AND scheduler_utc(lease_expires_at) < scheduler_utc(?)
                 {run_target_clause}
                 """,
                 (iso(now), iso(now), *targets),
@@ -370,9 +377,9 @@ class SchedulerStore:
             rows = conn.execute(
                 f"""
                 SELECT * FROM jobs
-                WHERE enabled = 1 AND next_due_at <= ?
+                WHERE enabled = 1 AND scheduler_utc(next_due_at) <= scheduler_utc(?)
                 {job_target_clause}
-                ORDER BY next_due_at, id
+                ORDER BY scheduler_utc(next_due_at), id
                 LIMIT ?
                 """,
                 (iso(now), *targets, limit),
@@ -432,11 +439,16 @@ class SchedulerStore:
         return claimed
 
     def start_run(self, run_id: str, *, now: datetime | None = None) -> None:
-        stamp = iso(now or datetime.now(UTC))
         with self.connect() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            # A busy writer may outlive the lease; observe the real clock only
+            # after obtaining admission's write transaction, unless explicitly injected.
+            stamp = iso(now or datetime.now(UTC))
             result = conn.execute(
-                "UPDATE runs SET status = 'running', started_at = ? WHERE run_id = ? AND status = 'claimed'",
-                (stamp, run_id),
+                """UPDATE runs SET status = 'running', started_at = ?
+                WHERE run_id = ? AND status = 'claimed'
+                  AND scheduler_utc(lease_expires_at) >= scheduler_utc(?)""",
+                (stamp, run_id, stamp),
             )
             if result.rowcount != 1:
                 raise _run_conflict(conn, run_id, f"run cannot start: {run_id}")
@@ -522,7 +534,7 @@ class SchedulerStore:
     def recent_runs(self, limit: int = 20) -> list[dict[str, Any]]:
         with self.read_connection() as conn:
             rows = conn.execute(
-                "SELECT * FROM runs ORDER BY scheduled_for DESC, attempt DESC LIMIT ?",
+                "SELECT * FROM runs ORDER BY scheduler_utc(scheduled_for) DESC, attempt DESC LIMIT ?",
                 (limit,),
             ).fetchall()
         return [dict(row) for row in rows]
@@ -554,7 +566,7 @@ class SchedulerStore:
                     SELECT latest.run_id
                     FROM runs latest
                     WHERE latest.job_id = r.job_id
-                    ORDER BY latest.scheduled_for DESC, latest.attempt DESC
+                    ORDER BY scheduler_utc(latest.scheduled_for) DESC, latest.attempt DESC
                     LIMIT 1
                 )
                 """
