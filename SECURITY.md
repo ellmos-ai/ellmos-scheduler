@@ -27,6 +27,18 @@
 5. **Read-Only Inspection Surface**:
    - Commands such as `status`, `authority-receipt`, and dry-run imports (`import-bach --dry-run`) are strictly read-only and never mutate database records or execution states.
 
+### New POSIX state files
+
+New state directories, including missing intermediate parents, are created with
+mode `0700`; a new database is exclusively created with mode `0600` before SQLite
+can write payloads. SQLite WAL and shared-memory files inherit the database's
+private permissions. The process umask may restrict these modes further and is
+not changed by the store. Existing directories and database permissions remain
+unchanged: owners must separately inspect and restrict older or intentionally
+shared state, including pre-existing sidecar files. Use a trusted parent directory;
+this is not protection against an attacker who can replace its entries. Windows
+ACLs are unaffected.
+
 ### Supported Versions
 
 | Version | Supported | Notes |
@@ -70,6 +82,18 @@ The provision of this software and its associated documentation is gratuitous (u
    - Abgelaufene oder verwaiste Leases werden sicher bereinigt (`abandoned`), ohne blockierte Zustände zu hinterlassen.
 5. **Rein lesende Prüfschnittstellen**:
    - Befehle wie `status`, `authority-receipt` oder `import-bach --dry-run` sind rein lesend und verändern zu keinem Zeitpunkt Datensätze oder Ausführungszustände.
+
+### Neue POSIX-Zustandsdateien
+
+Neue Zustandsverzeichnisse einschließlich fehlender Zwischenverzeichnisse erhalten
+den Modus `0700`. Eine neue Datenbank wird vor dem ersten SQLite-Schreibzugriff
+exklusiv mit `0600` angelegt. SQLite-WAL- und Shared-Memory-Dateien übernehmen die
+privaten Datenbankrechte. Die Prozess-umask kann die Rechte weiter einschränken und
+wird vom Store nicht verändert. Bestehende Verzeichnisse und Datenbankrechte bleiben
+unverändert: Eigentümer müssen ältere oder bewusst gemeinsam genutzte Zustände und
+bereits vorhandene Begleitdateien separat prüfen und absichern. Das übergeordnete
+Verzeichnis muss vertrauenswürdig sein; ein Angreifer mit Austauschrechten für dessen
+Einträge wird dadurch nicht abgewehrt. Windows-ACLs bleiben unverändert.
 
 ### Unterstützte Versionen
 
