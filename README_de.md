@@ -309,6 +309,13 @@ ellmos-scheduler --db "$env:LOCALAPPDATA\ellmos\scheduler.db" status --json
 ellmos-scheduler --db "$env:LOCALAPPDATA\ellmos\scheduler.db" serve --require-authorities
 ```
 
+`status`, `jobs`, `runs` und `authority-receipt` lesen vorhandene Zustände über
+schreibgeschützte SQLite-Verbindungen. Job-/Run-Datensätze und Schema bleiben
+unverändert; bestätigte Daten aus einer aktiven WAL-Datei werden berücksichtigt.
+Eine fehlende, inkompatible oder beschädigte Datenbank führt zu einem Fehler
+(Exitcode 2). Anlage und Migration erfolgen ausdrücklich mit `init`. SQLite kann
+beim Lesen WAL-Koordinationsdateien pflegen. Die Zustandsabfrage startet keine Jobs.
+
 Für vorbereitete Cutover- oder Schattenjobs materialisiert `add --disabled` den
 Datensatz atomar im deaktivierten Zustand. Das verhindert, dass ein paralleler
 Scheduler den Job im Intervall zwischen `add` und `disable` anstößt. Später

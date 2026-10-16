@@ -25,7 +25,7 @@
    - Deterministic `run_id` generation and atomic database leases prevent double-execution across concurrent scheduler workers or parallel host processes.
    - Expired or abandoned leases are safely recovered without leaving orphaned execution locks.
 5. **Read-Only Inspection Surface**:
-   - Commands such as `status`, `authority-receipt`, and dry-run imports (`import-bach --dry-run`) are strictly read-only and never mutate database records or execution states.
+   - `status`, `jobs`, `runs` and `authority-receipt` open existing databases with SQLite `mode=ro`; each read connection uses one transaction snapshot. They perform no initialization, schema migration or record updates. Missing/incompatible/corrupt state is an error, and committed live WAL data is included. SQLite may maintain WAL coordination files. Dry-run imports (`import-bach --dry-run`) preview changes without importing job records.
 
 ### New POSIX state files
 
@@ -81,7 +81,7 @@ The provision of this software and its associated documentation is gratuitous (u
    - Determinative `run_id`-Erzeugung und atomare Datenbank-Leases verhindern Doppelstarts bei parallelen Scheduler-Workern.
    - Abgelaufene oder verwaiste Leases werden sicher bereinigt (`abandoned`), ohne blockierte Zustände zu hinterlassen.
 5. **Rein lesende Prüfschnittstellen**:
-   - Befehle wie `status`, `authority-receipt` oder `import-bach --dry-run` sind rein lesend und verändern zu keinem Zeitpunkt Datensätze oder Ausführungszustände.
+   - `status`, `jobs`, `runs` und `authority-receipt` öffnen vorhandene Datenbanken mit SQLite `mode=ro`; jede Leseverbindung verwendet einen Transaktions-Snapshot. Initialisierung, Schemamigration und Datensatzänderungen bleiben aus. Fehlende/inkompatible/beschädigte Zustände führen zu Fehlern; bestätigte Daten aus einer aktiven WAL-Datei werden berücksichtigt. SQLite kann WAL-Koordinationsdateien pflegen. Trockenläufe (`import-bach --dry-run`) zeigen Änderungen vorab, ohne Job-Datensätze zu importieren.
 
 ### Neue POSIX-Zustandsdateien
 
