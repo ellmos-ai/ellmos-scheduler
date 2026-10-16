@@ -36,7 +36,9 @@
 
 - [ ] **TASK-SCHED-07: CI-Dependency-Hinweise verifizieren** (`effort=medium`, `scope=ci`, priority `normal`).
   - **Befund vom 16.10.2026:** OSV meldet `wheel==0.45.1` (GHSA-8rrh-rw8j-w5fx) und `setuptools==80.9.0` (GHSA-h35f-9h28-mq5c). Betroffene `wheel unpack`- bzw. macOS-MANIFEST/sdist-Aufrufe sind im aktuellen Wheel-CI nicht belegt; kein Advisory-Gesamt-PASS. Lokales tzdata 2026.2 liegt hinter PyPI 2026.5.
-  - **Nächster Schritt:** Toolchain und transitive Auflösung isoliert auf allen unterstützten Plattformen prüfen; nur verifizierte Pins ändern. Keine riskanten Upgrades im Audit.
+  - **Korrekturzweig vom 16.10.2026:** Die beiden Advisories wurden über GitHub und OSV bestätigt. CI-Pins wechseln auf die ersten korrigierten Versionen `setuptools==83.0.0` und `wheel==0.46.2`. Das inzwischen zurückgezogene `build==1.5.1` wird durch das nicht zurückgezogene, Python-3.10-kompatible `build==1.6.1` ersetzt. CI prüft die installierten Abhängigkeiten mit `pip check` und protokolliert ihre tatsächlich aufgelösten Versionen. Versionsgebundene Advisory-Prüfung, native Matrix und unabhängige Prüfung sind getrennte Nachweise; keine allgemeine Sicherheitsfreigabe.
+  - **Installer-Befund:** Die frische lokale Prüfumgebung enthielt `pip==25.0.1` mit aktuellen Advisory-Treffern. CI legt deshalb vor der weiteren Auflösung `pip==26.2.1` fest; diese Version unterstützt Python 3.10 und wurde separat geprüft. Das belegt keinen früheren CI-Exploit.
+  - **Weiter offen:** Unabhängige Prüfung und Integration; die allgemeine Build-Backend-Mindestanforderung und bereits installierte Umgebungen werden nicht migriert. tzdata bleibt eine unbeschränkte Laufzeitauflösung innerhalb der bestehenden Mindestanforderung.
 
 - [x] **TASK-SCHED-08: Private Dokumentationspfade neutralisieren** (`effort=low`, `scope=documentation`, priority `normal`).
   - **Ergebnis vom 16.10.2026:** Beide Quick-Start-Payloads nutzen denselben neutralen Beispielordner; der Marketing-Log enthält keinen lokalen Klonpfad mehr. Keine Historienbereinigung oder Löschung; Source-Audit auf f2740ba7 bleibt revisionsgebunden.
