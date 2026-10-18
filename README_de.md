@@ -303,7 +303,7 @@ ellmos-scheduler --db "$env:LOCALAPPDATA\ellmos\scheduler.db" add `
   --id sync.daily.cross-system `
   --schedule '{"kind":"daily","time":"09:00","timezone":"Europe/Berlin"}' `
   --executor command `
-  --payload '{"argv":["python","C:\\path\\to\\task.py"],"cwd":"C:\\Users\\lukas"}' `
+  --payload '{"argv":["python","C:\\path\\to\\task.py"],"cwd":"C:\\path\\to"}' `
   --authorities '[{"id":"policy:sync","type":"policy","resolver":"file","required":true,"source":{"path":"C:\\authorities\\SYNC_PROTOCOL.md"}}]'
 ellmos-scheduler --db "$env:LOCALAPPDATA\ellmos\scheduler.db" status --json
 ellmos-scheduler --db "$env:LOCALAPPDATA\ellmos\scheduler.db" serve --require-authorities

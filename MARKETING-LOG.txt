@@ -3,7 +3,7 @@ Latest Run: 2026-10-02 (Version: 0.3.6 Pfad B)
 Initial Baseline: 2026-09-11 (Version: 0.3.3)
 Operator: Antigravity / Gemini (via GITHUBBOT Pfad A / Pfad B)
 Target Repo: ellmos-ai/ellmos-scheduler
-Canonical Path: C:\_Local_DEV\repos\ellmos-scheduler
+Canonical Checkout: <local-checkout>/ellmos-scheduler
 
 ================================================================================
 1. REPOSITORY AUDIT & DISCOVERABILITY BASELINE
