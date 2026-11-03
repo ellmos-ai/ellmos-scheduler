@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Source-bound runtime and security documentation (2026-11-03)
+- Apply the focused claim corrections reviewed in stacked PR #14 directly to
+  current main, retaining the private POSIX creation and read-only inspection fixes.
+- Describe inherited caller/network permissions, sensitive stored payloads/output,
+  mutable hash records, valid-lease limits and declared inventory scope without
+  blanket isolation, immutability, platform-parity or dependency-audit guarantees.
+- Replace the historical test-count badge with a link to current CI results,
+  use the actual `jobs` CLI name, and clarify strict configured output decoding.
+  Align the same mechanism boundaries in the bilingual contributor guide.
+  Runtime, versions, workflow configuration and dependency declarations are unchanged.
+
 ### Existing-state inspection on current main (2026-11-03)
 - Open inspection queries read-only, retain committed WAL data and a consistent
   transaction snapshot, and remove implicit CLI initialization/migration. Missing,
