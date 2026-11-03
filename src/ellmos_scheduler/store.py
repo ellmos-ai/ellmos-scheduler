@@ -17,6 +17,20 @@ from .schedules import next_after
 UTC = timezone.utc
 
 
+class RunStateConflict(RuntimeError):
+    """A conditional run transition no longer owns its expected state."""
+
+    def __init__(self, message: str, *, observed_status: str | None):
+        super().__init__(message)
+        self.observed_status = observed_status
+
+
+def _run_conflict(conn: sqlite3.Connection, run_id: str, message: str) -> RunStateConflict:
+    # Read under the same transaction as the failed conditional UPDATE.
+    row = conn.execute("SELECT status FROM runs WHERE run_id = ?", (run_id,)).fetchone()
+    return RunStateConflict(message, observed_status=str(row["status"]) if row else None)
+
+
 def _readonly_uri(path: PurePath) -> str:
     uri = path.as_uri()
     if path.drive.startswith("\\\\"):
@@ -425,7 +439,7 @@ class SchedulerStore:
                 (stamp, run_id),
             )
             if result.rowcount != 1:
-                raise RuntimeError(f"run cannot start: {run_id}")
+                raise _run_conflict(conn, run_id, f"run cannot start: {run_id}")
 
     def record_authority_receipt(
         self,
@@ -456,8 +470,8 @@ class SchedulerStore:
                 ),
             )
             if result.rowcount != 1:
-                raise RuntimeError(
-                    f"authority receipt cannot be recorded for run: {run_id}"
+                raise _run_conflict(
+                    conn, run_id, f"authority receipt cannot be recorded for run: {run_id}"
                 )
 
     def fail_claimed_run(
@@ -478,7 +492,7 @@ class SchedulerStore:
                 (stamp, error[-20000:], run_id),
             )
             if result.rowcount != 1:
-                raise RuntimeError(f"claimed run cannot fail: {run_id}")
+                raise _run_conflict(conn, run_id, f"claimed run cannot fail: {run_id}")
 
     def finish_run(
         self,
@@ -503,7 +517,7 @@ class SchedulerStore:
                 (status, stamp, exit_code, output[-20000:], error[-20000:], run_id),
             )
             if result.rowcount != 1:
-                raise RuntimeError(f"run cannot finish: {run_id}")
+                raise _run_conflict(conn, run_id, f"run cannot finish: {run_id}")
 
     def recent_runs(self, limit: int = 20) -> list[dict[str, Any]]:
         with self.read_connection() as conn:

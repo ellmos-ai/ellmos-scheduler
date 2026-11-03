@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Per-run state conflicts on current main (2026-11-03)
+- Integrate the independently reviewed runtime correction from stacked PR #18 on the current default base. Report late receipt/start/failure/completion state conflicts per run, preserve original/retry records and continue independent claimed jobs; propagate unrelated storage errors.
+- Preserve the private state creation, read-only inspection, bounded command lifetime and local-state ignore corrections already integrated on main. This adds no external cancellation, owner/lease-expiry fencing or heartbeat; no workflow, dependency or version change.
+
 ### Local state exclusions on current main (2026-11-03)
 - Integrate the independently reviewed ignore correction from stacked PR #16: SQLite state and WAL/SHM/rollback journals for .db/.sqlite/.sqlite3 plus named conventional authentication artifacts. Sanitized environment templates remain trackable.
 - Keep arbitrary secret detection and already tracked history outside this change; verify root and nested paths using actual Git ignore semantics.
