@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Local state exclusions on current main (2026-11-03)
+- Integrate the independently reviewed ignore correction from stacked PR #16: SQLite state and WAL/SHM/rollback journals for .db/.sqlite/.sqlite3 plus named conventional authentication artifacts. Sanitized environment templates remain trackable.
+- Keep arbitrary secret detection and already tracked history outside this change; verify root and nested paths using actual Git ignore semantics.
+- Reconcile TODO integration notes with separately verified merged PRs #20–#23 and their limited scope; keep remaining runtime and dependency audit tasks open. No runtime, workflow, dependency or version change.
+
 ### Owned command lifetime on current main (2026-11-03)
 - Integrate the independently reviewed command-lifetime mechanism from stacked PR #15 on the current default base.
 - Bind a trusted Windows gate before producer release, stop owned work with Job/group control on completion, timeout and controller death, and cap combined captured stdout/stderr at 16 MiB. Commands receive closed stdin; unconfirmed cleanup fails.
