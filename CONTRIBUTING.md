@@ -11,18 +11,18 @@ Thank you for your interest in contributing to **ellmos-scheduler** (`ellmos-ai/
 
 ### 1. Architectural Principles & Invariants
 
-Every contribution must preserve our 10 foundational system and operational invariants:
+Contributions must preserve these ten mechanisms and document their execution and trust boundaries:
 
-- **100% Local-First & Zero-Egress (`INV-LOCAL-01`)**: No unauthorized network sockets, outbound telemetry, analytics beacons, or remote dependencies.
-- **Unprivileged Non-Elevation Execution (`INV-PRIV-02`)**: Executes strictly in user-mode (`RunAsInvoker`), never requiring administrative or root elevation.
-- **Atomic Concurrency & Leases (`INV-CONC-03`)**: Content-addressed deterministic `run_id` generation and atomic SQLite leases prevent concurrent double-execution.
-- **Preflight Authority Integrity Gate (`INV-AUTH-04`)**: Dual read-only passes + SHA-256 hash checks validate mandatory authority files prior to execution.
-- **Strict UTF-8 & Stream Hygiene (`INV-STRM-05`)**: Subprocess stream decoding enforces strict error handling (`utf-8:strict`) without data corruption.
+- **Local state & network boundaries (`INV-LOCAL-01`)**: SQLite scheduling needs no mandatory cloud service; external executors and remote filesystem paths retain host network permissions. No network filter is installed.
+- **Caller permissions (`INV-PRIV-02`)**: RunAsInvoker inherits the caller's rights without requesting elevation or dropping existing privileges. Use an appropriate OS account.
+- **Valid-lease claims (`INV-CONC-03`)**: Transactions serialize claims during valid leases. Retry after expiry does not prove the previous process has stopped.
+- **Authority readback (`INV-AUTH-04`)**: Two reads and SHA-256 compare observed bytes of trusted configured sources; hashes alone do not establish approval authenticity or permission to execute.
+- **Strict output decoding (`INV-STRM-05`)**: UTF-8 is the default; supported selected codecs are decoded strictly. A failed result does not undo prior program effects or redact captured output.
 - **Shell Injection Safety (`INV-EXEC-06`)**: Subprocess execution strictly uses explicit `argv` lists (`shell=False`).
-- **Resilient Lease Recovery (`INV-RES-07`)**: Overdue, hanging, or crashed worker leases are marked `abandoned` and reclaimed safely without deadlocks.
+- **Timeouts and abandoned claims (`INV-RES-07`)**: Direct command processes have a timeout; expiry permits claim recovery, without proving descendant termination or general resource bounds.
 - **Modular Ecosystem Integration (`INV-MOD-08`)**: Pluggable executor registry and clean decoupling outside monoliths.
-- **Multi-OS Parity (`INV-PLAT-09`)**: Full operational parity across Windows (with `tzdata` fallback for IANA zones), Linux, and macOS.
-- **Audit Trails & Security SLA (`INV-SLA-10`)**: Immutable SQLite receipts, Level 1 SBOM transparency, and a binding 48h Security Response SLA.
+- **Platform tests (`INV-PLAT-09`)**: CI covers Windows, Linux and macOS; record skips and separate native device/provider acceptance rather than promising universal parity.
+- **Stored records and inventory (`INV-SLA-10`)**: Local hash/readback records are mutable by database writers, not signed or append-only. Payloads/output can be sensitive; selected license inventories are not complete dependency audits. See SECURITY.md for disclosure policy.
 
 ### 2. Local Development & Environment Setup
 
@@ -85,18 +85,18 @@ Please do not open public GitHub issues for security vulnerabilities. Instead, r
 
 ### 1. Architektonische Prinzipien & Invarianten
 
-Jeder Beitrag muss unsere 10 grundlegenden System- und Betriebsinvarianten wahren:
+Beiträge müssen diese zehn Mechanismen erhalten und ihre Ausführungs- und Vertrauensgrenzen dokumentieren:
 
-- **100% Local-First & Zero-Egress (`INV-LOCAL-01`)**: Keine ausgehenden Netzwerk-Sockets, Telemetrie, Analyse-Beacons oder unerwünschte Cloud-Verbindungen.
-- **Nicht-privilegierte Ausführung (`INV-PRIV-02`)**: Strikter Benutzermodus (`RunAsInvoker`), niemals Administrator- oder Root-Rechte erforderlich.
-- **Atomare Nebenläufigkeit & Leases (`INV-CONC-03`)**: Deterministische `run_id`-Generierung und transaktionale SQLite-Leases verhindern Doppel-Ausführungen.
-- **Preflight-Autoritäts-Prüfung (`INV-AUTH-04`)**: Zweifache Read-Passes mit kryptographischer SHA-256-Integritätsprüfung vor der Auftragsabwicklung.
-- **Strikte UTF-8-Stream-Hygiene (`INV-STRM-05`)**: Subprozess-Dekodierung erzwingt strikte Fehlerbehandlung (`utf-8:strict`) ohne Datenverlust.
+- **Lokaler Zustand und Netzwerkgrenzen (`INV-LOCAL-01`)**: SQLite-Zeitplanung braucht keinen verpflichtenden Cloud-Dienst; externe Executoren und entfernte Dateisystempfade behalten die Netzwerkrechte des Hosts. Ein Netzwerkfilter wird nicht eingerichtet.
+- **Aufruferrechte (`INV-PRIV-02`)**: RunAsInvoker übernimmt vorhandene Rechte, ohne zusätzliche anzufordern oder geerbte Rechte abzulegen. Ein geeignetes OS-Konto verwenden.
+- **Claims mit gültigen Leases (`INV-CONC-03`)**: Transaktionen serialisieren Claims während gültiger Leases. Ein erneuter Versuch nach Ablauf beweist nicht, dass der vorige Prozess beendet ist.
+- **Authority-Rücklesen (`INV-AUTH-04`)**: Zwei Lesevorgänge und SHA-256 vergleichen beobachtete Bytes vertrauenswürdiger Quellen; Hashes allein beweisen weder Freigabeechtheit noch Ausführungsberechtigung.
+- **Strikte Ausgabedekodierung (`INV-STRM-05`)**: UTF-8 ist der Standard; unterstützte gewählte Codecs werden strikt dekodiert. Ein fehlgeschlagenes Ergebnis macht Programmwirkungen nicht rückgängig und schwärzt erfasste Ausgaben nicht.
 - **Schutz vor Shell-Injection (`INV-EXEC-06`)**: Subprozess-Ausführung nutzt ausschließlich explizite `argv`-Listen (`shell=False`).
-- **Resilientes Lease-Reclaiming (`INV-RES-07`)**: Abgestürzte oder abgelaufene Worker-Leases werden als `abandoned` markiert und ohne Deadlocks zurückgewonnen.
+- **Timeouts und abgelaufene Claims (`INV-RES-07`)**: Direkte Befehlsprozesse haben einen Timeout; Ablauf erlaubt die Claim-Wiederaufnahme, beweist aber weder Nachkommenbeendigung noch allgemeine Ressourcengrenzen.
 - **Modulare Systemintegration (`INV-MOD-08`)**: Steckbare Executor-Registry und saubere Trennung außerhalb monolithischer Blöcke.
-- **Plattformübergreifende Parität (`INV-PLAT-09`)**: Gleiches Verhalten unter Windows (mit `tzdata`-Fallback für IANA-Zonen), Linux und macOS.
-- **Revisionssicherheit & 48h SLA (`INV-SLA-10`)**: Unveränderliche SQLite-Receipts, Level 1 SBOM Transparenz und verbindliche 48h Sicherheits-Reaktions-SLA.
+- **Plattformtests (`INV-PLAT-09`)**: CI prüft Windows, Linux und macOS; Auslassungen und separate Geräte-/Provider-Abnahmen dokumentieren statt universelle Parität zu versprechen.
+- **Gespeicherte Datensätze und Inventar (`INV-SLA-10`)**: Lokale Hash-/Rücklesebelege sind durch DB-Schreibberechtigte veränderbar, weder signiert noch append-only. Payloads/Ausgaben können sensibel sein; ausgewählte Lizenzinventare sind keine vollständigen Abhängigkeitsaudits. Meldewege stehen in SECURITY.md.
 
 ### 2. Lokale Entwicklung & Setup
 
