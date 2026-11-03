@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import sqlite3
+import sys
 from pathlib import Path
 from typing import Sequence
 
@@ -129,6 +131,21 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         _print(report.to_dict(), args.json)
         return 0
+    if args.command in {"jobs", "status", "runs", "authority-receipt"}:
+        try:
+            if args.command == "jobs":
+                value = store.list_jobs()
+            elif args.command == "status":
+                value = store.status()
+            elif args.command == "runs":
+                value = store.recent_runs(args.limit)
+            else:
+                value = store.authority_receipt(args.run_id)
+        except (sqlite3.Error, KeyError) as exc:
+            print(f"Cannot inspect scheduler database: {exc}", file=sys.stderr)
+            return 2
+        _print(value, args.json)
+        return 0
     store.init()
     if args.command == "init":
         print(args.db)
@@ -144,14 +161,6 @@ def main(argv: Sequence[str] | None = None) -> int:
             enabled=not args.disabled,
         )
         print(args.id)
-    elif args.command == "jobs":
-        _print(store.list_jobs(), args.json)
-    elif args.command == "status":
-        _print(store.status(), args.json)
-    elif args.command == "runs":
-        _print(store.recent_runs(args.limit), args.json)
-    elif args.command == "authority-receipt":
-        _print(store.authority_receipt(args.run_id), args.json)
     elif args.command == "set-authorities":
         store.set_authorities(args.job_id, json.loads(args.authorities))
         print(args.job_id)

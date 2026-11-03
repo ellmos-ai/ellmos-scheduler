@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Existing-state inspection on current main (2026-11-03)
+- Open inspection queries read-only, retain committed WAL data and a consistent
+  transaction snapshot, and remove implicit CLI initialization/migration. Missing,
+  incompatible or corrupt state and missing run receipts produce explicit CLI
+  errors instead of fabricated empty state. SQLite may maintain WAL coordination files.
+- Apply the focused correction reviewed in stacked PR #13 directly to the current
+  default branch, preserving the already integrated private POSIX state creation.
+
 ### Private POSIX state creation (2026-11-03)
 - Create every missing state directory with mode 0700 and exclusively create new
   SQLite databases with mode 0600 before opening them. Preserve existing directory
