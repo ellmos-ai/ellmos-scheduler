@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Precise UTC boundaries on current main (2026-11-03)
+- Integrate the independently reviewed time/admission correction from stacked PR #19 directly on the current default base: compare due times, leases and history as microsecond UTC instants without rewriting raw timestamps or run IDs.
+- Obtain the admission writer transaction before observing the real clock; preserve equality at exact expiry and reject strictly later starts. Invalid timestamps remain storage errors with rollback. No lease renewal, owner fencing or cancellation of already-running work.
+- Clarify that persisted legacy values use Z or an explicit offset; naive BACH inputs use the configured import timezone. No workflow, dependency or version change.
+
 ### Per-run state conflicts on current main (2026-11-03)
 - Integrate the independently reviewed runtime correction from stacked PR #18 on the current default base. Report late receipt/start/failure/completion state conflicts per run, preserve original/retry records and continue independent claimed jobs; propagate unrelated storage errors.
 - Preserve the private state creation, read-only inspection, bounded command lifetime and local-state ignore corrections already integrated on main. This adds no external cancellation, owner/lease-expiry fencing or heartbeat; no workflow, dependency or version change.
