@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Owned command lifetime on current main (2026-11-03)
+- Integrate the independently reviewed command-lifetime mechanism from stacked PR #15 on the current default base.
+- Bind a trusted Windows gate before producer release, stop owned work with Job/group control on completion, timeout and controller death, and cap combined captured stdout/stderr at 16 MiB. Commands receive closed stdin; unconfirmed cleanup fails.
+- Preserve explicit MarbleRun background dispatch by handing off ownership only after CLI success, discarding dispatch streams and distinguishing dispatch from chain completion. Failed dispatches remain contained.
+- Keep POSIX group escape, brokered/custom executors, general resource/privilege limits and lease fencing outside this mechanism. No workflow, dependency or version change.
+
 ### Source-bound runtime and security documentation (2026-11-03)
 - Apply the focused claim corrections reviewed in stacked PR #14 directly to
   current main, retaining the private POSIX creation and read-only inspection fixes.
