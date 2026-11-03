@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Any, Callable, Mapping
 
+from ._command_process import run_command
+
 
 @dataclass(frozen=True)
 class ExecutionResult:
@@ -56,7 +58,8 @@ def _decode_stream(value: bytes | str | None, encoding: str) -> str:
     return value.decode(encoding, errors="strict")
 
 
-def command_executor(payload: dict[str, Any], timeout_seconds: int) -> ExecutionResult:
+def command_executor(payload: dict[str, Any], timeout_seconds: int, *,
+                     _detach_on_success: bool = False) -> ExecutionResult:
     """Execute an argv list and fail closed if audit output cannot be decoded."""
     argv = payload.get("argv")
     if (
@@ -119,15 +122,12 @@ def command_executor(payload: dict[str, Any], timeout_seconds: int) -> Execution
             del env[key]
     env["PYTHONIOENCODING"] = f"{output_encoding}:strict"
     try:
-        completed = subprocess.run(
+        completed = run_command(
             argv,
             cwd=cwd,
             env=env,
-            capture_output=True,
-            text=False,
             timeout=timeout_seconds,
-            shell=False,
-            check=False,
+            detach_on_success=_detach_on_success,
         )
     except subprocess.TimeoutExpired as exc:
         try:

@@ -112,4 +112,8 @@ def marblerun_executor(
     for key in ("cwd", "env"):
         if key in payload:
             command_payload[key] = payload[key]
-    return command_executor(command_payload, timeout_seconds)
+    result = command_executor(command_payload, timeout_seconds, _detach_on_success=background)
+    if background and result.status == "succeeded":
+        return ExecutionResult("succeeded", result.exit_code,
+            "Background dispatch returned exit code 0; inspect MarbleRun for chain completion.", result.error)
+    return result
