@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
@@ -13,6 +14,18 @@ from .schedules import next_after
 
 
 UTC = timezone.utc
+
+
+def _private_directory(path: Path) -> None:
+    """Create each missing parent privately without chmod on existing directories."""
+    try:
+        path.mkdir(mode=0o700)
+    except FileNotFoundError:
+        _private_directory(path.parent)
+        path.mkdir(mode=0o700, exist_ok=True)
+    except FileExistsError:
+        if not path.is_dir():
+            raise
 
 
 def iso(value: datetime) -> str:
@@ -82,7 +95,16 @@ class SchedulerStore:
 
     @contextmanager
     def connect(self) -> Iterator[sqlite3.Connection]:
-        self.path.parent.mkdir(parents=True, exist_ok=True)
+        if os.name == "posix" and str(self.path) != ":memory:":
+            _private_directory(self.path.parent)
+            try:
+                descriptor = os.open(self.path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+            except FileExistsError:
+                pass  # Preserve existing state and any explicitly configured sharing policy.
+            else:
+                os.close(descriptor)
+        else:
+            self.path.parent.mkdir(parents=True, exist_ok=True)
         conn = sqlite3.connect(self.path)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys = ON")
