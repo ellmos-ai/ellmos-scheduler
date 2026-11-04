@@ -676,3 +676,65 @@ Definitions-IDs: keine Wiederholung, höchstens acht Definitionen einschließlic
 des neuen Triggers. Folgeadapter müssen die gespeicherte Historie weitergeben;
 willkürlich neu gestartete externe Ereignisse sind damit nicht global begrenzt.
 Der Scheduler erzeugt selbst keine rekursiven Ereignisse.
+
+## Gemeinsame Agententrigger-Definitionen – SOLL/IST (04.11.2026)
+
+SOLL: Routinen, Deine Agenten und Kalender verwalten dieselben Trigger-IDs.
+IST: Der native Python-Vertrag `AgentTriggers(SchedulerStore(path))` liefert jetzt
+CAS-CRUD im bestehenden Scheduler-Store. GUI, HTTP-Adapter, Kalenderprojektion und
+produktive Agentenausführung bleiben nachfolgende Integrationen.
+
+`create(id, agent_id=..., schedule=..., executor=..., payload={}, enabled=False,
+authorities=..., lease_seconds=900, timeout_seconds=600)` erzeugt eine stabile
+Definition. `get(id)` und `list(agent_id=None, include_deleted=False)` sind rein
+lesend: kein Init, keine Migration, keine Erstellung einer fehlenden Datenbank.
+`store.init()` ist eine ausdrückliche Bereitstellung, niemals Teil eines GET.
+`update(id, expected_version=n, changes={...})` ersetzt einzelne vollständige
+Felder (`agent_id`, `schedule`, `executor`, `payload`, `authorities`, Lease, Timeout,
+`enabled`). Unbekannte/leere Änderungen und ungültige Werte werden abgewiesen.
+`delete(id, expected_version=n)` ist ein CAS-Tombstone, keine Datenlöschung.
+Snapshots enthalten `id`, `version`, `revision`, `enabled`, `deleted` und die
+Konfiguration. `history(id)` erhält alle Mutations-Snapshots.
+
+Zeitpläne verwenden die bestehenden `once`, `daily`, `cron` und `interval`-Verträge;
+Ereignisse verwenden `{"kind":"event","event_type":"task.accepted"}`.
+Jede Mutation erhöht `version`; nur tatsächliche Konfigurationsänderungen erzeugen
+eine neue `revision` und einen neuen Job-Snapshot. Reine Aktivierung/Deaktivierung
+oder identische Konfiguration erhält die Revision und erzeugt keinen neuen,
+bereits verbrauchten Einmaltermin. Auch Payload-, Agenten- und Autoritätskorrekturen
+oder eine andere Offsetdarstellung eines bereits terminal verbrauchten
+UTC-Terminzeitpunkts lösen keinen weiteren Lauf aus. Eine explizit neue Terminzeit
+darf ein neues Vorkommen erzeugen; Rückwechsel auf einen früher verbrauchten
+Zeitpunkt bleibt verbraucht. Erfolg, Fehler und Zeitüberschreitung sind terminal;
+`abandoned` ist dagegen weiterhin Lease-Recovery, kein Verbrauchsnachweis.
+Bei einer Korrektur während eines noch laufenden Termins bleibt dessen Snapshot
+unverändert. Sein späterer terminaler Abschluss verbraucht atomar denselben
+UTC-Termin auch in zwischenzeitlich angelegten Revisionen; dadurch folgt kein
+zweiter Lauf derselben Terminzeit. Abgelehnte veraltete Abschlussversuche dürfen
+keinen Verbrauch markieren. Eine ausdrücklich andere Terminzeit bleibt separat.
+Die Revisions-/Lease-Regeln für pending/claimed und Recovery bleiben erhalten.
+
+`deliver(id, expected_version=n, event_id=..., event_type=..., source=...,
+lineage=...)` materialisiert native einmalige Jobs. Deduplizierung gilt über alle
+Revisionen derselben stabilen Definition: eine bereits zugestellte Ereignis-ID
+kehrt zum ursprünglichen Job zurück, auch wenn dieser inzwischen veraltet ist;
+sie erzeugt keinen Ersatzlauf mit neuem Payload. Abweichende Provenienz ist ein
+`DefinitionConflict`. Herkunft und `task.accepted` sind weiterhin kein
+Abnahme-/Autoritätsnachweis. Alle Event-Ketten-/Validierungsgrenzen gelten weiter.
+
+Erstellen, Update, Tombstone, Snapshot und Jobanlage sind atomare Transaktionen.
+Claim und tatsächlicher Start prüfen aktuelle Revision, Aktivierung, Tombstone
+sowie globale, Job- und `definition:<id>`-Pause. Veraltete pending/claimed Jobs und
+spätere Lease-Recovery starten nach Update/Löschung nicht mehr. Bereits laufende
+Arbeit behält ihren Payload und darf regulär enden. Neue Revisionen derselben
+Definition starten nicht parallel zu einem noch gültig übernommenen/laufenden
+Versuch; erst Abschluss oder Lease-Ablauf erlaubt den nächsten Lauf. Die bestehende
+Lease-Recovery bleibt mindestens einmal und kann externe Effekte nicht zurückrollen.
+
+Tombstones, alte Jobs, Runs und Historie werden aufbewahrt; IDs werden nie erneut
+vergeben. Fehlender/veralteter Provider ist kein Erfolg: `DefinitionConflict`
+meldet CAS-/ID-/Ereigniskonflikte, `KeyError` einen nicht gefundenen Lesezugriff,
+`ValueError` ungültige Eingaben; Speicher-/Schemafehler bleiben explizite Fehler.
+Bestehende direkte Job- und `EventTriggers`-Verträge bleiben kompatibel, werden
+aber nicht still als gemeinsame Agentendefinitionen ausgegeben. Kein zweiter
+Scheduler, keine zweite Laufwarteschlange und kein neuer Datenbankpfad entsteht.

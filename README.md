@@ -642,3 +642,46 @@ must not trust review-only results or pre-commit CLI hooks. Lineage rejects repe
 definitions and chains longer than eight; adapters must propagate stored lineage.
 The scheduler emits no recursive events itself; unrelated externally injected
 roots cannot be globally bounded by lineage. Provider starts remain consumer-owned.
+
+## Shared agent-trigger definitions: target/current (2026-11-04)
+
+Target: the same stable trigger IDs in Routines, Your Agents and Calendar.
+Current: `AgentTriggers(SchedulerStore(path))` provides native shared CAS CRUD;
+HTTP, GUI, calendar projection and production agent dispatch remain separate work.
+See README_de.md for the detailed contract.
+
+`create(id, agent_id=..., schedule=..., executor=..., payload={}, enabled=False,
+authorities=..., lease_seconds=900, timeout_seconds=600)` creates a definition.
+`get(id)`, `list(agent_id=None, include_deleted=False)` and `history(id)` use only
+read connections: absent stores/schemas raise errors, never initialize or migrate.
+`update(id, expected_version=n, changes={...})` replaces specified complete fields;
+`delete(id, expected_version=n)` writes a permanent tombstone without removing audit.
+Snapshots expose id/version/revision/enabled/deleted and the complete configuration.
+
+Every mutation increments version. Only changed configuration increments revision
+and materializes a new time-job snapshot; enable-only and identical configuration
+do not rearm a consumed once occurrence. Payload/agent/authority corrections and
+alternate UTC offsets of an already terminal once instant also do not replay it.
+A genuinely different explicit instant can schedule another occurrence; switching
+back to an already consumed instant still cannot replay it. Success/failure/timeout
+are terminal; abandoned leases remain recoverable. Pending/claimed/running revision
+semantics remain revision/lease-bound. A running snapshot may finish unchanged;
+its successful terminal CAS atomically consumes the same UTC appointment across
+replacement revisions created while it was running. Rejected stale completions
+cannot consume a pending replacement. A genuinely different instant remains a
+separate occurrence. Supported schedules are native
+once/daily/cron/interval or `{kind:'event',event_type:...}`. Event `deliver` requires
+expected_version and the existing event ID/type/source/lineage contract. Event-ID
+deduplication survives definition revisions; duplicates retain their original job,
+never replay with a newer payload. Changed provenance conflicts.
+
+Mutations and materialization are transactional. Claim and actual start gate on
+current revision, enabled/deleted state, definition/global/job pause and active
+runs of the same definition. Stale pending/claimed/recovery cannot start after
+edit/delete; running snapshots may finish. Replacement revisions wait for valid
+active leases to end. Lease recovery remains at-least-once. Tombstones, history,
+old jobs/runs and stable IDs persist. DefinitionConflict reports CAS/ID/provenance
+conflicts; invalid input raises ValueError, missing GET raises KeyError, storage
+errors are explicit. Provenance is not task acceptance or authority proof.
+Existing direct jobs/EventTriggers remain compatible; no separate scheduler,
+queue or database path is introduced, and no adapters activate providers here.
