@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Durable dispatch receipt contract (2026-11-04)
+- Add native occurrence/version CAS, immutable request/target binding and persistent admission/launch intent before external effects.
+- Preserve generation through lease recovery and lost RPC responses; allow only positively proven unlaunched recovery and identity-bound controller-loss closure.
+- Store explicit task/result metadata without credentials or arbitrary receipt payloads. Add synthetic restart, rival-RPC, stale-owner and accepted-result regressions; worker/controller integration remains separate.
+
 ### Precise UTC boundaries on current main (2026-11-03)
 - Integrate the independently reviewed time/admission correction from stacked PR #19 directly on the current default base: compare due times, leases and history as microsecond UTC instants without rewriting raw timestamps or run IDs.
 - Obtain the admission writer transaction before observing the real clock; preserve equality at exact expiry and reject strictly later starts. Invalid timestamps remain storage errors with rollback. No lease renewal, owner fencing or cancellation of already-running work.
