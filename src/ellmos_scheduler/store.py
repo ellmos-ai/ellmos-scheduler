@@ -11,7 +11,7 @@ from typing import Any, Iterator, Sequence
 from urllib.parse import quote
 
 from .authorities import DEFAULT_AUTHORITY_REGISTRY, AuthorityResolverRegistry
-from .schedules import next_after
+from .schedules import next_after, once_at
 
 
 UTC = timezone.utc
@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS jobs (
     payload_json TEXT NOT NULL,
     enabled INTEGER NOT NULL DEFAULT 1,
     generation INTEGER NOT NULL DEFAULT 1,
+    exhausted INTEGER NOT NULL DEFAULT 0,
     next_due_at TEXT NOT NULL,
     lease_seconds INTEGER NOT NULL DEFAULT 900,
     timeout_seconds INTEGER NOT NULL DEFAULT 600,
@@ -168,20 +169,14 @@ class SchedulerStore:
     @staticmethod
     def _migrate_schema(conn: sqlite3.Connection) -> None:
         """Add authority fields to 0.1.x databases without rewriting existing rows."""
-        job_columns = {
-            str(row["name"]) for row in conn.execute("PRAGMA table_info(jobs)")
-        }
+        job_columns = {str(row["name"]) for row in conn.execute("PRAGMA table_info(jobs)")}
+        if "exhausted" not in job_columns:
+            conn.execute("ALTER TABLE jobs ADD COLUMN exhausted INTEGER NOT NULL DEFAULT 0")
         if "authorities_json" not in job_columns:
-            conn.execute(
-                "ALTER TABLE jobs ADD COLUMN authorities_json TEXT NOT NULL DEFAULT '[]'"
-            )
-        run_columns = {
-            str(row["name"]) for row in conn.execute("PRAGMA table_info(runs)")
-        }
+            conn.execute("ALTER TABLE jobs ADD COLUMN authorities_json TEXT NOT NULL DEFAULT '[]'")
+        run_columns = {str(row["name"]) for row in conn.execute("PRAGMA table_info(runs)")}
         additions = {
-            "authority_receipt_json": (
-                "TEXT NOT NULL DEFAULT '[]'"
-            ),
+            "authority_receipt_json": ("TEXT NOT NULL DEFAULT '[]'"),
             "authority_set_sha256": "TEXT",
             "authority_error": "TEXT NOT NULL DEFAULT ''",
         }
@@ -208,11 +203,14 @@ class SchedulerStore:
             raise ValueError("lease_seconds must be positive")
         if timeout_seconds <= 0:
             raise ValueError("timeout_seconds must be positive")
-        due = (
-            next_after(schedule, now)
-            if next_due_at is None
-            else next_due_at.astimezone(UTC)
-        )
+        if schedule.get("kind") == "once":
+            instant = once_at(schedule)
+            if next_due_at is not None and (
+                next_due_at.tzinfo is None or next_due_at.utcoffset() is None or next_due_at.astimezone(UTC) != instant
+            ):
+                raise ValueError("once next_due_at must match its timezone-aware at")
+            next_due_at = instant
+        due = next_after(schedule, now) if next_due_at is None else next_due_at.astimezone(UTC)
         authority_specs = self.authority_registry.validate_specs(authorities)
         stamp = iso(now)
         with self.connect() as conn:
@@ -244,9 +242,7 @@ class SchedulerStore:
             rows = conn.execute("SELECT * FROM jobs ORDER BY id").fetchall()
         return [dict(row) for row in rows]
 
-    def set_enabled(
-        self, job_id: str, enabled: bool, *, now: datetime | None = None
-    ) -> None:
+    def set_enabled(self, job_id: str, enabled: bool, *, now: datetime | None = None) -> None:
         stamp = iso(now or datetime.now(UTC))
         with self.connect() as conn:
             result = conn.execute(
@@ -329,16 +325,11 @@ class SchedulerStore:
             if isinstance(job_ids, (str, bytes)):
                 raise ValueError("job_ids must be a sequence of job IDs")
             values = tuple(job_ids)
-            if not values or any(
-                not isinstance(job_id, str) or not job_id.strip()
-                for job_id in values
-            ):
+            if not values or any(not isinstance(job_id, str) or not job_id.strip() for job_id in values):
                 raise ValueError("job_ids must contain non-empty strings")
             targets = tuple(dict.fromkeys(values))
         placeholders = ", ".join("?" for _ in targets)
-        run_target_clause = (
-            f" AND job_id IN ({placeholders})" if targets else ""
-        )
+        run_target_clause = f" AND job_id IN ({placeholders})" if targets else ""
         job_target_clause = f" AND id IN ({placeholders})" if targets else ""
         now = (now or datetime.now(UTC)).astimezone(UTC)
         claimed: list[dict[str, Any]] = []
@@ -364,20 +355,20 @@ class SchedulerStore:
             )
             for expired_run in expired:
                 current = conn.execute(
-                    "SELECT next_due_at FROM jobs WHERE id = ?",
+                    "SELECT next_due_at, exhausted FROM jobs WHERE id = ?",
                     (expired_run["job_id"],),
                 ).fetchone()
-                if current and parse_iso(expired_run["scheduled_for"]) < parse_iso(
-                    current["next_due_at"]
+                if current and (
+                    current["exhausted"] or parse_iso(expired_run["scheduled_for"]) < parse_iso(current["next_due_at"])
                 ):
                     conn.execute(
-                        "UPDATE jobs SET next_due_at = ?, updated_at = ? WHERE id = ?",
+                        "UPDATE jobs SET next_due_at = ?, exhausted = 0, updated_at = ? WHERE id = ?",
                         (expired_run["scheduled_for"], iso(now), expired_run["job_id"]),
                     )
             rows = conn.execute(
                 f"""
                 SELECT * FROM jobs
-                WHERE enabled = 1 AND scheduler_utc(next_due_at) <= scheduler_utc(?)
+                WHERE enabled = 1 AND exhausted = 0 AND scheduler_utc(next_due_at) <= scheduler_utc(?)
                 {job_target_clause}
                 ORDER BY scheduler_utc(next_due_at), id
                 LIMIT ?
@@ -393,9 +384,7 @@ class SchedulerStore:
                     (row["id"], scheduled_for),
                 ).fetchone()
                 attempt = int(attempt_row["count"]) + 1
-                run_id = self._run_id(
-                    row["id"], row["generation"], scheduled_for, attempt
-                )
+                run_id = self._run_id(row["id"], row["generation"], scheduled_for, attempt)
                 lease_expires = now + timedelta(seconds=row["lease_seconds"])
                 conn.execute(
                     """
@@ -416,8 +405,13 @@ class SchedulerStore:
                 schedule = json.loads(row["schedule_json"])
                 next_due = next_after(schedule, parse_iso(scheduled_for))
                 conn.execute(
-                    "UPDATE jobs SET next_due_at = ?, updated_at = ? WHERE id = ?",
-                    (iso(next_due), iso(now), row["id"]),
+                    "UPDATE jobs SET next_due_at = ?, exhausted = ?, updated_at = ? WHERE id = ?",
+                    (
+                        iso(next_due) if next_due is not None else scheduled_for,
+                        int(next_due is None),
+                        iso(now),
+                        row["id"],
+                    ),
                 )
                 item = dict(row)
                 item.update(
@@ -482,9 +476,7 @@ class SchedulerStore:
                 ),
             )
             if result.rowcount != 1:
-                raise _run_conflict(
-                    conn, run_id, f"authority receipt cannot be recorded for run: {run_id}"
-                )
+                raise _run_conflict(conn, run_id, f"authority receipt cannot be recorded for run: {run_id}")
 
     def fail_claimed_run(
         self,
@@ -579,9 +571,7 @@ class SchedulerStore:
         Store-written timestamps are normalized to UTC ISO values. If completion
         times tie, scheduled time, attempt, and run ID provide stable ordering.
         """
-        ranked: dict[
-            str, tuple[tuple[datetime, datetime, int, str], dict[str, Any]]
-        ] = {}
+        ranked: dict[str, tuple[tuple[datetime, datetime, int, str], dict[str, Any]]] = {}
         with self.read_connection() as conn:
             rows = conn.execute(
                 """
@@ -606,9 +596,7 @@ class SchedulerStore:
 
     def status(self) -> dict[str, Any]:
         with self.read_connection() as conn:
-            jobs = conn.execute(
-                "SELECT COUNT(*) total, SUM(enabled) enabled FROM jobs"
-            ).fetchone()
+            jobs = conn.execute("SELECT COUNT(*) total, SUM(enabled) enabled FROM jobs").fetchone()
             runs = conn.execute(
                 """
                 SELECT COUNT(*) total,
@@ -618,12 +606,8 @@ class SchedulerStore:
                 FROM runs
                 """
             ).fetchone()
-            control = conn.execute(
-                "SELECT paused, reason FROM controls WHERE scope = 'global'"
-            ).fetchone()
-            tick = conn.execute(
-                "SELECT value FROM meta WHERE key = 'last_tick_at'"
-            ).fetchone()
+            control = conn.execute("SELECT paused, reason FROM controls WHERE scope = 'global'").fetchone()
+            tick = conn.execute("SELECT value FROM meta WHERE key = 'last_tick_at'").fetchone()
         return {
             "database": str(self.path),
             "jobs": {

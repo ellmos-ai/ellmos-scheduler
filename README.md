@@ -590,3 +590,23 @@ The provision of this software and its associated documentation is gratuitous (u
 
 ### Security Policy & Vulnerability Response SLA
 We commit to acknowledging vulnerability reports within **48 hours** and providing an initial triage assessment within **5 business days** via `security@open-bricks.org` and `security@ellmos.ai`. For full details, see [`SECURITY.md`](SECURITY.md).
+
+## One-shot triggers: target and current implementation (2026-11-04)
+
+Target: shared time/event trigger management with consumer GUI controls. Current:
+the native scheduler accepts `{"kind":"once","at":"2026-11-04T14:00:00+02:00"}`
+through the existing `add --schedule` JSON argument. `at` must include a UTC offset
+(or `Z`); naive dates are rejected. Overdue registrations remain due immediately.
+`next_after` returns `None` at/after the single instant.
+
+Claims atomically persist `jobs.exhausted=1`, independent of enabled/pause state;
+no sentinel future date is used. Terminal success, failure, timeout or authority
+rejection consumes the occurrence. Only an expired claimed/running lease reopens
+the same occurrence as a recovery attempt. Recovery is at-least-once: an executor
+that completed external effects before losing its lease still needs idempotency.
+Re-enabling a job or restarting the store does not rearm an exhausted occurrence.
+The BACH projection exposes exhaustion and no next run; exhaustion alone is not
+proof of successful execution. Old databases migrate with exhaustion defaulting
+to false. Existing recurring schedules retain their behavior.
+
+Event triggers and the shared GUI are not delivered by this change.

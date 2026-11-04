@@ -458,7 +458,8 @@ class BachSchedulerAdapter:
             if not isinstance(provenance, Mapping):
                 provenance = {}
             enabled = bool(row["enabled"])
-            due = parse_iso(row["next_due_at"]) <= stamp
+            exhausted = bool(row.get("exhausted", 0))
+            due = not exhausted and parse_iso(row["next_due_at"]) <= stamp
             latest = latest_runs.get(str(row["id"]))
             last_success = latest_successful_runs.get(str(row["id"]))
             last_status = None if latest is None else latest["status"]
@@ -466,6 +467,10 @@ class BachSchedulerAdapter:
                 status = "disabled"
             elif last_status in {"failed", "timed_out", "abandoned"}:
                 status = "error"
+            elif last_status in {"claimed", "running"}:
+                status = last_status
+            elif exhausted:
+                status = "exhausted"
             else:
                 status = "due" if due else "scheduled"
             result.append(
@@ -481,7 +486,8 @@ class BachSchedulerAdapter:
                     "schedule": provenance.get("schedule", row["schedule_json"]),
                     "is_active": enabled,
                     "status": status,
-                    "next_run": row["next_due_at"],
+                    "next_run": None if exhausted else row["next_due_at"],
+                    "exhausted": exhausted,
                     "last_run": None
                     if latest is None
                     else latest["finished_at"] or latest["started_at"],
