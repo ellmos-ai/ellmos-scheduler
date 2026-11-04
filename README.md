@@ -762,3 +762,41 @@ rejection, positive nonstart and closed lease/trace evidence using only
 `admission_rejected`, `task_unavailable`, `scope_denied` or
 `configuration_conflict`. A timeout cannot supply this evidence; after launch
 intent that nonstart path is forbidden. Neither method stores exception text.
+
+## Shared trigger projection (SOLL / IST)
+
+SOLL: BACH and Ocean hosts use one native configuration/readback contract behind
+the common GUI, while each host retains its own session, origin and write gates.
+
+IST: `execute_trigger_request(store, operation, identifier, payload, agent_id,
+registered_executors=..., transport_credentials=...)` projects native
+`AgentTriggers` without HTTP-framework, BACH, provider or credential-store imports.
+It never initializes storage or calls an executor. The historical
+`bach.agent-triggers.v1` namespace is preserved for existing shared-GUI clients;
+it does not identify the host or grant BACH-specific authority.
+
+Operations are exactly `list`, `get`, `create`, `update`, `delete` and `deliver`.
+Mutations preserve native expected-version CAS, separate readback, tombstones,
+event deduplication and independently checked materialization provenance. A
+materialized event or saved configuration never reports worker execution.
+`TriggerProjectionError` exposes only bounded status/state/reason metadata.
+Provider exception strings and fields outside the public snapshot are withheld.
+
+Hosts must authenticate **before** calling the projection and apply their native
+write authority, origin checks and provider-binding/readiness rules. Pass a
+snapshot of registered executor **names**, never callbacks. HTTP adapters must
+supply the exact canonical credential values accepted by their authenticator;
+noncanonical contexts fail closed. Recursive key/value checks reject transport
+credentials before persistence and before a response, including old snapshots.
+The projection does not authenticate callers or resolve secrets itself.
+Request values must have plain parsed-JSON types: tuples, sets, non-string object
+keys, nonfinite numbers and cycles are rejected before mutation. Returned public
+snapshots obey the same JSON shape. Event readbacks must retain the exact requested
+ID before materialization and after delivery; agent filters are independently
+checked against every returned snapshot.
+
+The CRUD/readback projection is adapted from the independently reviewed BACH
+adapter at `9e3e3b5938b8052836ce3dcfedb796678205715a`. Native synthetic-store tests
+cover its contract. Host adoption, authenticated HTTP wiring, agent execution and
+runtime acceptance remain separate, open integration steps. This source change
+does not install a new daemon or another configuration authority.
