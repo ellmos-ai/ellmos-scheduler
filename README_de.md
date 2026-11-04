@@ -701,8 +701,14 @@ Ereignisse verwenden `{"kind":"event","event_type":"task.accepted"}`.
 Jede Mutation erhöht `version`; nur tatsächliche Konfigurationsänderungen erzeugen
 eine neue `revision` und einen neuen Job-Snapshot. Reine Aktivierung/Deaktivierung
 oder identische Konfiguration erhält die Revision und erzeugt keinen neuen,
-bereits verbrauchten Einmaltermin. Eine echte Konfigurationsänderung ist dagegen
-eine neue explizite Planung; ein dann vergangener Einmaltermin ist sofort fällig.
+bereits verbrauchten Einmaltermin. Auch Payload-, Agenten- und Autoritätskorrekturen
+oder eine andere Offsetdarstellung eines bereits terminal verbrauchten
+UTC-Terminzeitpunkts lösen keinen weiteren Lauf aus. Eine explizit neue Terminzeit
+darf ein neues Vorkommen erzeugen; Rückwechsel auf einen früher verbrauchten
+Zeitpunkt bleibt verbraucht. Erfolg, Fehler und Zeitüberschreitung sind terminal;
+`abandoned` ist dagegen weiterhin Lease-Recovery, kein Verbrauchsnachweis.
+Änderungen eines noch pending/claimed/running Termins behalten die beschriebenen
+Revisions-/Lease-Regeln; nur bereits terminale Vorkommen werden hier dedupliziert.
 
 `deliver(id, expected_version=n, event_id=..., event_type=..., source=...,
 lineage=...)` materialisiert native einmalige Jobs. Deduplizierung gilt über alle

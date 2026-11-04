@@ -660,8 +660,12 @@ Snapshots expose id/version/revision/enabled/deleted and the complete configurat
 
 Every mutation increments version. Only changed configuration increments revision
 and materializes a new time-job snapshot; enable-only and identical configuration
-do not rearm a consumed once occurrence. A configuration edit explicitly replans,
-so a new past once instant is immediately due. Supported schedules are native
+do not rearm a consumed once occurrence. Payload/agent/authority corrections and
+alternate UTC offsets of an already terminal once instant also do not replay it.
+A genuinely different explicit instant can schedule another occurrence; switching
+back to an already consumed instant still cannot replay it. Success/failure/timeout
+are terminal; abandoned leases remain recoverable. Pending/claimed/running revision
+semantics remain unchanged; this consumption check concerns already terminal runs. Supported schedules are native
 once/daily/cron/interval or `{kind:'event',event_type:...}`. Event `deliver` requires
 expected_version and the existing event ID/type/source/lineage contract. Event-ID
 deduplication survives definition revisions; duplicates retain their original job,

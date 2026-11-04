@@ -112,7 +112,7 @@ class AgentTriggers:
             (row["id"], row["version"], canonical(AgentTriggers._snapshot(row))),
         )
 
-    def _job(self, conn: Any, row: Any, *, now: str, event: dict | None = None) -> str:
+    def _job(self, conn: Any, row: Any, *, now: str, event: dict | None = None, exhausted: bool = False) -> str:
         config = json.loads(row["config_json"])
         material = [row["id"], row["revision"], event["event_id"] if event else "schedule"]
         job_id = "trigger-" + hashlib.sha256(canonical(material).encode("utf-8")).hexdigest()
@@ -132,8 +132,8 @@ class AgentTriggers:
             payload["_scheduler_event"] = event
         conn.execute(
             """INSERT INTO jobs(id,schedule_json,executor,payload_json,enabled,next_due_at,
-            lease_seconds,timeout_seconds,authorities_json,created_at,updated_at)
-            VALUES (?,?,?,?,1,?,?,?,?,?,?)""",
+            lease_seconds,timeout_seconds,authorities_json,created_at,updated_at,exhausted)
+            VALUES (?,?,?,?,1,?,?,?,?,?,?,?)""",
             (
                 job_id,
                 canonical(schedule),
@@ -145,10 +145,29 @@ class AgentTriggers:
                 canonical(config["authorities"]),
                 now,
                 now,
+                int(exhausted),
             ),
         )
         conn.execute("INSERT INTO agent_trigger_jobs VALUES (?,?,?)", (job_id, row["id"], row["revision"]))
         return job_id
+
+    @staticmethod
+    def _once_consumed(conn: Any, definition_id: str, schedule: dict) -> bool:
+        if schedule.get("kind") != "once":
+            return False
+        instant = once_at(schedule)
+        rows = conn.execute(
+            "SELECT j.schedule_json,j.payload_json FROM jobs j JOIN agent_trigger_jobs m ON m.job_id=j.id "
+            "WHERE m.definition_id=? AND EXISTS (SELECT 1 FROM runs r WHERE r.job_id=j.id "
+            "AND r.status IN ('succeeded','failed','timed_out'))",
+            (definition_id,),
+        ).fetchall()
+        return any(
+            json.loads(row["payload_json"]).get("_agent_trigger", {}).get("kind") == "once"
+            and (old := json.loads(row["schedule_json"])).get("kind") == "once"
+            and once_at(old) == instant
+            for row in rows
+        )
 
     def create(
         self,
@@ -257,7 +276,9 @@ class AgentTriggers:
             current = conn.execute("SELECT * FROM agent_trigger_definitions WHERE id=?", (definition_id,)).fetchone()
             self._record(conn, current)
             if changed and config["schedule"]["kind"] != "event":
-                self._job(conn, current, now=when)
+                self._job(
+                    conn, current, now=when, exhausted=self._once_consumed(conn, definition_id, config["schedule"])
+                )
             return self._snapshot(current)
 
     def delete(self, definition_id: str, *, expected_version: int, now: datetime | None = None) -> dict:

@@ -169,3 +169,87 @@ def test_multiple_events_same_definition_never_overlap_in_batch(tmp_path):
     s.finish_run(first["run_id"], "succeeded", now=AT)
     (second,) = s.claim_due("b", now=AT)
     assert second["id"] != first["id"]
+
+
+@pytest.mark.parametrize("terminal", ["succeeded", "failed", "timed_out"])
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"payload": {"note": "corrected"}},
+        {"agent_id": "other-agent"},
+        {"timeout_seconds": 42},
+        {
+            "authorities": [
+                {
+                    "id": "test-policy",
+                    "type": "policy",
+                    "resolver": "file",
+                    "required": True,
+                    "source": {"path": "C:/synthetic/policy.json"},
+                }
+            ]
+        },
+        {"schedule": {"kind": "once", "at": "2026-11-04T14:00:00+02:00"}},
+    ],
+)
+def test_terminal_once_metadata_correction_never_replays(tmp_path, terminal, changes):
+    s, a = setup(tmp_path)
+    (run,) = s.claim_due("a", now=AT)
+    s.start_run(run["run_id"], now=AT)
+    s.finish_run(run["run_id"], terminal, now=AT)
+    snapshot = a.update("stable", expected_version=1, changes=changes, now=AT + timedelta(days=1))
+    assert snapshot["version"] == 2 and snapshot["revision"] == 2
+    assert not s.claim_due("b", now=AT + timedelta(days=1))
+    # Reopen, toggle and a second metadata change retain the consumed instant.
+    reopened = SchedulerStore(s.path)
+    reopened.init()
+    a = AgentTriggers(reopened)
+    a.update("stable", expected_version=2, changes={"enabled": False}, now=AT)
+    a.update("stable", expected_version=3, changes={"enabled": True}, now=AT)
+    a.update("stable", expected_version=4, changes={"lease_seconds": 5}, now=AT)
+    assert not reopened.claim_due("c", now=AT + timedelta(days=2))
+    assert len(reopened.recent_runs()) == 1
+
+
+def test_explicit_different_once_instant_creates_new_occurrence(tmp_path):
+    s, a = setup(tmp_path)
+    (run,) = s.claim_due("a", now=AT)
+    s.start_run(run["run_id"], now=AT)
+    s.finish_run(run["run_id"], "succeeded", now=AT)
+    later = AT + timedelta(days=1)
+    a.update("stable", expected_version=1, changes={"schedule": {"kind": "once", "at": later.isoformat()}}, now=AT)
+    assert not s.claim_due("b", now=later - timedelta(microseconds=1))
+    assert len(s.claim_due("b", now=later)) == 1
+
+
+def test_once_schedule_back_to_consumed_instant_does_not_replay(tmp_path):
+    s, a = setup(tmp_path)
+    (run,) = s.claim_due("a", now=AT)
+    s.start_run(run["run_id"], now=AT)
+    s.finish_run(run["run_id"], "succeeded", now=AT)
+    later = AT + timedelta(days=1)
+    a.update("stable", expected_version=1, changes={"schedule": {"kind": "once", "at": later.isoformat()}}, now=AT)
+    a.update("stable", expected_version=2, changes={"schedule": ONCE}, now=AT)
+    assert not s.claim_due("b", now=later)
+
+
+def test_abandoned_once_correction_retains_recovery(tmp_path):
+    s, a = setup(tmp_path)
+    (_run,) = s.claim_due("a", now=AT)
+    a.update("stable", expected_version=1, changes={"enabled": False}, now=AT)
+    assert not s.claim_due("b", now=AT + timedelta(seconds=2))
+    assert s.recent_runs()[0]["status"] == "abandoned"
+    a.update("stable", expected_version=2, changes={"payload": {"corrected": True}}, now=AT)
+    a.update("stable", expected_version=3, changes={"enabled": True}, now=AT)
+    (restored,) = s.claim_due("c", now=AT + timedelta(seconds=3))
+    assert json.loads(restored["payload_json"])["corrected"] is True
+
+
+def test_terminal_event_at_same_instant_does_not_consume_explicit_once(tmp_path):
+    s, a = setup(tmp_path, schedule=EVENT)
+    deliver(a)
+    (run,) = s.claim_due("a", now=AT)
+    s.start_run(run["run_id"], now=AT)
+    s.finish_run(run["run_id"], "succeeded", now=AT)
+    a.update("stable", expected_version=1, changes={"schedule": ONCE}, now=AT)
+    assert len(s.claim_due("b", now=AT)) == 1
