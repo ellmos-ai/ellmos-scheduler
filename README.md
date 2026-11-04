@@ -800,3 +800,46 @@ adapter at `9e3e3b5938b8052836ce3dcfedb796678205715a`. Native synthetic-store te
 cover its contract. Host adoption, authenticated HTTP wiring, agent execution and
 runtime acceptance remain separate, open integration steps. This source change
 does not install a new daemon or another configuration authority.
+
+
+## Prepared provider proposal (S1: SOLL / IST)
+
+SOLL: A host can deliberately migrate scheduling authority under its canonical
+control owner's atomic lock, fresh migration-manifest CAS and independent readback.
+
+IST: `prepare_provider_selection(current, expected_version=..., expected_generation=...,
+new_generation=..., proposal=...)` is only a pure, logical CAS transformation.
+`validate_provider_selection(value)` validates and copies an existing proposal.
+Neither function owns files, a database, a registry, a lock or a daemon loop.
+No host integration, provider switch, initialization, import or execution occurs.
+
+The exact `ellmos.scheduler-provider-selection.v1` snapshot contains version,
+32-character lowercase hex generation, phase `prepared`, selected_provider
+`legacy`, and proposal. The proposal has only provider `ellmos-scheduler`,
+store_binding_sha256, legacy_manifest_sha256, full 40-character module_commit and
+executor_registry_sha256. Digests use 64 lowercase hex characters. Fixed field
+sets/string lengths and versions 1..2^53-1 bound the snapshot; bool is not int.
+These hashes bind proposed provenance, never assert its truth, readiness,
+review status, permission or activation. No arbitrary manifests, paths,
+credentials, callbacks or ready/verified/active flags are accepted.
+
+Only host-confirmed initial absence is `current=None`, expected version 0 and
+expected generation None. Malformed existing state is an error, never absence
+or a default. Existing proposals require both exact version and generation;
+the successor increments version and requires a different caller-supplied
+generation. This generation identifies the proposal mutation, not a scheduler
+occurrence, worker run or admission grant. Versions never wrap. Inputs remain
+unchanged and every returned mutable container is independent.
+
+A future thin host adapter must construct provenance from controlled canonical
+facts, not accept arbitrary GUI claims as authority. It must hold its existing
+native control-owner lock across strict fresh read, logical CAS, existing-owner
+atomic replacement and separate persisted readback before acknowledging. The
+pure function cannot prevent concurrent file overwrites by itself. A lost write
+response requires reading and matching version/generation/proposal, not retrying
+a mutation blindly. The selected provider stays legacy throughout this step;
+active/unknown snapshots fail closed and cannot be overwritten as prepared legacy.
+Actual activation, installed-package verification, migration, rollback behavior,
+canonical host storage and daemon adoption remain separate unimplemented work.
+No second store or configuration authority is added, and no legacy host code is
+replaced or prematurely marked as migrated by S1.
