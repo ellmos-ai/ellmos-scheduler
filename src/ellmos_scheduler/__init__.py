@@ -24,6 +24,7 @@ from .definitions import AgentTriggers, DefinitionConflict
 from .events import EventTriggers
 from .service import SchedulerService
 from .store import SchedulerStore
+from .trigger_projection import TriggerProjectionError, execute_trigger_request
 
 __all__ = [
     "DEFAULT_AUTHORITY_REGISTRY",
@@ -45,7 +46,9 @@ __all__ = [
     "RecoveryEvidence",
     "SchedulerService",
     "SchedulerStore",
+    "TriggerProjectionError",
     "create_bach_adapter",
+    "execute_trigger_request",
     "executor_names",
     "import_legacy_jobs",
     "register_contextual_executor",
