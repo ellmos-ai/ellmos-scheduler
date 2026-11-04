@@ -24,11 +24,21 @@ from .definitions import AgentTriggers, DefinitionConflict
 from .events import EventTriggers
 from .service import SchedulerService
 from .store import SchedulerStore
+from .provider_selection import (
+    MAX_PROVIDER_SELECTION_VERSION,
+    PROVIDER_SELECTION_SCHEMA,
+    ProviderSelectionConflict,
+    ProviderSelectionError,
+    prepare_provider_selection,
+    validate_provider_selection,
+)
 from .trigger_projection import TriggerProjectionError, execute_trigger_request
 
 __all__ = [
     "DEFAULT_AUTHORITY_REGISTRY",
     "DEFAULT_REGISTRY",
+    "MAX_PROVIDER_SELECTION_VERSION",
+    "PROVIDER_SELECTION_SCHEMA",
     "AcceptedTaskResult",
     "AgentTriggers",
     "AuthorityConfigurationError",
@@ -43,6 +53,8 @@ __all__ = [
     "ExecutionContext",
     "ExecutionResult",
     "ExecutorRegistry",
+    "ProviderSelectionConflict",
+    "ProviderSelectionError",
     "RecoveryEvidence",
     "SchedulerService",
     "SchedulerStore",
@@ -51,10 +63,12 @@ __all__ = [
     "execute_trigger_request",
     "executor_names",
     "import_legacy_jobs",
+    "prepare_provider_selection",
     "register_contextual_executor",
     "register_executor",
     "unregister_executor",
     "validate_authority_specs",
+    "validate_provider_selection",
 ]
 
 __version__ = "0.3.6"
