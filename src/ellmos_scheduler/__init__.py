@@ -17,6 +17,7 @@ from .executors import (
     register_executor,
     unregister_executor,
 )
+from .events import EventTriggers
 from .service import SchedulerService
 from .store import SchedulerStore
 
@@ -28,6 +29,7 @@ __all__ = [
     "AuthorityResolverRegistry",
     "AuthoritySetResult",
     "BachSchedulerAdapter",
+    "EventTriggers",
     "ExecutionResult",
     "ExecutorRegistry",
     "SchedulerService",

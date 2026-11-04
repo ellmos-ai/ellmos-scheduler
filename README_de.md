@@ -623,3 +623,56 @@ Die BACH-Projektion zeigt Erschöpfung und keinen nächsten Lauf; Erfolg braucht
 weiterhin einen erfolgreichen Run-Record. Bestehende Datenbanken erhalten eine
 additive Migration. Wiederholungen, Pause und Autoritätsprüfung bleiben erhalten.
 Ereignisauslöser und gemeinsame GUI sind mit dieser Änderung noch offen.
+
+## Ereignistrigger – SOLL/IST und Consumer-Vertrag (04.11.2026)
+
+SOLL: eine gemeinsame Agenten-/Triggerverwaltung in GUI und Kalender. IST dieser
+Lieferung: persistente Definitionen und Ereigniszustellung über die Python-API;
+kein HTTP-Adapter, keine GUI und kein automatischer Task-Abnahmeadapter.
+
+```python
+from ellmos_scheduler import SchedulerStore, EventTriggers
+store = SchedulerStore('/private/path/scheduler.db')
+store.init()
+events = EventTriggers(store)
+events.create('agent-maintainer', event_type='task.accepted', executor='agent',
+              payload={'agent_id': 'maintainer'}, enabled=False,
+              authorities=[...])  # native registrierte Autoritätsverträge
+version = events.set_enabled('agent-maintainer', True, expected_version=1)
+receipt = events.deliver('agent-maintainer', event_id='task-42-result-9',
+                         event_type='task.accepted', source='native-task-adapter')
+```
+
+Definitionen sind bis auf `enabled` unveränderlich; Aktivierung benötigt die
+aktuelle Version (CAS). Andere Änderungen benötigen eine neue Definitions-ID.
+`list()` liest Definitionen, `deliveries(id)` verbindet Ereignisherkunft mit der
+materialisierten Job-ID. Zustellung erzeugt atomar einen normalen `once`-Job;
+dessen ID ist deterministisch aus Definitions-ID und Ereignis-ID abgeleitet.
+Doppelte Zustellung bleibt auch nach Neustart idempotent; dieselbe ID mit
+abweichender Herkunft oder Kettenhistorie ist ein Fehler, keine Überschreibung.
+Freie Eventdaten werden nicht angenommen. Die Agentenreferenz bleibt im Payload.
+`_scheduler_event` ist reserviert und enthält Definition, ID, Typ, Quelle und
+Kettenhistorie. Über Job-ID und Run-Record bleibt der Auslöser nachvollziehbar.
+
+`state=materialized` bedeutet nur angelegter Job, weder erfolgten Claim noch
+Running oder Erfolg. Deaktivierte/pausierte Definitionen dürfen Zustellungen
+speichern, starten aber nicht; Reaktivierung macht wartende Zustellungen fällig.
+`store.set_pause('trigger:' + id, True)` pausiert eine Definition. Parent-Zustand,
+globale Pause und Job-Pause werden atomar beim Claim und beim tatsächlichen Start
+geprüft. Bereits laufende Arbeit wird durch Deaktivierung nicht abgebrochen.
+Leases, Wiederaufnahme, Timeout und Autoritätsauflösung bleiben im vorhandenen
+Scheduler. Recovery ist weiterhin mindestens einmal, externe Effekte brauchen
+Idempotenz. Ein terminaler Fehler verbraucht die Ereigniszustellung.
+
+Der Consumer wählt die passende Definition und validiert vor Zustellung die
+native fachliche Abnahme. `task.accepted`, `source` und Herkunftsdaten sind
+unvertrauenswürdige Bezeichnungen und **kein** Abnahme- oder Autoritätsbeleg.
+Reviewstatus, CLI-`after_task_done` und ungeprüfte Resultate dürfen nicht als
+bestätigter Abschluss eingespeist werden. APIs aktivieren keine Provider selbst.
+
+IDs/Typen/Quellen sind 1–128 ASCII-Zeichen aus Buchstaben, Ziffern und `_.:@/-`,
+mit alphanumerischem Anfang. `lineage` ist eine Liste bereits ausgelöster
+Definitions-IDs: keine Wiederholung, höchstens acht Definitionen einschließlich
+des neuen Triggers. Folgeadapter müssen die gespeicherte Historie weitergeben;
+willkürlich neu gestartete externe Ereignisse sind damit nicht global begrenzt.
+Der Scheduler erzeugt selbst keine rekursiven Ereignisse.

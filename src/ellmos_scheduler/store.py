@@ -12,6 +12,7 @@ from urllib.parse import quote
 
 from .authorities import DEFAULT_AUTHORITY_REGISTRY, AuthorityResolverRegistry
 from .schedules import next_after, once_at
+from .events import EVENT_SCHEMA, event_job_allowed
 
 
 UTC = timezone.utc
@@ -111,6 +112,9 @@ CREATE TABLE IF NOT EXISTS meta (
     value TEXT NOT NULL
 );
 """
+
+
+SCHEMA += EVENT_SCHEMA
 
 
 class SchedulerStore:
@@ -369,6 +373,11 @@ class SchedulerStore:
                 f"""
                 SELECT * FROM jobs
                 WHERE enabled = 1 AND exhausted = 0 AND scheduler_utc(next_due_at) <= scheduler_utc(?)
+                AND NOT EXISTS (
+                    SELECT 1 FROM event_deliveries d JOIN event_triggers t ON t.id=d.trigger_id
+                    WHERE d.job_id=jobs.id AND (t.enabled=0 OR EXISTS (
+                        SELECT 1 FROM controls c WHERE c.paused=1
+                        AND c.scope IN ('global', 'trigger:' || t.id))))
                 {job_target_clause}
                 ORDER BY scheduler_utc(next_due_at), id
                 LIMIT ?
@@ -376,7 +385,7 @@ class SchedulerStore:
                 (iso(now), *targets, limit),
             ).fetchall()
             for row in rows:
-                if self.is_paused(conn, row["id"]):
+                if self.is_paused(conn, row["id"]) or not event_job_allowed(conn, row["id"]):
                     continue
                 scheduled_for = row["next_due_at"]
                 attempt_row = conn.execute(
@@ -435,6 +444,13 @@ class SchedulerStore:
     def start_run(self, run_id: str, *, now: datetime | None = None) -> None:
         with self.connect() as conn:
             conn.execute("BEGIN IMMEDIATE")
+            event_run = conn.execute(
+                "SELECT r.job_id, j.enabled FROM runs r JOIN jobs j ON j.id=r.job_id "
+                "JOIN event_deliveries d ON d.job_id=j.id WHERE r.run_id=?", (run_id,)).fetchone()
+            if event_run and (not event_run["enabled"]
+                              or self.is_paused(conn, event_run["job_id"])
+                              or not event_job_allowed(conn, event_run["job_id"])):
+                raise _run_conflict(conn, run_id, "event trigger disabled or paused")
             # A busy writer may outlive the lease; observe the real clock only
             # after obtaining admission's write transaction, unless explicitly injected.
             stamp = iso(now or datetime.now(UTC))
