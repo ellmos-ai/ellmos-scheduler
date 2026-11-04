@@ -685,3 +685,80 @@ conflicts; invalid input raises ValueError, missing GET raises KeyError, storage
 errors are explicit. Provenance is not task acceptance or authority proof.
 Existing direct jobs/EventTriggers remain compatible; no separate scheduler,
 queue or database path is introduced, and no adapters activate providers here.
+
+
+## Durable dispatch correlation (source contract)
+
+`DispatchReceipts(SchedulerStore(path))` stores dispatch metadata in the same
+module-owned database. Explicit `store.init()` creates its tables; `get`,
+`history`, `pending` and `task_bindings` only read and never initialize.
+This is a correlation ledger, not a worker engine or a second scheduler.
+
+`reserve(native_execution_context, agent_id=..., configuration_version=...,
+task_id=..., task_version=...)` validates the live persisted run and freezes the
+target for its occurrence. Task identity/version must either both be supplied
+(fixed task) or both be absent (queue selection). The occurrence and request IDs
+remain stable across abandoned-lease attempts. Later attempts take ownership
+without clearing admission, generation, observations or terminal receipts.
+Configuration changes cannot silently retarget an existing occurrence.
+
+The consumer must commit `prepare` before sending its RPC. `start_unknown` means
+the response is unknown, never that nothing started. Under its native admission
+lock, the controller uses `claim_admission` with occurrence/version CAS. Only
+the winner receives a generation and may continue native admission. It commits
+`launch_intent` after admission and before Thread.start or provider effects.
+Stale/rival RPCs cannot acquire another generation. The integration must use this
+same ledger API and lock order; a separate in-memory request cache is insufficient.
+No SQLite transaction is held over RPC, native admission or worker execution.
+
+Reconnect reads the existing generation and reconciles its native receipt,
+including already-finished workers. `observe` records bounded lifecycle facts;
+unknown/false start observations cannot erase positive start evidence.
+`bind_task` records native task/version/fence/holder metadata. For fixed tasks,
+the consumer must enforce this task in native admission/claim with no queue
+fallback; recording a binding afterward does not enforce that policy.
+`complete_accepted` accepts only named, bounded result metadata tied to an
+existing generation/task/fence binding, current accepted status revision and a
+persisted terminal observation with positive thread-start evidence. Terminal
+observations cannot regress. The consumer must verify physical native thread end
+before recording that observation; task acceptance during a running worker is
+insufficient.
+The consumer must independently verify canonical task status, acceptance and
+result hash through its native Task API before calling it. This module cannot
+verify external Task authority. Review without acceptance remains unresolved
+and is never success. No result text, arbitrary receipt JSON, credentials or
+lease capabilities are accepted or stored.
+
+`RecoveryEvidence` must be independently verified by the consumer and match the
+recorded controller instance, generation, PID and process creation time. Only
+a reservation before launch intent can return to prepared, with positive proof
+that the controller is gone, leases/traces are closed and native admission is
+absent. A timeout or missing observation is insufficient. After launch intent
+the same occurrence never launches a second worker. Confirmed controller loss
+can close it as failure via `complete_lost`, preserving uncertainty about whether
+a worker started. Terminal receipts are immutable and remain readable after
+restart. Every mutation uses version CAS and retains snapshot history.
+
+Current implementation: native persistence and synthetic crash/CAS/reconnect
+regressions. Required integration: controller admission, strict task claiming,
+process/lease reconciliation and canonical accepted-result verification. No
+BACH adapter, credential access, provider call or actual worker start is added.
+
+Fixed-task occurrences support exactly one binding; another task or fence
+conflicts. Queue profiles retain multiple task bindings.
+`complete_accepted_results(results=[AcceptedTaskResult(...), ...])` requires the
+exact complete binding set, with canonical current accepted metadata for every
+task/fence of the same generation. Missing/foreign/duplicate bindings cannot
+report occurrence success. The single-result method wraps one typed result and
+therefore fails when additional tasks were bound. Claimed task versions are
+read from persisted native bindings; current versions come from accepted results.
+No multi-task worker restriction is introduced.
+
+`complete_failure` classifies positively verified physical thread end using only
+`task_rejected`, `task_failed`, `no_accepted_result`, `cancelled` or
+`review_not_accepted`. These are failed, accepted=false, never success. Before
+launch intent, `complete_rejected` records independently verified native admission
+rejection, positive nonstart and closed lease/trace evidence using only
+`admission_rejected`, `task_unavailable`, `scope_denied` or
+`configuration_conflict`. A timeout cannot supply this evidence; after launch
+intent that nonstart path is forbidden. Neither method stores exception text.

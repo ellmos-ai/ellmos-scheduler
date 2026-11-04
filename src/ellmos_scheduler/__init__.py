@@ -10,6 +10,7 @@ from .authorities import (
 )
 from .bach import BachSchedulerAdapter, create_bach_adapter, import_legacy_jobs
 from .context import ExecutionContext
+from .dispatch import AcceptedTaskResult, DispatchConflict, DispatchReceipts, RecoveryEvidence
 from .executors import (
     DEFAULT_REGISTRY,
     ExecutionResult,
@@ -27,6 +28,7 @@ from .store import SchedulerStore
 __all__ = [
     "DEFAULT_AUTHORITY_REGISTRY",
     "DEFAULT_REGISTRY",
+    "AcceptedTaskResult",
     "AgentTriggers",
     "AuthorityConfigurationError",
     "AuthorityResolution",
@@ -34,10 +36,13 @@ __all__ = [
     "AuthoritySetResult",
     "BachSchedulerAdapter",
     "DefinitionConflict",
+    "DispatchConflict",
+    "DispatchReceipts",
     "EventTriggers",
     "ExecutionContext",
     "ExecutionResult",
     "ExecutorRegistry",
+    "RecoveryEvidence",
     "SchedulerService",
     "SchedulerStore",
     "create_bach_adapter",

@@ -12,6 +12,7 @@ from urllib.parse import quote
 
 from .authorities import DEFAULT_AUTHORITY_REGISTRY, AuthorityResolverRegistry
 from .context import ExecutionContext
+from .dispatch import DISPATCH_SCHEMA
 from .schedules import next_after, once_at
 from .events import EVENT_SCHEMA, event_job_allowed
 from .definitions import DEFINITION_SCHEMA, definition_job_allowed, consume_terminal_once
@@ -170,6 +171,7 @@ class SchedulerStore:
     def init(self) -> None:
         with self.connect() as conn:
             conn.executescript(SCHEMA)
+            conn.executescript(DISPATCH_SCHEMA)
             self._migrate_schema(conn)
 
     @staticmethod
