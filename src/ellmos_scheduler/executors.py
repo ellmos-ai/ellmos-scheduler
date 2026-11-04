@@ -9,6 +9,7 @@ from types import MappingProxyType
 from typing import Any, Callable, Mapping
 
 from ._command_process import run_command
+from .context import ExecutionContext
 
 
 @dataclass(frozen=True)
@@ -20,6 +21,7 @@ class ExecutionResult:
 
 
 Executor = Callable[[dict[str, Any], int], ExecutionResult]
+ContextualExecutor = Callable[[dict[str, Any], int, ExecutionContext], ExecutionResult]
 _EXECUTOR_NAME = re.compile(r"^[a-z][a-z0-9_.-]*$")
 _STREAM_OUTPUT_ENCODINGS = frozenset(
     {
@@ -182,7 +184,8 @@ class ExecutorRegistry:
         *,
         include_standard: bool = True,
     ) -> None:
-        self._executors: dict[str, Executor] = {}
+        self._executors: dict[str, Executor | ContextualExecutor] = {}
+        self._contextual: set[str] = set()
         if include_standard:
             for name, executor in STANDARD_EXECUTORS.items():
                 self.register(name, executor)
@@ -191,7 +194,7 @@ class ExecutorRegistry:
                 self.register(name, executor)
 
     @staticmethod
-    def _validate(name: str, executor: Executor) -> None:
+    def _validate(name: str, executor: Executor | ContextualExecutor) -> None:
         if not isinstance(name, str) or not _EXECUTOR_NAME.fullmatch(name):
             raise ValueError(
                 "executor name must start with a lowercase letter and contain "
@@ -205,17 +208,28 @@ class ExecutorRegistry:
         if name in self._executors and not replace:
             raise ValueError(f"executor already registered: {name}")
         self._executors[name] = executor
+        self._contextual.discard(name)
 
-    def unregister(self, name: str) -> Executor:
+    def register_contextual(self, name: str, executor: ContextualExecutor, *, replace: bool = False) -> None:
+        """Register a three-argument callback; no signature guessing or payload context."""
+        self.register(name, executor, replace=replace)
+        self._contextual.add(name)
+
+    def requires_context(self, name: str) -> bool:
+        return name in self._contextual
+
+    def unregister(self, name: str) -> Executor | ContextualExecutor:
         try:
-            return self._executors.pop(name)
+            executor = self._executors.pop(name)
+            self._contextual.discard(name)
+            return executor
         except KeyError:
             raise KeyError(f"unknown executor: {name}") from None
 
     def names(self) -> tuple[str, ...]:
         return tuple(sorted(self._executors))
 
-    def snapshot(self) -> Mapping[str, Executor]:
+    def snapshot(self) -> Mapping[str, Executor | ContextualExecutor]:
         return MappingProxyType(dict(self._executors))
 
     def execute(
@@ -223,6 +237,8 @@ class ExecutorRegistry:
         name: str,
         payload: dict[str, Any],
         timeout_seconds: int,
+        *,
+        context: ExecutionContext | None = None,
     ) -> ExecutionResult:
         executor = self._executors.get(name)
         if executor is None:
@@ -231,8 +247,12 @@ class ExecutorRegistry:
             return ExecutionResult("failed", error="executor payload must be an object")
         if timeout_seconds <= 0:
             return ExecutionResult("failed", error="timeout_seconds must be positive")
+        contextual = self.requires_context(name)
+        if contextual and not isinstance(context, ExecutionContext):
+            return ExecutionResult("failed", error="executor requires native execution context")
         try:
-            result = executor(payload, timeout_seconds)
+            result = (executor(payload, timeout_seconds, context) if contextual else
+                      executor(payload, timeout_seconds))
         except Exception as exc:  # Adapters must not strand a run in "running".
             return ExecutionResult(
                 "failed",
@@ -273,7 +293,12 @@ def register_executor(name: str, executor: Executor, *, replace: bool = False) -
     DEFAULT_REGISTRY.register(name, executor, replace=replace)
 
 
-def unregister_executor(name: str) -> Executor:
+def register_contextual_executor(name: str, executor: ContextualExecutor, *, replace: bool = False) -> None:
+    """Register a contextual adapter without executing it or resolving credentials."""
+    DEFAULT_REGISTRY.register_contextual(name, executor, replace=replace)
+
+
+def unregister_executor(name: str) -> Executor | ContextualExecutor:
     return DEFAULT_REGISTRY.unregister(name)
 
 
@@ -282,6 +307,6 @@ def executor_names() -> tuple[str, ...]:
 
 
 def execute(
-    name: str, payload: dict[str, Any], timeout_seconds: int
+    name: str, payload: dict[str, Any], timeout_seconds: int, *, context: ExecutionContext | None = None
 ) -> ExecutionResult:
-    return DEFAULT_REGISTRY.execute(name, payload, timeout_seconds)
+    return DEFAULT_REGISTRY.execute(name, payload, timeout_seconds, context=context)
