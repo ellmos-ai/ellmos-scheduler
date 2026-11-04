@@ -18,10 +18,7 @@ def _utc(value: datetime) -> datetime:
 def _is_valid_local(value: datetime, zone: ZoneInfo) -> bool:
     """Whether a zoned wall time survives a UTC round-trip unchanged."""
     round_trip = value.astimezone(UTC).astimezone(zone)
-    return (
-        round_trip.replace(tzinfo=None) == value.replace(tzinfo=None)
-        and round_trip.fold == value.fold
-    )
+    return round_trip.replace(tzinfo=None) == value.replace(tzinfo=None) and round_trip.fold == value.fold
 
 
 def _first_valid_local(value: datetime, zone: ZoneInfo) -> datetime:
@@ -129,9 +126,7 @@ def _cron_date_matches(
     if cron_weekday == 0:
         weekday_matches = weekday_matches or 7 in weekday_values
     day_unrestricted = any(part.strip() == "*" for part in day_expression.split(","))
-    weekday_unrestricted = any(
-        part.strip() == "*" for part in weekday_expression.split(",")
-    )
+    weekday_unrestricted = any(part.strip() == "*" for part in weekday_expression.split(","))
     if day_unrestricted or weekday_unrestricted:
         return day_matches and weekday_matches
     return day_matches or weekday_matches
@@ -162,28 +157,38 @@ def _next_cron(expression: str, local_after: datetime, zone: ZoneInfo) -> dateti
             continue
         for hour in sorted(hours):
             for minute in sorted(minutes):
-                candidate_wall = datetime.combine(
-                    current, time(hour=hour, minute=minute)
-                )
+                candidate_wall = datetime.combine(current, time(hour=hour, minute=minute))
                 # BACH feeds croniter a naive local datetime. This wall-clock
                 # comparison prevents a second fixed-time run after its first
                 # fold occurrence has already passed.
                 if candidate_wall <= after_wall:
                     continue
                 future = [
-                    candidate
-                    for candidate in _cron_instants(current, hour, minute, zone)
-                    if candidate > after_utc
+                    candidate for candidate in _cron_instants(current, hour, minute, zone) if candidate > after_utc
                 ]
                 if future:
                     return min(future)
     raise ValueError("no cron occurrence found within a Gregorian 400-year cycle")
 
 
-def next_after(spec: dict[str, Any], after: datetime) -> datetime:
-    """Return the first scheduled instant strictly after *after*, in UTC."""
+def once_at(spec: dict[str, Any]) -> datetime:
+    """Parse the explicit, timezone-aware instant of a one-shot schedule."""
+    value = spec.get("at")
+    if not isinstance(value, str):
+        raise ValueError("once at must be a timezone-aware ISO datetime string")
+    instant = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if instant.tzinfo is None or instant.utcoffset() is None:
+        raise ValueError("once at must be timezone-aware")
+    return instant.astimezone(UTC)
+
+
+def next_after(spec: dict[str, Any], after: datetime) -> datetime | None:
+    """Return the first instant strictly after *after*, or None for an exhausted once."""
     after = _utc(after)
     kind = spec.get("kind")
+    if kind == "once":
+        instant = once_at(spec)
+        return instant if instant > after else None
     if kind == "interval":
         seconds = int(spec["seconds"])
         if seconds <= 0:
@@ -196,9 +201,7 @@ def next_after(spec: dict[str, Any], after: datetime) -> datetime:
         hour, minute = (int(part) for part in str(spec["time"]).split(":", 1))
         if hour not in range(24) or minute not in range(60):
             raise ValueError("daily time must be HH:MM")
-        candidate = local_after.replace(
-            hour=hour, minute=minute, second=0, microsecond=0
-        )
+        candidate = local_after.replace(hour=hour, minute=minute, second=0, microsecond=0)
         if candidate <= local_after:
             candidate += timedelta(days=1)
         return candidate.astimezone(UTC)

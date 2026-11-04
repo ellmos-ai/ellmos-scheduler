@@ -604,3 +604,22 @@ Die Bereitstellung dieser Software sowie der dazugehörigen Dokumentation erfolg
 
 ### Sicherheitsrichtlinie & Reaktions-SLA
 Wir verpflichten uns, den Eingang von Sicherheitsmeldungen innerhalb von **48 Stunden** zu bestätigen und innerhalb von **5 Werktagen** eine fundierte erste Triage-Bewertung über `security@open-bricks.org` und `security@ellmos.ai` bereitzustellen. Siehe [`SECURITY.md`](SECURITY.md) für vollständige Details.
+
+## Einmalige Termine: SOLL und IST (04.11.2026)
+
+SOLL: gemeinsame Verwaltung von Zeit- und Ereignisauslösern einschließlich GUI.
+IST: `add --schedule` nimmt `{"kind":"once","at":"2026-11-04T14:00:00+02:00"}`
+entgegen. `at` benötigt eine Zeitzone als Offset oder `Z`; naive Angaben werden
+abgelehnt. Vergangene Termine bleiben sofort fällig. `next_after` liefert am oder
+nach dem Termin `None`.
+
+Der Claim setzt atomar den dauerhaften Zustand `exhausted=1`, ohne Ersatzdatum.
+Erfolg, Fehler, Zeitüberschreitung und Autoritätsablehnung verbrauchen den Termin.
+Nur eine abgelaufene Lease eines übernommenen/laufenden Versuchs öffnet denselben
+Termin zur Wiederherstellung erneut. Externe Wirkungen benötigen deshalb weiterhin
+Idempotenz: Lease-Recovery garantiert keine genau einmalige externe Ausführung.
+Neustart und erneutes Aktivieren erzeugen keinen regulären Doppelstart.
+Die BACH-Projektion zeigt Erschöpfung und keinen nächsten Lauf; Erfolg braucht
+weiterhin einen erfolgreichen Run-Record. Bestehende Datenbanken erhalten eine
+additive Migration. Wiederholungen, Pause und Autoritätsprüfung bleiben erhalten.
+Ereignisauslöser und gemeinsame GUI sind mit dieser Änderung noch offen.
