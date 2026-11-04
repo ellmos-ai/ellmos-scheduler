@@ -13,6 +13,7 @@ from urllib.parse import quote
 from .authorities import DEFAULT_AUTHORITY_REGISTRY, AuthorityResolverRegistry
 from .schedules import next_after, once_at
 from .events import EVENT_SCHEMA, event_job_allowed
+from .definitions import DEFINITION_SCHEMA, definition_job_allowed
 
 
 UTC = timezone.utc
@@ -114,7 +115,7 @@ CREATE TABLE IF NOT EXISTS meta (
 """
 
 
-SCHEMA += EVENT_SCHEMA
+SCHEMA += EVENT_SCHEMA + DEFINITION_SCHEMA
 
 
 class SchedulerStore:
@@ -378,14 +379,24 @@ class SchedulerStore:
                     WHERE d.job_id=jobs.id AND (t.enabled=0 OR EXISTS (
                         SELECT 1 FROM controls c WHERE c.paused=1
                         AND c.scope IN ('global', 'trigger:' || t.id))))
+                AND NOT EXISTS (
+                    SELECT 1 FROM agent_trigger_jobs m JOIN agent_trigger_definitions d
+                    ON d.id=m.definition_id WHERE m.job_id=jobs.id AND (
+                        d.deleted=1 OR d.enabled=0 OR d.revision!=m.revision OR EXISTS (
+                            SELECT 1 FROM controls c WHERE c.paused=1
+                            AND c.scope IN ('global','definition:' || d.id)) OR EXISTS (
+                            SELECT 1 FROM runs ar JOIN agent_trigger_jobs am ON am.job_id=ar.job_id
+                            WHERE am.definition_id=d.id AND ar.status IN ('claimed','running')
+                            AND scheduler_utc(ar.lease_expires_at)>=scheduler_utc(?))))
                 {job_target_clause}
                 ORDER BY scheduler_utc(next_due_at), id
                 LIMIT ?
                 """,
-                (iso(now), *targets, limit),
+                (iso(now), iso(now), *targets, limit),
             ).fetchall()
             for row in rows:
-                if self.is_paused(conn, row["id"]) or not event_job_allowed(conn, row["id"]):
+                if (self.is_paused(conn, row["id"]) or not event_job_allowed(conn, row["id"])
+                        or not definition_job_allowed(conn, row["id"], now=iso(now))):
                     continue
                 scheduled_for = row["next_due_at"]
                 attempt_row = conn.execute(
@@ -451,6 +462,12 @@ class SchedulerStore:
                               or self.is_paused(conn, event_run["job_id"])
                               or not event_job_allowed(conn, event_run["job_id"])):
                 raise _run_conflict(conn, run_id, "event trigger disabled or paused")
+            definition_run = conn.execute("SELECT r.job_id,j.enabled FROM runs r JOIN jobs j ON j.id=r.job_id "
+                "JOIN agent_trigger_jobs m ON m.job_id=j.id WHERE r.run_id=?", (run_id,)).fetchone()
+            admission_now = iso(now or datetime.now(UTC))
+            if definition_run and (not definition_run["enabled"] or self.is_paused(conn, definition_run["job_id"])
+                    or not definition_job_allowed(conn, definition_run["job_id"], now=admission_now, run_id=run_id)):
+                raise _run_conflict(conn, run_id, "agent trigger changed, disabled, deleted, paused or busy")
             # A busy writer may outlive the lease; observe the real clock only
             # after obtaining admission's write transaction, unless explicitly injected.
             stamp = iso(now or datetime.now(UTC))

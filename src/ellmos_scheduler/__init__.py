@@ -17,6 +17,7 @@ from .executors import (
     register_executor,
     unregister_executor,
 )
+from .definitions import AgentTriggers, DefinitionConflict
 from .events import EventTriggers
 from .service import SchedulerService
 from .store import SchedulerStore
@@ -24,11 +25,13 @@ from .store import SchedulerStore
 __all__ = [
     "DEFAULT_AUTHORITY_REGISTRY",
     "DEFAULT_REGISTRY",
+    "AgentTriggers",
     "AuthorityConfigurationError",
     "AuthorityResolution",
     "AuthorityResolverRegistry",
     "AuthoritySetResult",
     "BachSchedulerAdapter",
+    "DefinitionConflict",
     "EventTriggers",
     "ExecutionResult",
     "ExecutorRegistry",
