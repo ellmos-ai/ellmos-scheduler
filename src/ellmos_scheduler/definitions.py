@@ -36,6 +36,38 @@ class DefinitionConflict(ValueError):
     """A stale version, deleted definition, or reused event ID cannot mutate state."""
 
 
+def consume_terminal_once(conn: Any, run_id: str) -> None:
+    """Consume the stable appointment atomically with its successful terminal CAS."""
+    finished = conn.execute(
+        "SELECT j.schedule_json,j.payload_json,m.definition_id FROM runs r "
+        "JOIN jobs j ON j.id=r.job_id JOIN agent_trigger_jobs m ON m.job_id=j.id "
+        "WHERE r.run_id=? AND r.status IN ('succeeded','failed','timed_out')",
+        (run_id,),
+    ).fetchone()
+    if finished is None:
+        return
+    config = json.loads(finished["schedule_json"])
+    if (
+        config.get("kind") != "once"
+        or json.loads(finished["payload_json"]).get("_agent_trigger", {}).get("kind") != "once"
+    ):
+        return
+    instant = once_at(config)
+    candidates = conn.execute(
+        "SELECT j.id,j.schedule_json,j.payload_json FROM jobs j "
+        "JOIN agent_trigger_jobs m ON m.job_id=j.id WHERE m.definition_id=?",
+        (finished["definition_id"],),
+    ).fetchall()
+    for candidate in candidates:
+        schedule = json.loads(candidate["schedule_json"])
+        if (
+            schedule.get("kind") == "once"
+            and json.loads(candidate["payload_json"]).get("_agent_trigger", {}).get("kind") == "once"
+            and once_at(schedule) == instant
+        ):
+            conn.execute("UPDATE jobs SET exhausted=1 WHERE id=?", (candidate["id"],))
+
+
 def definition_job_allowed(conn: Any, job_id: str, *, now: str, run_id: str | None = None) -> bool:
     row = conn.execute(
         """SELECT d.*,m.revision AS job_revision FROM agent_trigger_jobs m

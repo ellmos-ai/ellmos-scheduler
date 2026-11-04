@@ -66,7 +66,7 @@ def test_running_snapshot_can_finish_without_overlap(tmp_path, operation):
     assert not s.claim_due("b", now=AT)
     s.finish_run(run["run_id"], "succeeded", now=AT)
     newer = s.claim_due("b", now=AT)
-    assert len(newer) == (1 if operation == "update" else 0)
+    assert newer == []  # Completing the old snapshot consumes this same appointment.
     assert json.loads(run["payload_json"])["agent_id"] == "agent-1"
 
 
@@ -253,3 +253,59 @@ def test_terminal_event_at_same_instant_does_not_consume_explicit_once(tmp_path)
     s.finish_run(run["run_id"], "succeeded", now=AT)
     a.update("stable", expected_version=1, changes={"schedule": ONCE}, now=AT)
     assert len(s.claim_due("b", now=AT)) == 1
+
+
+@pytest.mark.parametrize("terminal", ["succeeded", "failed", "timed_out"])
+def test_running_metadata_update_consumed_when_old_snapshot_finishes(tmp_path, terminal):
+    s, a = setup(tmp_path)
+    (run,) = s.claim_due("a", now=AT)
+    s.start_run(run["run_id"], now=AT)
+    a.update("stable", expected_version=1, changes={"payload": {"corrected": True}}, now=AT)
+    s.finish_run(run["run_id"], terminal, now=AT)
+    assert not s.claim_due("b", now=AT)
+    reopened = SchedulerStore(s.path)
+    reopened.init()
+    assert not reopened.claim_due("c", now=AT + timedelta(days=1))
+    assert all(job["exhausted"] for job in reopened.list_jobs())
+
+
+def test_running_update_to_new_time_can_still_execute_after_finish(tmp_path):
+    s, a = setup(tmp_path)
+    (run,) = s.claim_due("a", now=AT)
+    s.start_run(run["run_id"], now=AT)
+    later = AT + timedelta(days=1)
+    a.update("stable", expected_version=1, changes={"schedule": {"kind": "once", "at": later.isoformat()}}, now=AT)
+    s.finish_run(run["run_id"], "succeeded", now=AT)
+    assert len(s.claim_due("b", now=later)) == 1
+
+
+def test_claimed_rejection_consumes_same_appointment_across_revision(tmp_path):
+    s, a = setup(tmp_path)
+    (run,) = s.claim_due("a", now=AT)
+    a.update("stable", expected_version=1, changes={"agent_id": "other-agent"}, now=AT)
+    s.fail_claimed_run(run["run_id"], error="authority-rejected", now=AT)
+    assert not s.claim_due("b", now=AT)
+
+
+def test_expired_stale_finish_cannot_consume_pending_replacement(tmp_path):
+    s, a = setup(tmp_path)
+    (run,) = s.claim_due("a", now=AT)
+    s.start_run(run["run_id"], now=AT)
+    a.update("stable", expected_version=1, changes={"payload": {"corrected": True}, "enabled": False}, now=AT)
+    assert not s.claim_due("b", now=AT + timedelta(seconds=2))
+    with pytest.raises(RunStateConflict):
+        s.finish_run(run["run_id"], "succeeded", now=AT + timedelta(seconds=2))
+    a.update("stable", expected_version=2, changes={"enabled": True}, now=AT)
+    assert len(s.claim_due("b", now=AT + timedelta(seconds=3))) == 1
+
+
+def test_finish_and_metadata_update_race_never_replays(tmp_path):
+    s, a = setup(tmp_path)
+    (run,) = s.claim_due("a", now=AT)
+    s.start_run(run["run_id"], now=AT)
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        finish = pool.submit(s.finish_run, run["run_id"], "succeeded", now=AT)
+        update = pool.submit(a.update, "stable", expected_version=1, changes={"payload": {"corrected": True}}, now=AT)
+        finish.result()
+        update.result()
+    assert not s.claim_due("b", now=AT)

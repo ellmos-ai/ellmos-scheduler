@@ -707,8 +707,12 @@ UTC-Terminzeitpunkts lösen keinen weiteren Lauf aus. Eine explizit neue Terminz
 darf ein neues Vorkommen erzeugen; Rückwechsel auf einen früher verbrauchten
 Zeitpunkt bleibt verbraucht. Erfolg, Fehler und Zeitüberschreitung sind terminal;
 `abandoned` ist dagegen weiterhin Lease-Recovery, kein Verbrauchsnachweis.
-Änderungen eines noch pending/claimed/running Termins behalten die beschriebenen
-Revisions-/Lease-Regeln; nur bereits terminale Vorkommen werden hier dedupliziert.
+Bei einer Korrektur während eines noch laufenden Termins bleibt dessen Snapshot
+unverändert. Sein späterer terminaler Abschluss verbraucht atomar denselben
+UTC-Termin auch in zwischenzeitlich angelegten Revisionen; dadurch folgt kein
+zweiter Lauf derselben Terminzeit. Abgelehnte veraltete Abschlussversuche dürfen
+keinen Verbrauch markieren. Eine ausdrücklich andere Terminzeit bleibt separat.
+Die Revisions-/Lease-Regeln für pending/claimed und Recovery bleiben erhalten.
 
 `deliver(id, expected_version=n, event_id=..., event_type=..., source=...,
 lineage=...)` materialisiert native einmalige Jobs. Deduplizierung gilt über alle

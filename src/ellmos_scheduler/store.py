@@ -13,7 +13,7 @@ from urllib.parse import quote
 from .authorities import DEFAULT_AUTHORITY_REGISTRY, AuthorityResolverRegistry
 from .schedules import next_after, once_at
 from .events import EVENT_SCHEMA, event_job_allowed
-from .definitions import DEFINITION_SCHEMA, definition_job_allowed
+from .definitions import DEFINITION_SCHEMA, definition_job_allowed, consume_terminal_once
 
 
 UTC = timezone.utc
@@ -530,6 +530,7 @@ class SchedulerStore:
             )
             if result.rowcount != 1:
                 raise _run_conflict(conn, run_id, f"claimed run cannot fail: {run_id}")
+            consume_terminal_once(conn, run_id)
 
     def finish_run(
         self,
@@ -555,6 +556,7 @@ class SchedulerStore:
             )
             if result.rowcount != 1:
                 raise _run_conflict(conn, run_id, f"run cannot finish: {run_id}")
+            consume_terminal_once(conn, run_id)
 
     def recent_runs(self, limit: int = 20) -> list[dict[str, Any]]:
         with self.read_connection() as conn:

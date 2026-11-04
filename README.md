@@ -665,7 +665,11 @@ alternate UTC offsets of an already terminal once instant also do not replay it.
 A genuinely different explicit instant can schedule another occurrence; switching
 back to an already consumed instant still cannot replay it. Success/failure/timeout
 are terminal; abandoned leases remain recoverable. Pending/claimed/running revision
-semantics remain unchanged; this consumption check concerns already terminal runs. Supported schedules are native
+semantics remain revision/lease-bound. A running snapshot may finish unchanged;
+its successful terminal CAS atomically consumes the same UTC appointment across
+replacement revisions created while it was running. Rejected stale completions
+cannot consume a pending replacement. A genuinely different instant remains a
+separate occurrence. Supported schedules are native
 once/daily/cron/interval or `{kind:'event',event_type:...}`. Event `deliver` requires
 expected_version and the existing event ID/type/source/lineage contract. Event-ID
 deduplication survives definition revisions; duplicates retain their original job,
