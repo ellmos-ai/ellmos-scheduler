@@ -610,3 +610,35 @@ proof of successful execution. Old databases migrate with exhaustion defaulting
 to false. Existing recurring schedules retain their behavior.
 
 Event triggers and the shared GUI are not delivered by this change.
+
+## Event triggers: target/current consumer contract (2026-11-04)
+
+Target: shared agent/trigger management and calendar integration. Current: the
+Python `EventTriggers(store)` API persists immutable definitions (`create`,
+`list`), version-CAS enable changes (`set_enabled`), deliveries (`deliver`) and
+read-only provenance (`deliveries`). No HTTP, GUI or automatic task-acceptance
+adapter is delivered. See the detailed contract in README_de.md.
+
+Initialize the ordinary `SchedulerStore` first. A definition contains a stable ID,
+event type, executor, payload (including the consumer's agent reference), leases,
+timeouts and authority specifications. Delivery requires definition ID, event ID,
+event type and source; optional lineage carries previous definition IDs. ASCII
+identifiers have 1–128 characters, start alphanumeric and otherwise allow
+`_.:@/-`. Arbitrary event data is not accepted. Reserved `_scheduler_event` payload
+metadata binds provenance to the materialized job and thus its run records.
+
+A transaction deduplicates `(trigger_id,event_id)` and creates a deterministic
+ordinary once-job. Reusing an ID with different provenance/lineage fails; no
+existing delivery is overwritten. Definitions cannot mutate payloads in place;
+create a new ID for configuration changes. `state=materialized` proves neither
+Running nor success. Disabled/paused definitions retain pending deliveries;
+parent/global/job gates are checked atomically at claim and actual start. Running
+work is not interrupted by later deactivation. Existing lease, timeout, authority
+and recovery mechanisms apply, with at-least-once recovery of expired attempts.
+
+Provenance and a name such as `task.accepted` are not authority or acceptance
+proof. Ingestion adapters must independently verify native task acceptance and
+must not trust review-only results or pre-commit CLI hooks. Lineage rejects repeat
+definitions and chains longer than eight; adapters must propagate stored lineage.
+The scheduler emits no recursive events itself; unrelated externally injected
+roots cannot be globally bounded by lineage. Provider starts remain consumer-owned.
