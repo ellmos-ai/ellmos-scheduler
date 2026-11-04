@@ -9,6 +9,7 @@ This module never initializes storage or executes an executor.
 from __future__ import annotations
 
 import json
+import math
 import re
 import sqlite3
 
@@ -64,6 +65,41 @@ def _error(status, state, reason):
     raise TriggerProjectionError(status, state, reason)
 
 
+def _json_shape(value, *, output=False):
+    """Only parsed-JSON shapes: no encoder coercion after the credential gate."""
+    active = set()
+
+    def visit(child):
+        kind = type(child)
+        if kind in (str, int, bool, type(None)):
+            return
+        if kind is float:
+            if not math.isfinite(child):
+                raise ValueError("nonfinite JSON number")
+            return
+        if kind not in (list, dict) or id(child) in active:
+            raise ValueError("not a plain JSON value")
+        active.add(id(child))
+        try:
+            if kind is dict:
+                for key, item in child.items():
+                    if type(key) is not str:
+                        raise ValueError("JSON object key must be a string")
+                    visit(item)
+            else:
+                for item in child:
+                    visit(item)
+        finally:
+            active.remove(id(child))
+
+    try:
+        visit(value)
+    except (ValueError, RecursionError):
+        if output:
+            _error(503, "unavailable", "invalid_provider_snapshot")
+        _error(400, "invalid", "invalid_json_value")
+
+
 
 def _identifier(value):
     if not isinstance(value, str) or not _ID.fullmatch(value):
@@ -114,6 +150,7 @@ def _snapshot(value):
         _error(503, "unavailable", "invalid_provider_snapshot")
     # Never expose provider-specific fields, exception text, filesystem paths or credentials.
     result = {key: value[key] for key in _FIELDS}
+    _json_shape(result, output=True)
     try:
         _no_credentials(result)
     except (ValueError, TypeError, AttributeError):
@@ -163,9 +200,10 @@ def _execute_trigger_request(store, operation, identifier=None, payload=None, ag
         if operation == "list":
             if agent_id is not None:
                 _identifier(agent_id)
-            return _response(
-                triggers=[_snapshot(row) for row in triggers.list(agent_id=agent_id)]
-            )
+            rows = [_snapshot(row) for row in triggers.list(agent_id=agent_id)]
+            if agent_id is not None and any(row["agent_id"] != agent_id for row in rows):
+                _error(503, "unavailable", "readback_unverified")
+            return _response(triggers=rows)
         identifier = _identifier(identifier)
         if operation == "get":
             current = _snapshot(triggers.get(identifier))
@@ -217,9 +255,11 @@ def _execute_trigger_request(store, operation, identifier=None, payload=None, ag
             ):
                 _error(400, "invalid", "invalid_delivery")
             before = _snapshot(triggers.get(identifier))
+            if before["id"] != identifier:
+                _error(503, "unavailable", "readback_unverified")
             delivery = triggers.deliver(identifier, **payload)
             after = _snapshot(triggers.get(identifier))
-            if before != after or after["version"] != expected:
+            if before != after or after["id"] != identifier or after["version"] != expected:
                 _error(503, "unavailable", "readback_unverified")
             if (
                 not isinstance(delivery, dict)
@@ -324,6 +364,7 @@ def execute_trigger_request(store, operation, identifier=None, payload=None, age
     ):
         _error(503, "unavailable", "invalid_credential_context")
     credentials = tuple(dict.fromkeys(transport_credentials))
+    _json_shape(payload)
     if _contains_credential(payload, credentials):
         _error(400, "invalid", "credential_in_payload")
     result = _execute_trigger_request(store, operation, identifier, payload, agent_id,

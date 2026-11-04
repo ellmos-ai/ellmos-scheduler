@@ -154,3 +154,53 @@ def test_uncanonical_transport_context_is_rejected_before_mutation(store, creden
         store, "create", "secret-test", definition("secret-test"), transport_credentials=credentials))
     assert "synthetic-secret" not in str(error.detail())
     assert execute_trigger_request(store, "list")["triggers"] == []
+
+
+@pytest.mark.parametrize("value", [("synthetic-secret",), {1: "synthetic-secret"}, {"synthetic-secret"}, float("nan"), float("inf")])
+def test_encoder_coercion_cannot_store_credentials_before_validation(store, value):
+    assert_error(400, "invalid_json_value", lambda: execute_trigger_request(
+        store, "create", "shape-test", definition("shape-test", payload={"items": value}),
+        transport_credentials=("synthetic-secret",)))
+    assert AgentTriggers(store).list() == []
+    assert AgentTriggers(store).history("shape-test") == []
+
+
+def test_cyclic_payload_is_invalid_without_storage_side_effects(store):
+    cyclic = []
+    cyclic.append(cyclic)
+    assert_error(400, "invalid_json_value", lambda: create(store, payload={"items": cyclic}))
+    assert AgentTriggers(store).list() == []
+
+
+def test_tuple_in_provider_snapshot_is_not_encoded_into_a_secret_response(store, monkeypatch):
+    create(store)
+    original = AgentTriggers.get
+    def malformed(self, identifier):
+        row = original(self, identifier)
+        row["payload"] = {"items": ("synthetic-secret",)}
+        return row
+    monkeypatch.setattr(AgentTriggers, "get", malformed)
+    error = assert_error(503, "invalid_provider_snapshot", lambda: execute_trigger_request(
+        store, "get", "shared/a", transport_credentials=("synthetic-secret",)))
+    assert "synthetic-secret" not in str(error.detail())
+
+
+def test_foreign_event_snapshot_is_rejected_before_materialization(store, monkeypatch):
+    create(store, schedule={"kind": "event", "event_type": "task.accepted"})
+    original = AgentTriggers.get
+    def foreign(self, identifier):
+        row = original(self, identifier)
+        row["id"] = "foreign"
+        return row
+    monkeypatch.setattr(AgentTriggers, "get", foreign)
+    assert_error(503, "readback_unverified", lambda: execute_trigger_request(
+        store, "deliver", "shared/a", {"expected_version": 1, "event_id": "event-1",
+        "event_type": "task.accepted", "source": "synthetic"}))
+    assert store.list_jobs() == [] and store.recent_runs() == []
+
+
+def test_agent_filter_is_verified_against_every_returned_snapshot(store, monkeypatch):
+    create(store)
+    original = AgentTriggers.list
+    monkeypatch.setattr(AgentTriggers, "list", lambda self, agent_id=None: original(self))
+    assert_error(503, "readback_unverified", lambda: execute_trigger_request(store, "list", agent_id="other"))

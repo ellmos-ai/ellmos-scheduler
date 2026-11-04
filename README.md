@@ -789,6 +789,11 @@ supply the exact canonical credential values accepted by their authenticator;
 noncanonical contexts fail closed. Recursive key/value checks reject transport
 credentials before persistence and before a response, including old snapshots.
 The projection does not authenticate callers or resolve secrets itself.
+Request values must have plain parsed-JSON types: tuples, sets, non-string object
+keys, nonfinite numbers and cycles are rejected before mutation. Returned public
+snapshots obey the same JSON shape. Event readbacks must retain the exact requested
+ID before materialization and after delivery; agent filters are independently
+checked against every returned snapshot.
 
 The CRUD/readback projection is adapted from the independently reviewed BACH
 adapter at `9e3e3b5938b8052836ce3dcfedb796678205715a`. Native synthetic-store tests
