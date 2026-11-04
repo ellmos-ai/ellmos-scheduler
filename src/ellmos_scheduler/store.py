@@ -11,6 +11,7 @@ from typing import Any, Iterator, Sequence
 from urllib.parse import quote
 
 from .authorities import DEFAULT_AUTHORITY_REGISTRY, AuthorityResolverRegistry
+from .context import ExecutionContext
 from .schedules import next_after, once_at
 from .events import EVENT_SCHEMA, event_job_allowed
 from .definitions import DEFINITION_SCHEMA, definition_job_allowed, consume_terminal_once
@@ -453,6 +454,17 @@ class SchedulerStore:
         return claimed
 
     def start_run(self, run_id: str, *, now: datetime | None = None) -> None:
+        self._admit_run(run_id, now=now)
+
+    def start_run_context(self, run_id: str, *, worker_id: str,
+                          now: datetime | None = None) -> ExecutionContext:
+        """Admit this worker's claim and return metadata from that same transaction."""
+        if not isinstance(worker_id, str) or not worker_id:
+            raise ValueError("worker_id required")
+        return self._admit_run(run_id, claimed_by=worker_id, now=now)
+
+    def _admit_run(self, run_id: str, *, claimed_by: str | None = None,
+                   now: datetime | None = None) -> ExecutionContext | None:
         with self.connect() as conn:
             conn.execute("BEGIN IMMEDIATE")
             event_run = conn.execute(
@@ -474,11 +486,21 @@ class SchedulerStore:
             result = conn.execute(
                 """UPDATE runs SET status = 'running', started_at = ?
                 WHERE run_id = ? AND status = 'claimed'
-                  AND scheduler_utc(lease_expires_at) >= scheduler_utc(?)""",
-                (stamp, run_id, stamp),
+                  AND scheduler_utc(lease_expires_at) >= scheduler_utc(?)
+                  AND (? IS NULL OR claimed_by = ?)""",
+                (stamp, run_id, stamp, claimed_by, claimed_by),
             )
             if result.rowcount != 1:
                 raise _run_conflict(conn, run_id, f"run cannot start: {run_id}")
+            if claimed_by is not None:
+                row = conn.execute("SELECT * FROM runs WHERE run_id = ?", (run_id,)).fetchone()
+                return ExecutionContext(
+                    job_id=row["job_id"], scheduled_for=iso(parse_iso(row["scheduled_for"])),
+                    run_id=row["run_id"], attempt=row["attempt"], claimed_by=row["claimed_by"],
+                    lease_expires_at=iso(parse_iso(row["lease_expires_at"])),
+                    started_at=iso(parse_iso(row["started_at"])),
+                )
+        return None
 
     def record_authority_receipt(
         self,

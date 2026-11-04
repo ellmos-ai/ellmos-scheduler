@@ -9,12 +9,14 @@ from .authorities import (
     validate_authority_specs,
 )
 from .bach import BachSchedulerAdapter, create_bach_adapter, import_legacy_jobs
+from .context import ExecutionContext
 from .executors import (
     DEFAULT_REGISTRY,
     ExecutionResult,
     ExecutorRegistry,
     executor_names,
     register_executor,
+    register_contextual_executor,
     unregister_executor,
 )
 from .definitions import AgentTriggers, DefinitionConflict
@@ -33,6 +35,7 @@ __all__ = [
     "BachSchedulerAdapter",
     "DefinitionConflict",
     "EventTriggers",
+    "ExecutionContext",
     "ExecutionResult",
     "ExecutorRegistry",
     "SchedulerService",
@@ -40,6 +43,7 @@ __all__ = [
     "create_bach_adapter",
     "executor_names",
     "import_legacy_jobs",
+    "register_contextual_executor",
     "register_executor",
     "unregister_executor",
     "validate_authority_specs",

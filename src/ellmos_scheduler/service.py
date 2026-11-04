@@ -150,11 +150,17 @@ class SchedulerService:
                 }
             )
             return
-        self.store.start_run(run_id, now=now)
+        context_options = {}
+        if self.registry.requires_context(job["executor"]):
+            context_options["context"] = self.store.start_run_context(
+                run_id, worker_id=self.worker_id, now=now)
+        else:
+            self.store.start_run(run_id, now=now)
         result = self.registry.execute(
             job["executor"],
             json.loads(job["payload_json"]),
             int(job["timeout_seconds"]),
+            **context_options,
         )
         self.store.finish_run(
             run_id,
