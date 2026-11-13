@@ -36,14 +36,19 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install development dependencies
         run: >-
+          python -m pip install pip==26.2.1
+          &&
           python -m pip install
-          build==1.5.1
+          build==1.6.1
           pytest==9.1.1
           ruff==0.15.18
-          setuptools==80.9.0
-          wheel==0.45.1
+          setuptools==83.0.0
+          wheel==0.46.2
           "tomli==2.2.1; python_version < '3.11'"
           && python -m pip install --no-build-isolation -e .
+      - name: Check and report resolved toolchain
+        run: >-
+          python -c "import importlib.metadata as m, importlib.util as u, json, pathlib, subprocess, sys; subprocess.check_call([sys.executable, '-m', 'pip', 'check']); subprocess.check_call([sys.executable, '-m', 'pip', 'list', '--format=json']); p = pathlib.Path(next(iter(u.find_spec('setuptools').submodule_search_locations))) / '_vendor'; print('SETUPTOOLS_VENDOR=' + json.dumps([{'name': d.metadata['Name'], 'version': d.version} for d in m.distributions(path=[str(p)])]))"
       - name: Bytecode compilation preflight
         run: python -m compileall -q src tests
       - name: Test
