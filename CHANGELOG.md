@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### CI packaging toolchain
+- Pin `setuptools==83.0.0` and `wheel==0.46.2` in CI, replace the yanked `build==1.5.1` with `build==1.6.1`, set `pip==26.2.1` before resolution, and report the resolved environment after `pip check`. Runtime requirements and the package version are unchanged (port of #17 to current `main`).
+
 ### Durable dispatch receipt contract (2026-11-04)
 - Add native occurrence/version CAS, immutable request/target binding and persistent admission/launch intent before external effects.
 - Preserve generation through lease recovery and lost RPC responses; allow only positively proven unlaunched recovery and identity-bound controller-loss closure.

@@ -39,6 +39,7 @@
 - [ ] **TASK-SCHED-07: CI-Dependency-Hinweise verifizieren** (`effort=medium`, `scope=ci`, priority `normal`).
   - **Befund vom 16.10.2026:** OSV meldet `wheel==0.45.1` (GHSA-8rrh-rw8j-w5fx) und `setuptools==80.9.0` (GHSA-h35f-9h28-mq5c). Betroffene `wheel unpack`- bzw. macOS-MANIFEST/sdist-Aufrufe sind im aktuellen Wheel-CI nicht belegt; kein Advisory-Gesamt-PASS. Lokales tzdata 2026.2 liegt hinter PyPI 2026.5.
   - **Nächster Schritt:** Toolchain und transitive Auflösung isoliert auf allen unterstützten Plattformen prüfen; nur verifizierte Pins ändern. Keine riskanten Upgrades im Audit.
+  - **Korrekturzweig (Portierung von #17 auf aktuelles `main`, 13.11.2026):** CI-Pins wechseln auf `setuptools==83.0.0` und `wheel==0.46.2`; das zurückgezogene `build==1.5.1` wird durch `build==1.6.1` ersetzt, `pip==26.2.1` wird vor der Auflösung festgelegt. CI führt `pip check` aus und protokolliert die aufgelösten Versionen. Offen bleibt die unabhängige Bestätigung der beiden Advisories und die native Matrix auf allen Plattformen.
 
 - [x] **TASK-SCHED-08: Private Dokumentationspfade neutralisieren** (`effort=low`, `scope=documentation`, priority `normal`).
   - **Ergebnis vom 16.10.2026:** Beide Quick-Start-Payloads nutzen denselben neutralen Beispielordner; der Marketing-Log enthält keinen lokalen Klonpfad mehr. Keine Historienbereinigung oder Löschung; Source-Audit auf f2740ba7 bleibt revisionsgebunden.
