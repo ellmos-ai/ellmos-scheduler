@@ -2,7 +2,7 @@
 
 <img src="assets/banner.png" width="100%" alt="ellmos Scheduler banner">
 
-[![Version](https://img.shields.io/badge/version-0.3.6-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
+[![Version](https://img.shields.io/badge/version-0.3.7-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
 [![CI](https://github.com/ellmos-ai/ellmos-scheduler/actions/workflows/test.yml/badge.svg)](https://github.com/ellmos-ai/ellmos-scheduler/actions)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
@@ -58,7 +58,7 @@ deliberately located **outside BACH**. BACH, Wonderland/Riverfall, desktop
 automations, COMA, MarbleRun/llmauto, and swarm-ai can consume it through
 narrow adapters.
 
-Status: `0.3.6` (Pfad B Discoverability, 18-point bilingual quick navigation parity, 10-dimension comparative matrix vs. 4 alternatives, SEO keywords, Level 1 SBOM Invariant Cross-Reference Matrix, 20-topic saturation, 2026-09-26).
+Status: `0.3.7` (Pfad B Discoverability, 18-point bilingual quick navigation parity, 10-dimension comparative matrix vs. 4 alternatives, SEO keywords, Level 1 SBOM Invariant Cross-Reference Matrix, 20-topic saturation, 2026-09-26).
 
 On Windows, the package installs `tzdata` as a conditional runtime dependency.
 This makes IANA time zones such as `Europe/Berlin` work in a clean virtual
@@ -843,3 +843,7 @@ Actual activation, installed-package verification, migration, rollback behavior,
 canonical host storage and daemon adoption remain separate unimplemented work.
 No second store or configuration authority is added, and no legacy host code is
 replaced or prematurely marked as migrated by S1.
+
+## Interval misfire policy
+
+Idempotent interval checks may opt into coalesce_latest; default replay continues to admit every missed occurrence. Existing jobs use a generation-bound native CAS which rejects active claims and preserves dates/history. See [interval misfires](docs/interval-misfires.md) for receipts, recovery and migration.
