@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Preserve the interval grid, record omitted occurrence counts without synthetic success receipts, and retry expired claims with their original occurrence metadata.
 - Add native generation/policy CAS checking active claims under the writer transaction without changing dates or history.
 - Migrate historical databases additively; export the versioned capability. Cover backlog fairness, concurrency, migration and failure behavior.
+- Independent-review correction: select all outstanding admitted retries separately from the interval cursor, preserve successful intervening history, and recover legacy replay cursor rewinds from native admissions.
 
 ### CI packaging toolchain
 - Pin `setuptools==83.0.0` and `wheel==0.46.2` in CI, replace the yanked `build==1.5.1` with `build==1.6.1`, set `pip==26.2.1` before resolution, and report the resolved environment after `pip check`. Runtime requirements and the package version are unchanged (port of #17 to current `main`).

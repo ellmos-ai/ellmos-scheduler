@@ -321,3 +321,87 @@ def test_claim_and_policy_change_are_serialized_at_the_native_boundary(store, _r
     else:
         assert row(store)["misfire_policy"] == claimed["misfire_policy"] == "replay"
         assert claimed["scheduled_for"] == iso(ANCHOR) and claimed["coalesced_count"] == 0
+
+
+
+@pytest.mark.parametrize("expired_before_policy", [False, True])
+@pytest.mark.parametrize("retry_outcome", ["succeeded", "failed", "timed_out"])
+def test_separated_expired_replay_occurrences_retry_without_recounting_success(
+    store, expired_before_policy, retry_outcome
+):
+    base = datetime(2026, 11, 17, tzinfo=UTC)
+    def stamp(seconds):
+        return base + timedelta(seconds=seconds)
+
+    store.add_job("delta", {"kind": "interval", "seconds": 60}, "noop", {},
+                  now=base, next_due_at=base, lease_seconds=180)
+    first = store.claim_due("old-zero", now=stamp(0), limit=1)[0]
+    middle = store.claim_due("old-success", now=stamp(60), limit=1)[0]
+    complete(store, middle, stamp(60))
+    last = store.claim_due("old-two", now=stamp(120), limit=1)[0]
+    middle_receipt = next(r for r in store.recent_runs() if r["run_id"] == middle["run_id"])
+
+    if expired_before_policy:
+        # An old replay owner can rewind the cursor while paused, before upgrade.
+        store.set_pause("job:delta", True, now=stamp(301))
+        assert store.claim_due("old-paused", now=stamp(301), limit=1) == []
+        assert row(store)["next_due_at"] == iso(stamp(0))
+        store.set_pause("job:delta", False, now=stamp(301))
+    before_policy = row(store)["next_due_at"]
+    store.set_misfire_policy("delta", "coalesce_latest",
+        expected_generation=1, expected_policy="replay", now=stamp(301))
+    assert row(store)["next_due_at"] == before_policy  # CAS never changes dates.
+
+    for original, outcome in ((first, retry_outcome), (last, "succeeded")):
+        retry = store.claim_due("new-owner", now=stamp(301), limit=1)[0]
+        assert retry["scheduled_for"] == original["scheduled_for"]
+        assert retry["attempt"] == 2 and retry["misfire_policy"] == "replay"
+        assert retry["coalesced_count"] == 0 and retry["coalesced_from"] is None
+        assert row(store)["next_due_at"] == iso(stamp(180))
+        complete(store, retry, stamp(301), outcome)
+
+    fresh = store.claim_due("new-owner", now=stamp(301), limit=1)[0]
+    assert fresh["scheduled_for"] == iso(stamp(300)) and fresh["attempt"] == 1
+    assert fresh["coalesced_from"] == iso(stamp(180)) and fresh["coalesced_count"] == 2
+    assert row(store)["next_due_at"] == iso(stamp(360))
+    assert next(r for r in store.recent_runs() if r["run_id"] == middle["run_id"]) == middle_receipt
+    assert len([r for r in store.recent_runs() if r["scheduled_for"] == iso(stamp(60))]) == 1
+
+
+def test_expired_retry_remains_eligible_before_future_high_water_cursor(store):
+    base = datetime(2026, 11, 17, tzinfo=UTC)
+    store.add_job("delta", {"kind": "interval", "seconds": 60}, "noop", {},
+                  now=base, next_due_at=base, lease_seconds=1, misfire_policy="coalesce_latest")
+    first = store.claim_due("first", now=base, limit=1)[0]
+    retry_time = base + timedelta(seconds=2)
+    retry = store.claim_due("retry", now=retry_time, limit=1)[0]
+    assert retry["scheduled_for"] == first["scheduled_for"]
+    assert retry["attempt"] == 2
+    assert row(store)["next_due_at"] == iso(base + timedelta(seconds=60))
+    complete(store, retry, retry_time)
+    assert store.claim_due("third", now=retry_time, limit=1) == []
+
+
+def test_migration_after_completed_legacy_retry_never_counts_admitted_successes_as_omitted(store):
+    base = datetime(2026, 11, 17, tzinfo=UTC)
+    def stamp(seconds):
+        return base + timedelta(seconds=seconds)
+
+    store.add_job("delta", {"kind": "interval", "seconds": 60}, "noop", {},
+                  now=base, next_due_at=base, lease_seconds=180)
+    store.claim_due("expired", now=stamp(0), limit=1)
+    for seconds in (60, 120):
+        completed = store.claim_due("completed", now=stamp(seconds), limit=1)[0]
+        complete(store, completed, stamp(seconds))
+    legacy_retry = store.claim_due("legacy-retry", now=stamp(301), limit=1)[0]
+    assert legacy_retry["scheduled_for"] == iso(stamp(0))
+    complete(store, legacy_retry, stamp(301))
+    assert row(store)["next_due_at"] == iso(stamp(60))
+    previous = {r["run_id"]: r for r in store.recent_runs()}
+    store.set_misfire_policy("delta", "coalesce_latest",
+        expected_generation=1, expected_policy="replay", now=stamp(301))
+    fresh = store.claim_due("new-owner", now=stamp(301), limit=1)[0]
+    assert fresh["scheduled_for"] == iso(stamp(300))
+    assert fresh["coalesced_from"] == iso(stamp(180))
+    assert fresh["coalesced_count"] == 2
+    assert all(r == previous[r["run_id"]] for r in store.recent_runs() if r["run_id"] in previous)

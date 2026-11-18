@@ -47,6 +47,20 @@ receipt, even when policy changed after expiry. Once that occurrence completes,
 subsequent unclaimed intervals can coalesce. Failures and timeouts retain the
 existing next-occurrence behavior; no unbounded retries are introduced.
 
+For coalescing jobs, pending retries are selected independently of next_due_at.
+That cursor records the admission high-water and never moves backwards for a
+retry. Every occurrence whose latest attempt is abandoned remains eligible,
+including when successful occurrences separate two abandoned ones. A completed
+retry resolves only its own occurrence.
+
+On the first native claim after migrating a legacy replay cursor that had
+already been rewound, claim_due restores the cursor from recorded admissions.
+The policy CAS still does not change a date. For example: admitted 00:00 and
+00:02 expire, while 00:01 has succeeded. At 00:05:01 the new policy retries
+00:00 and 00:02 with their original receipts, then coalesces only the unadmitted
+00:03/00:04 points into a fresh 00:05 occurrence. The completed 00:01 run is
+neither repeated nor counted as omitted.
+
 ## Creation and native CAS migration
 
 New jobs pass misfire_policy="coalesce_latest" to SchedulerStore.add_job.

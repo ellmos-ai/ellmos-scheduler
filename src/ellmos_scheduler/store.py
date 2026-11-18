@@ -380,6 +380,35 @@ class SchedulerStore:
         material = f"{job_id}|{generation}|{scheduled_for}|{attempt}".encode("utf-8")
         return hashlib.sha256(material).hexdigest()
 
+    def _restore_coalesced_cursors(
+        self, conn: sqlite3.Connection, targets: tuple[str, ...], now: datetime
+    ) -> None:
+        """Recover admission high-water after a legacy replay cursor rewind.
+
+        Only native admissions establish this lower bound; no unclaimed interval
+        is skipped here. Recovery is part of claim_due, never the policy CAS.
+        Retries have their own selection and cannot move this cursor backwards.
+        """
+        target_clause = " AND jobs.id IN (" + ", ".join("?" for _ in targets) + ")" if targets else ""
+        rows = conn.execute(
+            f"""SELECT jobs.*, MAX(scheduler_utc(r.scheduled_for)) AS admitted_through
+                FROM jobs JOIN runs r ON r.job_id = jobs.id
+                WHERE jobs.enabled = 1 AND jobs.misfire_policy = 'coalesce_latest'
+                {target_clause} GROUP BY jobs.id""",
+            targets,
+        ).fetchall()
+        for row in rows:
+            if self.is_paused(conn, row["id"]):
+                continue
+            schedule = json.loads(row["schedule_json"])
+            validate_misfire_policy(schedule, row["misfire_policy"])
+            high_water = next_after(schedule, parse_iso(row["admitted_through"]))
+            if high_water > parse_iso(row["next_due_at"]):
+                conn.execute(
+                    "UPDATE jobs SET next_due_at = ?, updated_at = ? WHERE id = ?",
+                    (iso(high_water), iso(now), row["id"]),
+                )
+
     def claim_due(
         self,
         worker_id: str,
@@ -424,20 +453,29 @@ class SchedulerStore:
             )
             for expired_run in expired:
                 current = conn.execute(
-                    "SELECT next_due_at, exhausted FROM jobs WHERE id = ?",
+                    "SELECT next_due_at, exhausted, misfire_policy FROM jobs WHERE id = ?",
                     (expired_run["job_id"],),
                 ).fetchone()
-                if current and (
+                if current and current["misfire_policy"] != "coalesce_latest" and (
                     current["exhausted"] or parse_iso(expired_run["scheduled_for"]) < parse_iso(current["next_due_at"])
                 ):
                     conn.execute(
                         "UPDATE jobs SET next_due_at = ?, exhausted = 0, updated_at = ? WHERE id = ?",
                         (expired_run["scheduled_for"], iso(now), expired_run["job_id"]),
                     )
+            self._restore_coalesced_cursors(conn, targets, now)
             rows = conn.execute(
                 f"""
-                SELECT * FROM jobs
-                WHERE enabled = 1 AND exhausted = 0 AND scheduler_utc(next_due_at) <= scheduler_utc(?)
+                SELECT jobs.*, retries.retry_at AS pending_retry_at FROM jobs
+                LEFT JOIN (
+                    SELECT r.job_id, MIN(scheduler_utc(r.scheduled_for)) AS retry_at
+                    FROM runs r WHERE r.status = 'abandoned' AND NOT EXISTS (
+                        SELECT 1 FROM runs newer WHERE newer.job_id = r.job_id
+                        AND newer.scheduled_for = r.scheduled_for AND newer.attempt > r.attempt
+                    ) GROUP BY r.job_id
+                ) retries ON retries.job_id = jobs.id AND jobs.misfire_policy = 'coalesce_latest'
+                WHERE enabled = 1 AND exhausted = 0 AND (
+                    scheduler_utc(next_due_at) <= scheduler_utc(?) OR retries.retry_at <= scheduler_utc(?))
                 AND (misfire_policy != 'coalesce_latest' OR NOT EXISTS (
                     SELECT 1 FROM runs active WHERE active.job_id=jobs.id
                     AND active.status IN ('claimed','running')
@@ -457,10 +495,10 @@ class SchedulerStore:
                             WHERE am.definition_id=d.id AND ar.status IN ('claimed','running')
                             AND scheduler_utc(ar.lease_expires_at)>=scheduler_utc(?))))
                 {job_target_clause}
-                ORDER BY scheduler_utc(next_due_at), id
+                ORDER BY COALESCE(retries.retry_at, scheduler_utc(next_due_at)), jobs.id
                 LIMIT ?
                 """,
-                (iso(now), iso(now), iso(now), *targets, limit),
+                (iso(now), iso(now), iso(now), iso(now), *targets, limit),
             ).fetchall()
             for row in rows:
                 if (self.is_paused(conn, row["id"]) or not event_job_allowed(conn, row["id"])
@@ -471,12 +509,21 @@ class SchedulerStore:
                 policy = row["misfire_policy"]
                 validate_misfire_policy(schedule, policy)
                 coalesced_from, coalesced_count = None, 0
-                previous = conn.execute(
-                    """SELECT * FROM runs WHERE job_id = ? AND scheduled_for = ?
-                       ORDER BY attempt DESC LIMIT 1""",
-                    (row["id"], scheduled_for),
-                ).fetchone()
-                if previous and previous["status"] == "abandoned":
+                if row["pending_retry_at"] is not None:
+                    previous = conn.execute(
+                        """SELECT * FROM runs WHERE job_id = ? AND scheduler_utc(scheduled_for) = ?
+                           ORDER BY attempt DESC LIMIT 1""",
+                        (row["id"], row["pending_retry_at"]),
+                    ).fetchone()
+                else:
+                    previous = conn.execute(
+                        """SELECT * FROM runs WHERE job_id = ? AND scheduled_for = ?
+                           ORDER BY attempt DESC LIMIT 1""",
+                        (row["id"], scheduled_for),
+                    ).fetchone()
+                retrying = previous is not None and previous["status"] == "abandoned"
+                if retrying:
+                    scheduled_for = previous["scheduled_for"]
                     # A claim was already admitted for this occurrence. Retry it
                     # exactly, even if the policy changed after its lease expired.
                     policy = previous["misfire_policy"]
@@ -513,16 +560,20 @@ class SchedulerStore:
                     ),
                 )
                 next_due = next_after(schedule, parse_iso(scheduled_for))
+                next_due_text = iso(next_due) if next_due is not None else scheduled_for
+                if row["misfire_policy"] == "coalesce_latest" and retrying:
+                    next_due_text = row["next_due_at"]
                 conn.execute(
                     "UPDATE jobs SET next_due_at = ?, exhausted = ?, updated_at = ? WHERE id = ?",
                     (
-                        iso(next_due) if next_due is not None else scheduled_for,
+                        next_due_text,
                         int(next_due is None),
                         iso(now),
                         row["id"],
                     ),
                 )
                 item = dict(row)
+                item.pop("pending_retry_at")
                 item.update(
                     {
                         "run_id": run_id,
