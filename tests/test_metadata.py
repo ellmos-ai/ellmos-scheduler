@@ -1060,10 +1060,10 @@ def test_marketing_log_recent_pfad_b_2026_10_02_audit():
 
 
 def test_version_freeze_discipline():
-    """Verify version 0.3.6 remains frozen per T-20260920-167562623 without unintended bumps."""
+    """Pin the explicit 0.3.7 misfire-policy release authorized by Ocean #49 / BACH #4225."""
     pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     manifest = json.loads((ROOT / "ellmos-module.v2.json").read_text(encoding="utf-8"))
 
-    assert __version__ == "0.3.6"
-    assert pyproject["project"]["version"] == "0.3.6"
-    assert manifest["version"] == "0.3.6"
+    assert __version__ == "0.3.7"
+    assert pyproject["project"]["version"] == "0.3.7"
+    assert manifest["version"] == "0.3.7"

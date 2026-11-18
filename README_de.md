@@ -2,7 +2,7 @@
 
 <img src="assets/banner.png" width="100%" alt="ellmos Scheduler banner">
 
-[![Version](https://img.shields.io/badge/version-0.3.6-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
+[![Version](https://img.shields.io/badge/version-0.3.7-blue.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
 [![CI](https://github.com/ellmos-ai/ellmos-scheduler/actions/workflows/test.yml/badge.svg)](https://github.com/ellmos-ai/ellmos-scheduler/actions)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/ellmos-ai/ellmos-scheduler)
@@ -58,7 +58,7 @@ ist bewusst **außerhalb von BACH** angelegt. BACH, Wonderland/Riverfall,
 Desktop-Automationen, COMA, MarbleRun/llmauto und swarm-ai können es über
 schmale Adapter konsumieren.
 
-Status: `0.3.6` (Pfad B Discoverability, 18-Punkte zweisprachige Schnellnavigations-Parität, 10-Dimensionen-Vergleichsmatrix gegenüber 4 Alternativen, SEO-Suchbegriffe, Level 1 SBOM Invariant Cross-Reference Matrix, 20-Topic Sättigung, 2026-09-26).
+Status: `0.3.7` (Pfad B Discoverability, 18-Punkte zweisprachige Schnellnavigations-Parität, 10-Dimensionen-Vergleichsmatrix gegenüber 4 Alternativen, SEO-Suchbegriffe, Level 1 SBOM Invariant Cross-Reference Matrix, 20-Topic Sättigung, 2026-09-26).
 
 Auf Windows installiert das Paket `tzdata` als bedingte Runtime-Abhängigkeit.
 Damit funktionieren IANA-Zeitzonen wie `Europe/Berlin` auch in einem sauberen
@@ -738,3 +738,7 @@ meldet CAS-/ID-/Ereigniskonflikte, `KeyError` einen nicht gefundenen Lesezugriff
 Bestehende direkte Job- und `EventTriggers`-Verträge bleiben kompatibel, werden
 aber nicht still als gemeinsame Agentendefinitionen ausgegeben. Kein zweiter
 Scheduler, keine zweite Laufwarteschlange und kein neuer Datenbankpfad entsteht.
+
+## Verpasste Intervalle
+
+Idempotente Intervallprüfungen können ausdrücklich coalesce_latest wählen. Standardmäßig bleibt replay erhalten und holt jeden verpassten Termin einzeln nach. Bestehende Jobs wechseln über die native Versionsprüfung, die aktive Claims abweist und Termine sowie Historie erhält. Siehe [Intervallregeln](docs/interval-misfires.md) für Belege, Wiederholung und Migration.

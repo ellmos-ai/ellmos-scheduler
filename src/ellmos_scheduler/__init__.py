@@ -23,7 +23,8 @@ from .executors import (
 from .definitions import AgentTriggers, DefinitionConflict
 from .events import EventTriggers
 from .service import SchedulerService
-from .store import SchedulerStore
+from .store import JobPolicyConflict, SchedulerStore
+from .schedules import MISFIRE_POLICY_SCHEMA
 from .provider_selection import (
     MAX_PROVIDER_SELECTION_VERSION,
     PROVIDER_SELECTION_SCHEMA,
@@ -38,6 +39,7 @@ __all__ = [
     "DEFAULT_AUTHORITY_REGISTRY",
     "DEFAULT_REGISTRY",
     "MAX_PROVIDER_SELECTION_VERSION",
+    "MISFIRE_POLICY_SCHEMA",
     "PROVIDER_SELECTION_SCHEMA",
     "AcceptedTaskResult",
     "AgentTriggers",
@@ -53,6 +55,7 @@ __all__ = [
     "ExecutionContext",
     "ExecutionResult",
     "ExecutorRegistry",
+    "JobPolicyConflict",
     "ProviderSelectionConflict",
     "ProviderSelectionError",
     "RecoveryEvidence",
@@ -71,4 +74,4 @@ __all__ = [
     "validate_provider_selection",
 ]
 
-__version__ = "0.3.6"
+__version__ = "0.3.7"

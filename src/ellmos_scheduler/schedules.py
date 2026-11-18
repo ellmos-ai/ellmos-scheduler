@@ -210,3 +210,32 @@ def next_after(spec: dict[str, Any], after: datetime) -> datetime | None:
         return _next_cron(str(spec["expression"]), local_after, zone)
 
     raise ValueError(f"unsupported schedule kind: {kind!r}")
+
+
+MISFIRE_POLICY_SCHEMA = "ellmos.scheduler.misfire-policy.v1"
+
+
+def validate_misfire_policy(spec: dict[str, Any], policy: str) -> None:
+    """Coalescing is an explicit consumer promise that missed interval checks are redundant."""
+    if policy not in ("replay", "coalesce_latest"):
+        raise ValueError("unsupported misfire policy")
+    if policy == "coalesce_latest":
+        if spec.get("kind") != "interval":
+            raise ValueError("coalesce_latest requires an interval schedule")
+        # Use canonical validation even with an explicit next_due_at.
+        next_after(spec, datetime(2000, 1, 1, tzinfo=UTC))
+
+
+def coalesced_interval(spec: dict[str, Any], due: datetime, now: datetime) -> tuple[datetime, int]:
+    """Select the latest due interval without moving the original time grid.
+
+    The count denotes omitted earlier occurrences, never successful executions.
+    Integer timedelta division preserves microseconds and avoids an O(backlog) loop.
+    """
+    validate_misfire_policy(spec, "coalesce_latest")
+    due, now = _utc(due), _utc(now)
+    if now < due:
+        raise ValueError("cannot coalesce a future occurrence")
+    period = next_after(spec, due) - due
+    skipped = (now - due) // period
+    return due + skipped * period, skipped
